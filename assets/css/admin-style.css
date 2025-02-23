@@ -1,4 +1,28 @@
 /* admin-style.css */
+  /* Bandeau de présentation de Zonify */
+  .zonify-banner {
+    display: flex;
+    align-items: center;
+    background: #3498db; /* Couleur de fond du bandeau */
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .zonify-banner .zonify-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+  }
+  
+  .zonify-banner .zonify-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    color: #fff;
+    margin: 0;
+  }
+  
+
 .wrap h1 {
     color: #2c3e50;
     font-size: 24px;
@@ -15,7 +39,7 @@
     border: 2px solid #ccc;
     border-radius: 4px;
     margin-top: 10px !important;
-    height:70vh !important;
+    height:60vh !important;
   }
   
   button#save-zone {

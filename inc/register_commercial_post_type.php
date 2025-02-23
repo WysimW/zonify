@@ -21,7 +21,7 @@ function register_commercial_post_type() {
         'public'             => true,
         'publicly_queryable' => true,
         'show_ui'            => true,
-        'show_in_menu'       => true,
+        'show_in_menu'       => false, // Masquer le menu par défaut
         'query_var'          => true,
         'rewrite'            => array('slug' => 'commercial'),
         'capability_type'    => 'post',
