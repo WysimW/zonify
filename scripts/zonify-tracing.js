@@ -1,17 +1,41 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var map = L.map('map').setView([50.5, 2.5], 9);
+
+    // Récupération du thème via zonifyMapVars.tile_provider par exemple
+    var provider = zonifyMapVars.tile_provider || 'cartodb_light';
+    var tileLayerUrl, attribution;
     
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-    }).addTo(map);
+    // Définir l'URL des tuiles et l'attribution en fonction du fournisseur
+    if (provider === 'cartodb_dark'){
+        tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
+    } else if (provider === 'osm'){
+        tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        attribution = '© OpenStreetMap contributors';
+    } else if (provider === 'custom'){
+        // Pour l'option custom, on suppose que l'URL personnalisée a été renseignée
+        tileLayerUrl = zonifyMapVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        attribution = 'Personnalisé';
+    } else {
+        // Par défaut, "cartodb_light"
+        tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
+    }
     
+    // Utilisation des autres options pour configurer la carte
+    var zoom = zonifyMapVars.map_zoom;
+    var centerLat = parseFloat(zonifyMapVars.map_center_lat);
+    var centerLng = parseFloat(zonifyMapVars.map_center_lng);
     
+    var map = L.map('map').setView([centerLat, centerLng], zoom);
+    L.tileLayer(tileLayerUrl, { attribution: attribution }).addTo(map);
     
-    
-    
-    // Définition des styles
-    var defaultStyle = { color: '#3388ff', weight: 2 };
-    var highlightStyle = { color: 'red', weight: 3 };
+    // Exemple d'utilisation des couleurs et opacité dans un style par défaut pour les zones
+    var defaultStyle = {
+        color: zonifyMapVars.zone_border_color,
+        fillColor: zonifyMapVars.zone_fill_color,
+        fillOpacity: zonifyMapVars.zone_opacity,
+        weight: 2
+    };
 
     // Groupe pour stocker les zones (pour édition éventuelle)
     var drawnItems = new L.FeatureGroup();
@@ -78,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Vous pouvez adapter la logique si nécessaire.
         var layer = layers[0];
         var geojson = layer.toGeoJSON();
-        fetch(zoneVars.ajax_url, {
+        fetch(zonifyMapVars.ajax_url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -87,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 action: 'save_zone',
                 zone_data: JSON.stringify(geojson.geometry),
                 commercial_id: commercialId,
-                _ajax_nonce: zoneVars.nonce
+                _ajax_nonce: zonifyMapVars.nonce
             })
         })
         .then(response => response.json())

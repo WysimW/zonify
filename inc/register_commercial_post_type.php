@@ -37,24 +37,48 @@ add_action('init', 'register_commercial_post_type');
 
 function zones_commerciales_meta_box_callback( $post ) {
     // Récupérer les valeurs enregistrées si elles existent
-    $email = get_post_meta( $post->ID, 'commercial_email', true );
-    $telephone = get_post_meta( $post->ID, 'commercial_telephone', true );
+    $email           = get_post_meta( $post->ID, 'commercial_email', true );
+    $telephone       = get_post_meta( $post->ID, 'commercial_telephone', true );
+    $address         = get_post_meta( $post->ID, 'commercial_address', true );
+    $opening_hours   = get_post_meta( $post->ID, 'commercial_opening_hours', true );
+    $social_links    = get_post_meta( $post->ID, 'commercial_social_links', true );
     ?>
     <label for="commercial_email">Email :</label>
     <input type="email" name="commercial_email" id="commercial_email" value="<?php echo esc_attr( $email ); ?>" class="widefat" />
-    <br>
+    <br><br>
     <label for="commercial_telephone">Téléphone :</label>
     <input type="text" name="commercial_telephone" id="commercial_telephone" value="<?php echo esc_attr( $telephone ); ?>" class="widefat" />
+    <br><br>
+    <label for="commercial_address">Adresse :</label>
+    <input type="text" name="commercial_address" id="commercial_address" value="<?php echo esc_attr( $address ); ?>" class="widefat" />
+    <br><br>
+    <label for="commercial_opening_hours">Horaires d'ouverture :</label>
+    <input type="text" name="commercial_opening_hours" id="commercial_opening_hours" value="<?php echo esc_attr( $opening_hours ); ?>" class="widefat" />
+    <br><br>
+    <label for="commercial_social_links">Liens sociaux (séparés par une virgule) :</label>
+    <input type="text" name="commercial_social_links" id="commercial_social_links" value="<?php echo esc_attr( $social_links ); ?>" class="widefat" />
     <?php
 }
 
+
 function zones_commerciales_save_meta_box( $post_id ) {
-    // Vérifier les permissions et la validité du nonce si vous en utilisez un
+    if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
+    if ( ! current_user_can('edit_post', $post_id) ) return;
+    
     if ( isset( $_POST['commercial_email'] ) ) {
         update_post_meta( $post_id, 'commercial_email', sanitize_email( $_POST['commercial_email'] ) );
     }
     if ( isset( $_POST['commercial_telephone'] ) ) {
         update_post_meta( $post_id, 'commercial_telephone', sanitize_text_field( $_POST['commercial_telephone'] ) );
+    }
+    if ( isset( $_POST['commercial_address'] ) ) {
+        update_post_meta( $post_id, 'commercial_address', sanitize_text_field( $_POST['commercial_address'] ) );
+    }
+    if ( isset( $_POST['commercial_opening_hours'] ) ) {
+        update_post_meta( $post_id, 'commercial_opening_hours', sanitize_text_field( $_POST['commercial_opening_hours'] ) );
+    }
+    if ( isset( $_POST['commercial_social_links'] ) ) {
+        update_post_meta( $post_id, 'commercial_social_links', sanitize_text_field( $_POST['commercial_social_links'] ) );
     }
 }
 add_action( 'save_post', 'zones_commerciales_save_meta_box' );

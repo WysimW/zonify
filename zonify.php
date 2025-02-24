@@ -19,4 +19,11 @@ foreach ( glob( $inc_dir . '*.php' ) as $file ) {
     require_once $file;
 }
 
+$admin_dir = plugin_dir_path(__FILE__) . 'admin/';
 
+// Parcours de tous les fichiers PHP dans le dossier inc et inclusion de chacun d'eux
+foreach ( glob( $admin_dir . '*.php' ) as $file ) {
+    require_once $file;
+}
+
+require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
