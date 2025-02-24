@@ -1,35 +1,51 @@
 <?php
 function zonify_frontend_shortcode() {
     // Récupérer les commerciaux ayant une zone enregistrée
-    $args_zone = array(
-        'post_type'      => 'commercial',
-        'posts_per_page' => -1,
-        'meta_query'     => array(
-            array(
-                'key'     => 'zone_geojson',
-                'compare' => 'EXISTS',
-            ),
-        ),
+    $args = array(
+        'post_type'      => 'zone',
+        'posts_per_page' => -1
     );
-    $query = new WP_Query($args_zone);
-    $zones = array();
-    if ($query->have_posts()){
-        while ($query->have_posts()){
+    $query = new WP_Query($args);
+    $zones = array(); // Contiendra un tableau de Features
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
             $query->the_post();
-            $zone = get_post_meta(get_the_ID(), 'zone_geojson', true);
-            if ($zone) {
+            $geojson = get_post_meta(get_the_ID(), 'zone_geojson', true);
+            $comm_id = get_post_meta(get_the_ID(), 'zone_commercial_id', true);
+
+            if ($geojson) {
+                // Récupérer les infos du commercial lié
+                $nom_commercial = '';
+                $infos = '';
+                $email = '';
+                $telephone = '';
+                $address = '';
+                $opening_hours = '';
+                $social_links = '';
+
+                if ($comm_id) {
+                    $nom_commercial = get_the_title($comm_id);
+                    // On peut récupérer l'excerpt si besoin, ou un champ "infos" perso
+                    $infos = get_the_excerpt($comm_id);
+                    $email = get_post_meta($comm_id, 'commercial_email', true);
+                    $telephone = get_post_meta($comm_id, 'commercial_telephone', true);
+                    $address = get_post_meta($comm_id, 'commercial_address', true);
+                    $opening_hours = get_post_meta($comm_id, 'commercial_opening_hours', true);
+                    $social_links = get_post_meta($comm_id, 'commercial_social_links', true);
+                }
+
                 $zones[] = array(
                     'type'       => 'Feature',
                     'properties' => array(
-                        'nom_commercial' => get_the_title(),
-                        'infos'          => get_the_excerpt(),
-                        'email'          => get_post_meta(get_the_ID(), 'commercial_email', true),
-                        'telephone'      => get_post_meta(get_the_ID(), 'commercial_telephone', true),
-                        'address'        => get_post_meta(get_the_ID(), 'commercial_address', true),
-                        'opening_hours'  => get_post_meta(get_the_ID(), 'commercial_opening_hours', true),
-                        'social_links'   => get_post_meta(get_the_ID(), 'commercial_social_links', true)
+                        'nom_commercial' => $nom_commercial,
+                        'infos'          => $infos,
+                        'email'          => $email,
+                        'telephone'      => $telephone,
+                        'address'        => $address,
+                        'opening_hours'  => $opening_hours,
+                        'social_links'   => $social_links
                     ),
-                    'geometry'   => json_decode($zone, true)
+                    'geometry'   => json_decode($geojson, true)
                 );
             }
         }

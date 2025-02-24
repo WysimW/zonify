@@ -35,8 +35,7 @@ function zonify_admin_menu() {
         'Liste des zones',
         'Liste des zones',
         'manage_options',
-        'zonify_list',
-        'zonify_list_pages'
+        'edit.php?post_type=zone'
     );
     
 
