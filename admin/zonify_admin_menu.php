@@ -47,5 +47,15 @@ function zonify_admin_menu() {
         'zonify_settings',
         'zonify_settings_page'
     );
+
+    add_submenu_page(
+        'zonify',
+        'Import / Export Zones',
+        'Import / Export',
+        'manage_options',
+        'zonify_import_export',
+        'zonify_import_export_page'
+    );
+    
 }
 add_action( 'admin_menu', 'zonify_admin_menu' );

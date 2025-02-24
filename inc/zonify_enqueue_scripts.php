@@ -4,6 +4,8 @@ function zonify_enqueue_scripts($hook) {
         'toplevel_page_zonify',
         'zonify_page_zonify_map',
         'zonify_page_zonify_list',
+        'zonify_page_zonify_settings',
+        'zonify_page_zonify_import_export',
         'zonify_page_zonify_settings'
     );
     if (! in_array($hook, $allowed_hooks)) {

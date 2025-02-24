@@ -3,6 +3,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function zonify_settings_page() {
+    $icon_url = plugin_dir_url(__FILE__) . '../assets/icons/icon.png';
+
     // Traitement de la soumission du formulaire
     if ( isset($_POST['zonify_settings_submit']) && check_admin_referer('zonify_settings_nonce') ) {
         // Options Back Office
@@ -37,6 +39,12 @@ function zonify_settings_page() {
     }
     ?>
     <div class="wrap">
+    <div class="zonify-header">
+            <div class="zonify-header-left">
+                <img src="<?php echo esc_url( $icon_url ); ?>" alt="Zonify Icon" class="zonify-icon" />
+                <h1 class="zonify-title">Zonify by MBS</h1>
+            </div>
+        </div>
     <h1>Réglages Zonify</h1>
     <form method="post">
         <?php wp_nonce_field('zonify_settings_nonce'); ?>

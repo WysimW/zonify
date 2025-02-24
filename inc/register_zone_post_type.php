@@ -103,3 +103,31 @@ function zone_save_geojson($post_id) {
     }
 }
 add_action('save_post_zone', 'zone_save_geojson');
+
+function zonify_zone_row_actions($actions, $post) {
+    if ($post->post_type === 'zone') {
+        $export_url = admin_url('admin-post.php?action=zonify_export_geojson_single&zone_id=' . $post->ID);
+        $actions['export_single'] = '<a href="' . esc_url($export_url) . '">Exporter (GeoJSON)</a>';
+        $export_url = admin_url('admin-post.php?action=zonify_export_csv_single&zone_id=' . $post->ID);
+        $actions['export_single_csv'] = '<a href="' . esc_url($export_url) . '">Exporter CSV</a>';
+    }
+    return $actions;
+}
+add_filter('post_row_actions', 'zonify_zone_row_actions', 10, 2);
+
+function zone_export_meta_box_callback($post) {
+    $export_url = admin_url('admin-post.php?action=zonify_export_geojson_single&zone_id=' . $post->ID);
+    echo '<a href="'.esc_url($export_url).'" class="button button-primary">Exporter cette zone</a>';
+}
+
+function zone_export_meta_box() {
+    add_meta_box(
+        'zone_export',
+        'Exporter la zone',
+        'zone_export_meta_box_callback',
+        'zone',
+        'side',
+        'low'
+    );
+}
+add_action('add_meta_boxes', 'zone_export_meta_box');
