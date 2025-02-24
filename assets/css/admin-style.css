@@ -1,27 +1,61 @@
-/* admin-style.css */
-  /* Bandeau de présentation de Zonify */
-  .zonify-banner {
-    display: flex;
-    align-items: center;
-    background: #3498db; /* Couleur de fond du bandeau */
-    padding: 10px 15px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-  }
-  
-  .zonify-banner .zonify-icon {
-    width: 40px;
-    height: 40px;
-    margin-right: 15px;
-  }
-  
-  .zonify-banner .zonify-title {
-    font-family: 'Roboto', sans-serif;
-    font-size: 24px;
-    color: #fff;
-    margin: 0;
-  }
-  
+.zonify-home {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #444;
+}
+.zonify-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e5e5e5;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+.zonify-header-left {
+  display: flex;
+  align-items: center;
+}
+.zonify-icon {
+  width: 60px;
+  margin-right: 15px;
+}
+.zonify-title {
+  font-size: 2em;
+  margin: 0;
+}
+.zonify-version {
+  font-size: 0.9em;
+  color: #888;
+}
+.zonify-content {
+  margin-top: 20px;
+}
+.zonify-section {
+  margin-bottom: 30px;
+}
+.zonify-section h2,
+.zonify-section h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+.zonify-section p {
+  font-size: 1em;
+  line-height: 1.6;
+  color: #555;
+}
+.zonify-links {
+  list-style-type: disc;
+  margin-left: 20px;
+}
+.zonify-links li {
+  margin-bottom: 5px;
+}
+.zonify-links a {
+  color: #0073aa;
+  text-decoration: none;
+}
+.zonify-links a:hover {
+  text-decoration: underline;
+}
 
 .wrap h1 {
     color: #2c3e50;
@@ -29,12 +63,7 @@
     margin-bottom: 20px;
   }
   
-  #commercial-select {
-    width: 300px;
-    padding: 5px;
-    margin-bottom: 5px;
-  }
-  
+
   #map {
     border: 2px solid #ccc;
     border-radius: 4px;
@@ -42,18 +71,42 @@
     height:60vh !important;
   }
   
-  button#save-zone {
-    background-color: #27ae60;
-    color: #fff;
-    padding: 8px 15px;
-    border: none;
+  .zonify-form-group {
+    margin-bottom: 20px;
+}
+.zonify-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.zonify-select {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #ccc;
     border-radius: 4px;
+}
+.button.button-primary {
+    background: #0073aa;
+    border: 1px solid #006799;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 3px;
+    font-size: 1em;
     cursor: pointer;
-    margin-top: 10px;
+}
+.button.button-primary:hover {
+    background: #006799;
+}
 
-  }
-  
-  button#save-zone:hover {
-    background-color: #2ecc71;
-  }
-  
+.zonify-section p,
+.zonify-section ol,
+.zonify-section ul {
+    font-size: 1em;
+    line-height: 1.6;
+    color: #555;
+}
+
+.zonify-links li {
+    margin-bottom: 5px;
+}

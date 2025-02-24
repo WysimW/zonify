@@ -7,7 +7,7 @@ function zonify_list_pages() {
         <!-- Bandeau de présentation de Zonify -->
         <div class="zonify-banner">
             <img src="<?php echo esc_url( $icon_url ); ?>" alt="Zonify Icon" class="zonify-icon" />
-            <h2 class="zonify-title">Zonify by MBS</h1>
+            <h1 class="zonify-title">Zonify by MBS</h1>
         </div>
         <h1>Liste des zones actives</h1>
         <table class="wp-list-table widefat striped">
@@ -54,6 +54,31 @@ function zonify_list_pages() {
             </tbody>
         </table>
     </div>
+    <style>
+ .wrap {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            color: #444;
+        }
+        .zonify-banner {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #e5e5e5;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+        }
+        .zonify-banner-left {
+            display: flex;
+            align-items: center;
+        }
+        .zonify-icon {
+            width: 60px;
+            margin-right: 15px;
+        }
+        .zonify-title {
+            font-size: 2em;
+            margin: 0;
+        }
+    </style>
     <?php
 }
 
