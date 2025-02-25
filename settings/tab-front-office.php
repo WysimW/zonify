@@ -11,6 +11,10 @@ $zone_opacity_front        = get_option('zonify_zone_opacity_front', 0.5);
 $map_zoom_front            = get_option('zonify_map_zoom_front', 9);
 $map_center_lat_front      = get_option('zonify_map_center_lat_front', '50.5');
 $map_center_lng_front      = get_option('zonify_map_center_lng_front', '2.5');
+
+// Réglages geocoder
+$geocoder_mode_front     = get_option('zonify_geocoder_mode_front', 'on_map');
+$geocoder_position_front = get_option('zonify_geocoder_position_front', 'topleft');
 ?>
 
 <table class="form-table">
@@ -71,4 +75,53 @@ $map_center_lng_front      = get_option('zonify_map_center_lng_front', '2.5');
             <input type="text" name="zonify_map_center_lng_front" id="zonify_map_center_lng_front" value="<?php echo esc_attr($map_center_lng_front); ?>" class="regular-text" />
         </td>
     </tr>
+      <!-- Réglages geocoder : mode -->
+      <tr valign="top">
+        <th scope="row"><label for="zonify_geocoder_mode_front">Mode de placement du champ de recherche</label></th>
+        <td>
+            <select name="zonify_geocoder_mode_front" id="zonify_geocoder_mode_front">
+                <option value="on_map" <?php selected($geocoder_mode_front, 'on_map'); ?>>Dans la carte (position par défaut)</option>
+                <option value="on_map_custom_position" <?php selected($geocoder_mode_front, 'on_map_custom_position'); ?>>Dans la carte (choisir position)</option>
+                <option value="outside_map" <?php selected($geocoder_mode_front, 'outside_map'); ?>>Hors de la carte (champ de recherche manuel)</option>
+            </select>
+            <p class="description">
+                - "Dans la carte (position par défaut)" : le contrôle Leaflet Geocoder apparaîtra en haut à gauche.<br/>
+                - "Dans la carte (choisir position)" : vous pourrez choisir "topright", "bottomleft", etc.<br/>
+                - "Hors de la carte" : vous devrez insérer un champ de recherche manuel en HTML.
+            </p>
+        </td>
+    </tr>
+
+    <!-- Réglages geocoder : position -->
+    <tr valign="top" id="geocoder_position_row_front" <?php if ($geocoder_mode_front !== 'on_map_custom_position') echo 'style="display:none;"'; ?>>
+        <th scope="row"><label for="zonify_geocoder_position_front">Position du geocoder</label></th>
+        <td>
+            <select name="zonify_geocoder_position_front" id="zonify_geocoder_position_front">
+                <option value="topleft" <?php selected($geocoder_position_front, 'topleft'); ?>>topleft</option>
+                <option value="topright" <?php selected($geocoder_position_front, 'topright'); ?>>topright</option>
+                <option value="bottomleft" <?php selected($geocoder_position_front, 'bottomleft'); ?>>bottomleft</option>
+                <option value="bottomright" <?php selected($geocoder_position_front, 'bottomright'); ?>>bottomright</option>
+            </select>
+            <p class="description">
+                Choisissez la position "Leaflet" : topleft, topright, bottomleft, ou bottomright.
+            </p>
+        </td>
+    </tr>
+
 </table>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var modeSelect = document.getElementById('zonify_geocoder_mode_front');
+    var positionRow = document.getElementById('geocoder_position_row_front');
+
+    function togglePositionRow() {
+        if (modeSelect.value === 'on_map_custom_position') {
+            positionRow.style.display = '';
+        } else {
+            positionRow.style.display = 'none';
+        }
+    }
+
+    modeSelect.addEventListener('change', togglePositionRow);
+});
+</script>
