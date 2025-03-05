@@ -116,20 +116,92 @@ document.addEventListener('DOMContentLoaded', function() {
     L.geoJSON(zonesData, {
         style: defaultStyle,
         onEachFeature: function(feature, layer) {
+            // Au clic sur la zone
             layer.on('click', function() {
-                var content = '<div class="popup-container" style="font-family:' + options.popup_font_family + '; font-size:' + options.popup_font_size + '; color:' + options.popup_font_color + ';">';
+                // Construction du contenu de la popup
+                // On peut appliquer un style "inline" basé sur popup_font_* si on veut
+                var content = '<div class="popup-container" style="'
+                              + 'font-family:' + (options.popup_font_family || 'Arial,sans-serif') + ';'
+                              + ' font-size:' + (options.popup_font_size || '14px') + ';'
+                              + ' color:' + (options.popup_font_color || '#333') + ';">';
+    
+                // Nom du commercial (feature.properties.nom_commercial)
                 content += '<h2>' + (feature.properties.nom_commercial || 'Commercial') + '</h2>';
-                content += '<p>' + (feature.properties.infos || '') + '</p>';
-
-                // etc. (adresse, horaires, liens sociaux, etc.)
-                if (feature.properties.address && parseInt(options.popup_show_address) === 1) {
-                    content += '<p>Adresse : ' + feature.properties.address + '</p>';
+    
+                // Info / présentation (feature.properties.infos)
+                if (feature.properties.infos) {
+                    content += '<p>' + feature.properties.infos + '</p>';
                 }
-                // ...
-                
+    
+                // Adresse
+                if (feature.properties.address 
+                    && parseInt(options.popup_show_address) === 1) 
+                {
+                    content += '<p><strong>Adresse :</strong> ' + feature.properties.address + '</p>';
+                }
+    
+                // Horaires d'ouverture
+                if (feature.properties.opening_hours 
+                    && parseInt(options.popup_show_hours) === 1) 
+                {
+                    content += '<p><strong>Horaires :</strong> ' + feature.properties.opening_hours + '</p>';
+                }
+    
+                // Liens sociaux (social_links séparés par des virgules)
+                if (feature.properties.social_links 
+                    && parseInt(options.popup_show_social) === 1) 
+                {
+                    var links = feature.properties.social_links.split(',');
+                    content += '<p><strong>Réseaux sociaux :</strong> ';
+                    links.forEach(function(link) {
+                        var trimmed = link.trim();
+                        if (trimmed) {
+                            content += '<a href="' + trimmed + '" target="_blank">'
+                                     + trimmed + '</a> ';
+                        }
+                    });
+                    content += '</p>';
+                }
+    
+                // Email
+                if (feature.properties.email 
+                    && parseInt(options.popup_enable_email_btn) === 1) 
+                {
+                    content += '<p><strong>Email :</strong> '
+                             + '<a href="mailto:' + feature.properties.email + '">'
+                             + feature.properties.email + '</a></p>';
+                }
+    
+                // Téléphone
+                if (feature.properties.telephone 
+                    && parseInt(options.popup_enable_phone_btn) === 1) 
+                {
+                    content += '<p><strong>Téléphone :</strong> '
+                             + '<a href="tel:' + feature.properties.telephone + '">'
+                             + feature.properties.telephone + '</a></p>';
+                }
+    
+                // Bouton "contacter" (exemple menant vers /contact)
+                if (parseInt(options.popup_enable_contact_btn) === 1) {
+                    content += '<p><a href="/contact" class="btn-contact">Contacter</a></p>';
+                }
+    
                 content += '</div>';
+    
+                // Ouvrir la popup centrée sur la bounding box du polygone (pour un polygon)
+                // ou sur la lat/lng si c'est un point
+                var popupLatLng;
+                if (layer.getBounds) {
+                    popupLatLng = layer.getBounds().getCenter();
+                } else if (layer.getLatLng) {
+                    popupLatLng = layer.getLatLng();
+                } else {
+                    // fallback
+                    popupLatLng = map.getCenter();
+                }
+    
                 L.popup()
-                 .setLatLng(layer.getBounds().getCenter())
+                 .setLatLng(popupLatLng)
                  .setContent(content)
                  .openOn(map);
             });

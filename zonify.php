@@ -11,17 +11,20 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Sécurité
 }
 
-// Chemin vers le dossier inc du plugin
-$inc_dir = plugin_dir_path(__FILE__) . 'inc/';
-
 // Parcours de tous les fichiers PHP dans le dossier inc et inclusion de chacun d'eux
+$inc_dir = plugin_dir_path(__FILE__) . 'inc/';
 foreach ( glob( $inc_dir . '*.php' ) as $file ) {
     require_once $file;
 }
 
+// Parcours de tous les fichiers PHP dans le dossier admin et inclusion de chacun d'eux
 $admin_dir = plugin_dir_path(__FILE__) . 'admin/';
+foreach ( glob( $admin_dir . '*.php' ) as $file ) {
+    require_once $file;
+}
 
-// Parcours de tous les fichiers PHP dans le dossier inc et inclusion de chacun d'eux
+// Parcours de tous les fichiers PHP dans le dossier post_type et inclusion de chacun d'eux
+$admin_dir = plugin_dir_path(__FILE__) . 'post_type/';
 foreach ( glob( $admin_dir . '*.php' ) as $file ) {
     require_once $file;
 }
