@@ -71,4 +71,16 @@ $map_center_lng      = get_option('zonify_map_center_lng', '2.5');
             <input type="text" name="zonify_map_center_lng" id="zonify_map_center_lng" value="<?php echo esc_attr($map_center_lng); ?>" class="regular-text" />
         </td>
     </tr>
+    <?php
+$always_show_all_zones = get_option('zonify_always_show_all_zones', 0);
+?>
+<tr valign="top">
+    <th scope="row"><label for="zonify_always_show_all_zones">Toujours afficher tous les polygones ?</label></th>
+    <td>
+        <input type="checkbox" name="zonify_always_show_all_zones" id="zonify_always_show_all_zones" value="1" <?php checked($always_show_all_zones, 1); ?> />
+        <p class="description">
+            Si coché, la carte affichera tous les polygones en permanence, même si cela peut affecter les performances.
+        </p>
+    </td>
+</tr>
 </table>

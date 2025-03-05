@@ -1,5 +1,5 @@
 <?php
-function register_commercial_post_type() {
+function zonify_register_commercial_post_type() {
     $labels = array(
         'name'                  => 'Commerciaux',
         'singular_name'         => 'Commercial',
@@ -33,9 +33,9 @@ function register_commercial_post_type() {
 
     register_post_type('commercial', $args);
 }
-add_action('init', 'register_commercial_post_type');
+add_action('init', 'zonify_register_commercial_post_type');
 
-function zones_commerciales_meta_box_callback( $post ) {
+function zonify_meta_box_callback( $post ) {
     // Récupérer les valeurs enregistrées si elles existent
     $email           = get_post_meta( $post->ID, 'commercial_email', true );
     $telephone       = get_post_meta( $post->ID, 'commercial_telephone', true );
@@ -61,7 +61,7 @@ function zones_commerciales_meta_box_callback( $post ) {
 }
 
 
-function zones_commerciales_save_meta_box( $post_id ) {
+function zonify_save_meta_box( $post_id ) {
     if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
     if ( ! current_user_can('edit_post', $post_id) ) return;
     
@@ -81,4 +81,4 @@ function zones_commerciales_save_meta_box( $post_id ) {
         update_post_meta( $post_id, 'commercial_social_links', sanitize_text_field( $_POST['commercial_social_links'] ) );
     }
 }
-add_action( 'save_post', 'zones_commerciales_save_meta_box' );
+add_action( 'save_post', 'zonify_save_meta_box' );
