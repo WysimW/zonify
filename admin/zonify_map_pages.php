@@ -79,7 +79,6 @@ function zonify_map_pages()
             <section class="zonify-section">
                 <h3>Carte Interactive</h3>
                 <div id="map" style="height: 500px; margin-top:20px;"></div>
-                <button id="save-zones save-zone" class="button button-primary" style="margin-top:20px;">Sauvegarder la zone</button>
             </section>
         </main>
     </div>

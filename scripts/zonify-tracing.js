@@ -341,6 +341,42 @@ jQuery(function($) {
         popupHtml += `</div>`;
         layer.bindPopup(popupHtml);
     }
+
+     // 8) Gestion de l'édition des zones : Sauvegarder automatiquement lorsqu'un point est déplacé
+     map.on('draw:edited', function(e) {
+        e.layers.eachLayer(function(layer) {
+            var zoneGeoJSON = layer.toGeoJSON().geometry;
+            var commercialId = layer.feature.properties.commercial_id || 0;
+            var zoneId = layer.feature.properties.zone_id || 0;
+            fetch(zonifyMapVars.ajax_url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                body: new URLSearchParams({
+                    action: 'save_zone',
+                    zone_data: JSON.stringify(zoneGeoJSON),
+                    commercial_id: commercialId,
+                    zone_id: zoneId,
+                    _ajax_nonce: zonifyMapVars.nonce
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Zone mise à jour : " + data.data.message);
+                    if (data.data.zone_id) {
+                        layer.feature.properties.zone_id = data.data.zone_id;
+                    }
+                } else {
+                    console.error("Erreur lors de la mise à jour : " + data.data);
+                }
+            })
+            .catch(error => console.error("Erreur AJAX update_zone:", error));
+        });
+    });
+
+    console.log("L.Handler.PolylineSnap :", L.Handler.PolylineSnap);
+
+
 });
 
 jQuery(document).ready(function($) {
