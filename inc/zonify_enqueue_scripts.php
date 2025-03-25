@@ -12,6 +12,10 @@ function zonify_enqueue_scripts($hook) {
         return;
     }
 
+          // Enqueue Select2 (pour moderniser le multi-select)
+          wp_enqueue_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
+          wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js', array('jquery'), '4.0.13', true);
+
     wp_enqueue_style('leaflet-css', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css');
     wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
     wp_enqueue_style('leaflet-draw-css', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css');
@@ -20,6 +24,8 @@ function zonify_enqueue_scripts($hook) {
     wp_enqueue_script('zonify-script', plugin_dir_url(__FILE__) . '../scripts/zonify-tracing.js', array('leaflet-js', 'leaflet-draw-js'), '1.0', true);
     wp_enqueue_style('zonify-admin-style', plugin_dir_url(__FILE__) . '../assets/css/admin-style.css', array(), '1.0');
 
+
+  
     $back_options = array(
         'tile_provider'   => get_option('zonify_tile_provider', 'cartodb_light'),
         'tile_custom_url' => get_option('zonify_tile_custom_url', ''),

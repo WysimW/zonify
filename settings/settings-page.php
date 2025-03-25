@@ -17,7 +17,7 @@ function zonify_settings_page()
         update_option('zonify_map_zoom', intval($_POST['zonify_map_zoom']));
         update_option('zonify_map_center_lat', sanitize_text_field($_POST['zonify_map_center_lat']));
         update_option('zonify_map_center_lng', sanitize_text_field($_POST['zonify_map_center_lng']));
-        update_option('zonify_always_show_all_zones', isset($_POST['zonify_always_show_all_zones']) ? 1 : 0);
+        update_option('zonify_always_show_all_zones', isset($_POST['zonify_always_show_all_zones']) ? 0 : 0);
 
         // Options Front Office
         update_option('zonify_tile_provider_front', sanitize_text_field($_POST['zonify_tile_provider_front']));
