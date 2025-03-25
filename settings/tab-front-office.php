@@ -25,6 +25,8 @@ $geocoder_position_front = get_option('zonify_geocoder_position_front', 'topleft
                 <option value="cartodb_light" <?php selected($tile_provider_front, 'cartodb_light'); ?>>CartoDB Positron (Light)</option>
                 <option value="cartodb_dark" <?php selected($tile_provider_front, 'cartodb_dark'); ?>>CartoDB Dark Matter (Dark)</option>
                 <option value="osm" <?php selected($tile_provider_front, 'osm'); ?>>OpenStreetMap Standard</option>
+                <option value="opentopo" <?php selected($tile_provider, 'opentopo'); ?>>OpenTopoMap Standard</option>
+                <option value="esri_topo" <?php selected($tile_provider, 'esri_topo'); ?>>ESRI World Topo</option>
                 <option value="custom" <?php selected($tile_provider_front, 'custom'); ?>>URL personnalisée</option>
             </select>
         </td>

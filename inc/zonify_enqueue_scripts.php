@@ -33,7 +33,6 @@ function zonify_enqueue_scripts($hook) {
         'nonce'           => wp_create_nonce('save_zone_nonce'),
         'edit_zone_base'  => admin_url('post.php') // ex: https://example.com/wp-admin/post.php
 
-        
     );
 
     wp_localize_script('zonify-script', 'zonifyMapVars', $back_options);

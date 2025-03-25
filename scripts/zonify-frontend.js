@@ -12,11 +12,20 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (provider === 'osm') {
         tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         attribution = '© OpenStreetMap contributors';
-    } else if (provider === 'custom') {
-        tileLayerUrl = options.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        
+    } else if (provider === 'opentopo') {
+        tileLayerUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+        attribution = '© OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)';
+    } else if (provider === 'esri_topo') {
+        tileLayerUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
+        attribution = 'Tiles © Esri — Source: Esri, USGS, NOAA';
+    }
+     else if (provider === 'custom') {
+        tileLayerUrl = zonifyMapVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         attribution = 'Personnalisé';
-    } else {
-        // Par défaut cartodb_light
+    }  
+    else {
+        // Par défaut
         tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
         attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
     }

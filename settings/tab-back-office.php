@@ -21,6 +21,8 @@ $map_center_lng      = get_option('zonify_map_center_lng', '2.5');
                 <option value="cartodb_light" <?php selected($tile_provider, 'cartodb_light'); ?>>CartoDB Positron (Light)</option>
                 <option value="cartodb_dark" <?php selected($tile_provider, 'cartodb_dark'); ?>>CartoDB Dark Matter (Dark)</option>
                 <option value="osm" <?php selected($tile_provider, 'osm'); ?>>OpenStreetMap Standard</option>
+                <option value="opentopo" <?php selected($tile_provider, 'opentopo'); ?>>OpenTopoMap Standard</option>
+                <option value="esri_topo" <?php selected($tile_provider, 'esri_topo'); ?>>ESRI World Topo</option>
                 <option value="custom" <?php selected($tile_provider, 'custom'); ?>>URL personnalisée</option>
             </select>
         </td>
