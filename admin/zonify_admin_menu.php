@@ -10,6 +10,16 @@ function zonify_admin_menu() {
         'zonify_main_page',// Fonction callback pour la page principale
         'dashicons-location-alt' // Icône du menu (ou utilisez votre propre icône via URL)
     );
+
+        // Ajout d'un lien vers la gestion des commerciaux (le CPT "commercial")
+        add_submenu_page(
+            'zonify',
+            'Commerciaux',
+            'Commerciaux',
+            'manage_options',
+            'edit.php?post_type=commercial'
+        );
+    
     
     add_submenu_page(
         'zonify',
@@ -25,17 +35,27 @@ function zonify_admin_menu() {
         'Liste des zones',
         'Liste des zones',
         'manage_options',
-        'zonify_list',
-        'zonify_list_pages'
+        'edit.php?post_type=zone'
     );
     
-    // Ajout d'un lien vers la gestion des commerciaux (le CPT "commercial")
+
     add_submenu_page(
         'zonify',
-        'Commerciaux',
-        'Commerciaux',
+        'Réglages',
+        'Réglages',
         'manage_options',
-        'edit.php?post_type=commercial'
+        'zonify_settings',
+        'zonify_settings_page'
     );
+
+    add_submenu_page(
+        'zonify',
+        'Import / Export Zones',
+        'Import / Export',
+        'manage_options',
+        'zonify_import_export',
+        'zonify_import_export_page'
+    );
+    
 }
 add_action( 'admin_menu', 'zonify_admin_menu' );

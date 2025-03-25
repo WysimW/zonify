@@ -77,6 +77,8 @@ function zonify_main_page() {
                 <ul class="zonify-links">
                     <li><a href="https://votresite.com/support" target="_blank">Support Technique</a></li>
                 </ul>
+                <?php echo '<a href="' . admin_url('admin-post.php?action=zonify_export_geojson') . '" class="button button-primary">Exporter toutes les zones (GeoJSON)</a>';
+?>
             </section>
         </div>
     </div>

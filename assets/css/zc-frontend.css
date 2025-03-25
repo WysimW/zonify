@@ -39,12 +39,11 @@
   
   /* Liens dans la popup */
   .popup-container a {
-    color: white;
     text-decoration: none;
     transition: color 0.3s;
   }
   .popup-container a:hover {
-    color: white;
+    color: rgb(160, 165, 216);
   }
   
   /* Bouton de contact dans la popup */
@@ -53,11 +52,12 @@
     margin-top: 10px;
     padding: 8px 16px;
     background-color: #3498db;
-    color: #fff;
+    color: #fff !important;
     border-radius: 4px;
     text-decoration: none;
     transition: background-color 0.3s;
   }
+
   .btn-contact:hover {
     background-color: #1d6fa5;
   }
