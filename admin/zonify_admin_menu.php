@@ -57,5 +57,13 @@ function zonify_admin_menu() {
         'zonify_import_export_page'
     );
     
+       // Ajout du sous-menu pour la gestion des Contacts
+       add_submenu_page(
+        'zonify',
+        'Contacts',
+        'Contacts',
+        'manage_options',
+        'edit.php?post_type=zonify_contact'
+    );
 }
 add_action( 'admin_menu', 'zonify_admin_menu' );

@@ -90,4 +90,12 @@ $popup_enable_contact_btn= get_option('zonify_popup_enable_contact_btn', 0);
             </label>
         </td>
     </tr>
+    <tr valign="top">
+    <th scope="row"><label for="zonify_contact_page_url">URL de la page de contact</label></th>
+    <td>
+        <input type="text" name="zonify_contact_page_url" id="zonify_contact_page_url" value="<?php echo esc_attr(get_option('zonify_contact_page_url', '/zonfiy-commercial-contact')); ?>" class="regular-text" />
+        <p class="description">Indiquez l'URL relative de la page de contact. Exemples: /contact, /contact/commercial, /contact-commercial</p>
+    </td>
+</tr>
+
 </table>

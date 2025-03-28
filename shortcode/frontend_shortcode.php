@@ -35,6 +35,7 @@ function zonify_frontend_shortcode() {
                 $zones[] = array(
                     'type' => 'Feature',
                     'properties' => array(
+                        "commercial_id"             => $comm_id,
                         'nom_commercial' => $nom_commercial,
                         'infos'          => $infos,
                         'email'          => $email,
@@ -92,7 +93,12 @@ function zonify_frontend_shortcode() {
         'popup_enable_contact_btn' => get_option('zonify_popup_enable_contact_btn', 0)
     );
 
-    $combined_options = array_merge($front_options, $popup_options);
+    $contact_page_url = get_option('zonify_contact_page_url', '/contact');
+
+$combined_options = array_merge($front_options, $popup_options, array(
+    'contact_page_url' => $contact_page_url
+));
+wp_localize_script('zonify-frontend', 'zonifyFrontendOptions', $combined_options);
 
     wp_localize_script('zonify-frontend', 'zonifyFrontendOptions', $combined_options);
 

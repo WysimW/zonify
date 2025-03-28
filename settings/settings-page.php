@@ -38,6 +38,7 @@ function zonify_settings_page()
         update_option('zonify_popup_enable_email_btn', isset($_POST['zonify_popup_enable_email_btn']) ? 1 : 0);
         update_option('zonify_popup_enable_phone_btn', isset($_POST['zonify_popup_enable_phone_btn']) ? 1 : 0);
         update_option('zonify_popup_enable_contact_btn', isset($_POST['zonify_popup_enable_contact_btn']) ? 1 : 0);
+        update_option('zonify_contact_page_url', sanitize_text_field($_POST['zonify_contact_page_url']));
 
         // NOUVEAU : Enregistrement des réglages Geocoder Front
         update_option('zonify_geocoder_mode_front', sanitize_text_field($_POST['zonify_geocoder_mode_front']));

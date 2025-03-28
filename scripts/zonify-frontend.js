@@ -192,8 +192,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
                 // Bouton "contacter" (exemple menant vers /contact)
                 if (parseInt(options.popup_enable_contact_btn) === 1) {
-                    content += '<p><a href="/contact" class="btn-contact">Contacter</a></p>';
+                    var commercialId = feature.properties.commercial_id || 0;
+                    var contactUrl = options.contact_page_url || '/contact';
+                    content += '<p><a href="' + contactUrl + '?commercial_id=' + commercialId + '" class="btn-contact">Contacter</a></p>';
                 }
+                
     
                 content += '</div>';
     

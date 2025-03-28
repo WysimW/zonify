@@ -1,0 +1,92 @@
+/* Style simple pour le formulaire de contact Zonify */
+.zonify-contact-form {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .zonify-contact-form p {
+    margin-bottom: 15px;
+  }
+  
+  .zonify-contact-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .zonify-contact-form input[type="text"],
+  .zonify-contact-form input[type="email"],
+  .zonify-contact-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .zonify-contact-form textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .zonify-contact-form input[type="submit"] {
+    background-color: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .zonify-contact-form input[type="submit"]:hover {
+    background-color: #005177;
+  }
+  
+  /* Popup de notification */
+.contact-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+  min-width: 250px;
+  font-family: Arial, sans-serif;
+  animation: fadein 0.5s;
+}
+
+.contact-popup.success {
+  border-color: #4caf50;
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+.contact-popup.error {
+  border-color: #f44336;
+  background-color: #f2dede;
+  color: #a94442;
+}
+
+.contact-popup .close-popup {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Animation d'apparition */
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
