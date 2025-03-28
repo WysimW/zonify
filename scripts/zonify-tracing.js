@@ -1,3 +1,5 @@
+    // zonify-tracing.js
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // 1) Récupération du mode always_show_all_zones depuis zonifyMapVars

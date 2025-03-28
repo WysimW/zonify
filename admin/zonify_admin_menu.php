@@ -65,5 +65,24 @@ function zonify_admin_menu() {
         'manage_options',
         'edit.php?post_type=zonify_contact'
     );
+// Ajout du sous-menu pour la liste des Points d'Intérêt (POI)
+add_submenu_page(
+    'zonify',
+    'Liste des Points d’Intérêt',
+    'Liste des Points d’Intérêt',
+    'manage_options',
+    'edit.php?post_type=poi'
+);
+
+    // Ajout du sous-menu pour la gestion des Points d'Intérêt (POI)
+add_submenu_page(
+    'zonify',
+    'Points d\'Intérêt',
+    'Points d\'Intérêt',
+    'manage_options',
+    'zonify_poi',
+    'zonify_poi_pages'
+);
+
 }
 add_action( 'admin_menu', 'zonify_admin_menu' );
