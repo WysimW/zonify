@@ -50,3 +50,8 @@ foreach ( glob( $contact_dir . '*.php' ) as $file ) {
 }
 
 require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
+
+// Charger les extensions
+if (file_exists(plugin_dir_path(__FILE__) . 'extensions/zonify-affichage-premier/zonify-affichage-premier.php')) {
+    require_once plugin_dir_path(__FILE__) . 'extensions/zonify-affichage-premier/zonify-affichage-premier.php';
+}

@@ -1,0 +1,541 @@
+/**
+ * Styles pour la carte des commerciaux - Tracteur Zone
+ * Direction artistique : Style minimaliste et professionnel inspiré du monde agricole
+ * Palette : vert profond (#2E5039), vert naturel (#7DA37B), jaune agricole (#FFC857), gris métallique (#D9D9D9), anthracite (#2A2A2A)
+ */
+
+/* Styles pour la page carte */
+.fullwidth-map-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Montserrat', 'Inter', sans-serif;
+    color: #2A2A2A;
+}
+
+.map-hero {
+    background-color: #2E5039;
+    padding: 30px 0;
+    border-bottom: 1px solid #7DA37B;
+}
+
+.map-hero-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 15px;
+    color: white;
+}
+
+.map-hero h1 {
+    margin: 0 0 10px;
+    font-size: 32px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+
+/* Container de la carte */
+.map-container-wrapper {
+    display: flex;
+    position: relative;
+    flex-grow: 1;
+    height: 70vh;
+}
+
+/* Contrôles flottants */
+.map-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 5px;
+    box-shadow: 0 2px 8px rgba(42, 42, 42, 0.2);
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #D9D9D9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    font-weight: 500;
+    color: #2A2A2A;
+}
+
+.control-btn.active,
+.control-btn:hover {
+    background: #7DA37B;
+    color: white;
+    border-color: #7DA37B;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.control-btn svg {
+    vertical-align: middle;
+}
+
+/* Panneau latéral */
+.map-sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 350px;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+    border-radius: 0 8px 8px 0;
+}
+
+.map-sidebar.sidebar-visible {
+    transform: translateX(0);
+}
+
+/* Onglets du panneau */
+.sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid #D9D9D9;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    background: #f8f8f8;
+    border: none;
+    border-right: 1px solid #D9D9D9;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #2A2A2A;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:last-child {
+    border-right: none;
+}
+
+.tab-btn.active {
+    background: white;
+    border-bottom: 3px solid #2E5039;
+    color: #2E5039;
+}
+
+.tab-btn svg {
+    vertical-align: middle;
+}
+
+/* Panneau de contenu */
+.sidebar-panel {
+    display: none;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.sidebar-panel.active {
+    display: flex;
+}
+
+.panel-header {
+    padding: 15px;
+    border-bottom: 1px solid #D9D9D9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f8f8;
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-family: 'Montserrat', sans-serif;
+    color: #2E5039;
+}
+
+.panel-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #2A2A2A;
+}
+
+/* Accordéon des filtres */
+.accordion-filters {
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.accordion-item {
+    border: 1px solid #D9D9D9;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f8f8;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.accordion-header:hover {
+    background-color: #7DA37B;
+    color: white;
+}
+
+.accordion-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.accordion-icon {
+    font-size: 18px;
+    color: #2A2A2A;
+}
+
+.accordion-content {
+    padding: 15px;
+    display: none;
+    border-top: 1px solid #D9D9D9;
+    background-color: white;
+}
+
+.accordion-item.active .accordion-content {
+    display: block;
+}
+
+/* Actions des filtres */
+.filter-actions {
+    padding: 15px;
+    border-top: 1px solid #D9D9D9;
+    display: flex;
+    gap: 10px;
+    background-color: #f8f8f8;
+}
+
+.apply-filters-btn,
+.reset-filters-btn {
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.apply-filters-btn {
+    background: #2E5039;
+    color: white;
+    border: none;
+    flex: 2;
+}
+
+.apply-filters-btn:hover {
+    background: #7DA37B;
+}
+
+.reset-filters-btn {
+    background: #D9D9D9;
+    border: 1px solid #D9D9D9;
+    color: #2A2A2A;
+    flex: 1;
+}
+
+.reset-filters-btn:hover {
+    background: #2A2A2A;
+    color: white;
+}
+
+/* Liste des résultats */
+.results-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #2A2A2A;
+    font-style: italic;
+}
+
+.result-item {
+    border: 1px solid #D9D9D9;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 15px;
+    position: relative;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    border-color: #7DA37B;
+}
+
+.result-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 0 8px 0 8px;
+}
+
+.result-badge.zone {
+    background: #2E5039;
+    color: white;
+}
+
+.result-badge.poi {
+    background: #FFC857;
+    color: #2A2A2A;
+}
+
+.result-item h4 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    padding-right: 80px;
+    font-family: 'Montserrat', sans-serif;
+    color: #2E5039;
+}
+
+.result-details {
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.result-details p {
+    margin: 5px 0;
+    color: #2A2A2A;
+}
+
+.locate-on-map {
+    background: #D9D9D9;
+    border: 1px solid #D9D9D9;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+    text-align: center;
+    transition: all 0.3s ease;
+    color: #2A2A2A;
+    font-family: 'Inter', sans-serif;
+}
+
+.locate-on-map:hover {
+    background: #7DA37B;
+    color: white;
+}
+
+/* Pagination */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-top: 1px solid #D9D9D9;
+    background-color: #f8f8f8;
+}
+
+.pagination-info {
+    font-size: 14px;
+    color: #2A2A2A;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #D9D9D9;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #7DA37B;
+    color: white;
+    border-color: #7DA37B;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-btn svg {
+    vertical-align: middle;
+}
+
+/* Conteneur principal de la carte */
+.map-main-container {
+    flex-grow: 1;
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+    position: relative;
+}
+
+.sidebar-open .map-main-container {
+    margin-left: 350px;
+}
+
+/* Section CTA */
+.map-cta-section {
+    background-color: #f8f8f8;
+    padding: 40px 0;
+    border-top: 1px solid #D9D9D9;
+}
+
+.map-cta-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 15px;
+}
+
+.map-cta-content h2 {
+    color: #2E5039;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 15px;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.cta-button {
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.cta-button.primary {
+    background: #2E5039;
+    color: white;
+}
+
+.cta-button.primary:hover {
+    background: #7DA37B;
+}
+
+.cta-button.secondary {
+    background: #FFC857;
+    color: #2A2A2A;
+    border: none;
+}
+
+.cta-button.secondary:hover {
+    background: #2A2A2A;
+    color: white;
+}
+
+/* Styles pour les popups de la carte */
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    padding: 0;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.popup-container {
+    padding: 15px;
+    font-family: 'Inter', sans-serif;
+}
+
+.popup-container h2 {
+    margin: 0 0 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #D9D9D9;
+    color: #2E5039;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-contact {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #2E5039;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-contact:hover {
+    background-color: #7DA37B;
+}
+
+/* Adaptations Responsive */
+@media (max-width: 768px) {
+    .map-container-wrapper {
+        height: 80vh;
+    }
+
+    .map-sidebar {
+        width: 100%;
+        max-width: none;
+    }
+
+    .sidebar-open .map-main-container {
+        margin-left: 0;
+    }
+
+    .map-controls {
+        left: 15px;
+        right: 15px;
+        justify-content: space-between;
+    }
+
+    .tab-btn {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+}
