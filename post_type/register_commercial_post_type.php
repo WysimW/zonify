@@ -42,6 +42,8 @@ function zonify_meta_box_callback( $post ) {
     $address         = get_post_meta( $post->ID, 'commercial_address', true );
     $opening_hours   = get_post_meta( $post->ID, 'commercial_opening_hours', true );
     $social_links    = get_post_meta( $post->ID, 'commercial_social_links', true );
+    $border_color    = get_post_meta( $post->ID, 'commercial_border_color', true ) ?: '#3388ff';
+    $fill_color      = get_post_meta( $post->ID, 'commercial_fill_color', true ) ?: '#3388ff';
     ?>
     <label for="commercial_email">Email :</label>
     <input type="email" name="commercial_email" id="commercial_email" value="<?php echo esc_attr( $email ); ?>" class="widefat" />
@@ -57,9 +59,20 @@ function zonify_meta_box_callback( $post ) {
     <br><br>
     <label for="commercial_social_links">Liens sociaux (séparés par une virgule) :</label>
     <input type="text" name="commercial_social_links" id="commercial_social_links" value="<?php echo esc_attr( $social_links ); ?>" class="widefat" />
+    <br><br>
+    <div class="zonify-color-fields" style="display: flex; gap: 20px; margin-top: 10px;">
+        <div>
+            <label for="commercial_border_color">Couleur de bordure :</label>
+            <input type="color" name="commercial_border_color" id="commercial_border_color" value="<?php echo esc_attr( $border_color ); ?>" />
+        </div>
+        <div>
+            <label for="commercial_fill_color">Couleur de remplissage :</label>
+            <input type="color" name="commercial_fill_color" id="commercial_fill_color" value="<?php echo esc_attr( $fill_color ); ?>" />
+        </div>
+    </div>
+    <p class="description">Ces couleurs seront utilisées pour afficher les zones de ce commercial sur la carte. Si non définies, les couleurs par défaut seront utilisées.</p>
     <?php
 }
-
 
 function zonify_save_meta_box( $post_id ) {
     if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
@@ -80,9 +93,14 @@ function zonify_save_meta_box( $post_id ) {
     if ( isset( $_POST['commercial_social_links'] ) ) {
         update_post_meta( $post_id, 'commercial_social_links', sanitize_text_field( $_POST['commercial_social_links'] ) );
     }
+    if ( isset( $_POST['commercial_border_color'] ) ) {
+        update_post_meta( $post_id, 'commercial_border_color', sanitize_hex_color( $_POST['commercial_border_color'] ) );
+    }
+    if ( isset( $_POST['commercial_fill_color'] ) ) {
+        update_post_meta( $post_id, 'commercial_fill_color', sanitize_hex_color( $_POST['commercial_fill_color'] ) );
+    }
 }
 add_action( 'save_post', 'zonify_save_meta_box' );
-
 
 function zonify_add_commercial_meta_box() {
     // id = 'zonify_commercial_info' => identifiant unique

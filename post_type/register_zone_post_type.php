@@ -29,6 +29,8 @@ function register_zone_post_type() {
     register_post_type('zone', $args);
 }
 add_action('init', 'register_zone_post_type');
+
+
 function zone_add_meta_box() {
     add_meta_box(
         'zone_commercial_id',
@@ -74,6 +76,7 @@ function zone_save_meta_box($post_id) {
     }
 }
 add_action('save_post_zone', 'zone_save_meta_box');
+
 function zone_add_geojson_meta_box() {
     add_meta_box(
         'zone_geojson_box',
@@ -131,3 +134,4 @@ function zone_export_meta_box() {
     );
 }
 add_action('add_meta_boxes', 'zone_export_meta_box');
+

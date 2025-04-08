@@ -84,5 +84,55 @@ add_submenu_page(
     'zonify_poi_pages'
 );
 
+add_submenu_page(
+    'zonify',
+    'Icônes POI',
+    'Icônes POI',
+    'edit_posts',
+    'edit.php?post_type=zonify_icon'
+);
+
 }
 add_action( 'admin_menu', 'zonify_admin_menu' );
+
+// Gérer les écrans de sous-menu
+function zonify_fix_submenu_highlight() {
+    global $submenu_file, $plugin_page, $pagenow;
+    
+    // Si on est sur l'écran d'édition d'un custom post type
+    if ($pagenow === 'edit.php' || $pagenow === 'post-new.php' || $pagenow === 'post.php') {
+        $post_type = $_GET['post_type'] ?? get_post_type($_GET['post'] ?? 0);
+        if ($post_type === 'zone') {
+            $submenu_file = 'edit.php?post_type=zone';
+            $plugin_page = null;
+        } else if ($post_type === 'commercial') {
+            $submenu_file = 'edit.php?post_type=commercial';
+            $plugin_page = null;
+        } else if ($post_type === 'poi') {
+            $submenu_file = 'edit.php?post_type=poi';
+            $plugin_page = null;
+        } else if ($post_type === 'zonify_icon') {
+            $submenu_file = 'edit.php?post_type=zonify_icon';
+            $plugin_page = null;
+        }
+    }
+    
+    // Ajouter des conditions similaires pour vos autres CPTs
+    // si vous en avez d'autres à gérer
+}
+add_action('admin_head', 'zonify_fix_submenu_highlight');
+
+// Fonction de callback pour l'affichage du tableau de bord
+function zonify_dashboard_page() {
+    // Vérifiez les permissions
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    
+    // Récupérer les statistiques
+    $zones_count = wp_count_posts('zone')->publish;
+    $commerciaux_count = wp_count_posts('commercial')->publish;
+    $poi_count = wp_count_posts('poi')->publish;
+    
+    include(plugin_dir_path(__FILE__) . 'templates/dashboard.php');
+}

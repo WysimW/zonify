@@ -2,52 +2,52 @@
 .popup-container {
     font-family: 'Roboto', sans-serif;
     padding: 10px;
-  }
+}
   
-  /* Modifier l'apparence du wrapper de la popup Leaflet */
-  .leaflet-popup-content-wrapper {
+/* Modifier l'apparence du wrapper de la popup Leaflet */
+.leaflet-popup-content-wrapper {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     padding: 15px;
-  }
+}
   
-  /* Modifier le "tip" de la popup */
-  .leaflet-popup-tip {
+/* Modifier le "tip" de la popup */
+.leaflet-popup-tip {
     background: #fff;
-  }
+}
   
-  /* Style du contenu de la popup */
-  .leaflet-popup-content {
+/* Style du contenu de la popup */
+.leaflet-popup-content {
     color: #333;
     font-size: 14px;
     line-height: 1.6;
     margin: 0;
-  }
+}
   
-  /* Titre dans la popup */
-  .popup-container h2 {
+/* Titre dans la popup */
+.popup-container h2 {
     margin: 0 0 10px;
     font-size: 18px;
     color: #2c3e50;
-  }
+}
   
-  /* Paragraphes dans la popup */
-  .popup-container p {
+/* Paragraphes dans la popup */
+.popup-container p {
     margin: 5px 0;
-  }
+}
   
-  /* Liens dans la popup */
-  .popup-container a {
+/* Liens dans la popup */
+.popup-container a {
     text-decoration: none;
     transition: color 0.3s;
-  }
-  .popup-container a:hover {
+}
+.popup-container a:hover {
     color: rgb(160, 165, 216);
-  }
+}
   
-  /* Bouton de contact dans la popup */
-  .btn-contact {
+/* Bouton de contact dans la popup */
+.btn-contact {
     display: inline-block;
     margin-top: 10px;
     padding: 8px 16px;
@@ -56,9 +56,140 @@
     border-radius: 4px;
     text-decoration: none;
     transition: background-color 0.3s;
-  }
+}
 
-  .btn-contact:hover {
+.btn-contact:hover {
     background-color: #1d6fa5;
-  }
-  
+}
+
+/* ===== STYLES POUR LE MULTI-SELECT SELECT2 ===== */
+
+/* Container du filtre */
+.zonify-filter-container {
+    margin-bottom: 20px;
+    font-family: 'Montserrat', 'Inter', sans-serif;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Label du filtre */
+.zonify-filter-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2A2A2A;
+    font-size: 14px;
+}
+
+/* Style de base Select2 */
+.select2-container--classic .select2-selection--multiple {
+    border: 1px solid #D9D9D9 !important;
+    border-radius: 6px !important;
+    background: white !important;
+    min-height: 42px !important;
+    padding: 4px 8px !important;
+    transition: all 0.2s ease;
+}
+
+/* Focus sur Select2 */
+.select2-container--classic.select2-container--focus .select2-selection--multiple {
+    border-color: #2E5039 !important;
+    box-shadow: 0 0 0 2px rgba(46, 80, 57, 0.2) !important;
+    outline: none !important;
+}
+
+/* Dropdown Select2 */
+.select2-container--classic .select2-dropdown {
+    border-color: #2E5039 !important;
+    border-radius: 6px !important;
+    overflow: hidden;
+    margin-top: 3px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Options dans le dropdown */
+.select2-container--classic .select2-results__option {
+    padding: 8px 12px !important;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+/* Option survolée */
+.select2-container--classic .select2-results__option--highlighted[aria-selected] {
+    background-color: #7DA37B !important;
+    color: white !important;
+}
+
+/* Option sélectionnée dans le dropdown */
+.select2-container--classic .select2-results__option[aria-selected=true] {
+    background-color: #2E5039 !important;
+    color: white !important;
+}
+
+/* Tags sélectionnés */
+.select2-container--classic .select2-selection--multiple .select2-selection__choice {
+    background-color: #7DA37B !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 5px 8px !important;
+    margin: 3px !important;
+    font-size: 13px;
+    position: relative;
+}
+
+/* Bouton suppression tag */
+.select2-container--classic .select2-selection--multiple .select2-selection__choice__remove {
+    color: white !important;
+    margin-right: 5px !important;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.select2-container--classic .select2-selection--multiple .select2-selection__choice__remove:hover {
+    opacity: 1;
+    background: none !important;
+}
+
+/* Placeholder du Select2 */
+.select2-container--classic .select2-selection--multiple .select2-search--inline .select2-search__field {
+    margin-top: 6px !important;
+    font-family: 'Montserrat', 'Inter', sans-serif !important;
+}
+
+/* Container des boutons de filtre */
+.zonify-filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Boutons de filtre */
+.zonify-filter-button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Montserrat', 'Inter', sans-serif;
+    background-color: #2E5039;
+    color: white;
+}
+
+.zonify-filter-button:hover {
+    background-color: #1e392a;
+}
+
+/* Bouton réinitialiser */
+.zonify-filter-button-reset {
+    background-color: #D9D9D9;
+    color: #2A2A2A;
+}
+
+.zonify-filter-button-reset:hover {
+    background-color: #c0c0c0;
+}

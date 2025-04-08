@@ -57,22 +57,40 @@ function zonify_map_pages()
         <main class="zonify-content">
             <section class="zonify-section">
                 <h2>Gestion des Zones Commerciales</h2>
-                <p>Sélectionnez un commercial pour afficher et gérer sa zone géographique.</p>
+                <p>Sélectionnez un commercial et/ou une région pour afficher et gérer les zones géographiques.</p>
                 <div class="zonify-form-group">
                     <label for="commercial-select">Commercial :</label>
                     <select id="commercial-select" class="zonify-select" multiple>
-    <option value="0">-- Aucun commercial --</option>
-    <?php
-    if ($commercials_query->have_posts()) :
-        while ($commercials_query->have_posts()) : $commercials_query->the_post();
-            echo '<option value="' . get_the_ID() . '">' . get_the_title() . '</option>';
-        endwhile;
-        wp_reset_postdata();
-    endif;
-    ?>
-</select>
+                        <option value="0">-- Aucun commercial --</option>
+                        <?php
+                        if ($commercials_query->have_posts()) :
+                            while ($commercials_query->have_posts()) : $commercials_query->the_post();
+                                echo '<option value="' . get_the_ID() . '">' . get_the_title() . '</option>';
+                            endwhile;
+                            wp_reset_postdata();
+                        endif;
+                        ?>
+                    </select>
+                </div>
 
-
+                <div class="zonify-form-group">
+                    <label for="region-select">Région :</label>
+                    <select id="region-select" class="zonify-select" multiple>
+                        <option value="0">-- Aucune région --</option>
+                        <?php
+                        // Récupération des régions
+                        $regions = get_terms([
+                            'taxonomy' => 'region',
+                            'hide_empty' => false,
+                        ]);
+                        
+                        if (!is_wp_error($regions) && !empty($regions)) :
+                            foreach ($regions as $region) :
+                                echo '<option value="' . $region->term_id . '">' . $region->name . '</option>';
+                            endforeach;
+                        endif;
+                        ?>
+                    </select>
                 </div>
             </section>
 

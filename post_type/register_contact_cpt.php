@@ -20,7 +20,7 @@ function zonify_register_contact_cpt() {
         'labels'             => $labels,
         'public'             => false, // le CPT n'est pas accessible publiquement (uniquement en back-office)
         'show_ui'            => true,
-        'show_in_menu'       => true,
+        'show_in_menu'       => false,
         'query_var'          => false,
         'rewrite'            => array( 'slug' => 'zonify_contact' ),
         'capability_type'    => 'post',
