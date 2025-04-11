@@ -54,13 +54,13 @@ function zap_customize_header() {
     ?>
     <style>
         .zonify-title {
-            color: #FF5500 !important;
+            color: #70c141 !important;
         }
         .zonify-banner {
-            border-bottom-color: #FF5500 !important;
+            border-bottom-color: #70c141 !important;
         }
         .zap-version-badge {
-            background-color: #FF5500;
+            background-color: #70c141;
             color: white;
             padding: 3px 8px;
             border-radius: 20px;
@@ -114,13 +114,13 @@ function zap_customize_admin_ui() {
         /* Couleurs personnalisées */
         .zonify-section h2, 
         .zonify-section h3 {
-            color: #FF5500;
+            color: #70c141;
         }
         
         /* Personnalisation des boutons */
         .zonify-content .button-primary,
         .zap-btn-primary {
-            background: #FF5500;
+            background: #70c141;
             border-color: #E04D00;
             color: white;
         }
@@ -133,7 +133,7 @@ function zap_customize_admin_ui() {
         /* Badge Affichage Premier */
         .zap-badge {
             display: inline-block;
-            background: #FF5500;
+            background: #70c141;
             color: white;
             font-size: 0.8em;
             padding: 2px 8px;

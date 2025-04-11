@@ -1,6 +1,6 @@
 /**
  * Styles pour la carte des panneaux d'affichage - Extension Affichage Premier
- * Palette de couleurs principale : orange (#FF5500), blanc, nuances de gris
+ * Palette de couleurs principale : orange (#70c141), blanc, nuances de gris
  */
 
 /* Styles pour la page carte */
@@ -13,7 +13,7 @@
 }
 
 .map-hero {
-    background-color: #FF5500;
+    background-color: #70c141;
     padding: 30px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -73,9 +73,9 @@
 
 .control-btn.active,
 .control-btn:hover {
-    background: #FF5500;
+    background: #70c141;
     color: white;
-    border-color: #FF5500;
+    border-color: #70c141;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -133,8 +133,8 @@
 
 .tab-btn.active {
     background: white;
-    border-bottom: 3px solid #FF5500;
-    color: #FF5500;
+    border-bottom: 3px solid #70c141;
+    color: #70c141;
 }
 
 .tab-btn svg {
@@ -165,7 +165,7 @@
 .panel-header h2 {
     margin: 0;
     font-size: 18px;
-    color: #FF5500;
+    color: #70c141;
 }
 
 .panel-close-btn {
@@ -251,7 +251,7 @@
 
 .search-filter-input:focus {
     outline: none;
-    border-color: #FF5500;
+    border-color: #70c141;
     box-shadow: 0 0 0 2px rgba(255, 85, 0, 0.2);
 }
 
@@ -263,14 +263,14 @@
 
 .surface-filter input[type="range"] {
     width: 100%;
-    accent-color: #FF5500;
+    accent-color: #70c141;
 }
 
 .surface-display {
     margin-top: 10px;
     text-align: center;
     font-weight: bold;
-    color: #FF5500;
+    color: #70c141;
 }
 
 /* Actions des filtres */
@@ -294,7 +294,7 @@
 }
 
 .apply-filters-btn {
-    background: #FF5500;
+    background: #70c141;
     color: white;
     border: none;
     flex: 2;
@@ -341,13 +341,13 @@
 
 .result-item:hover {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    border-color: #FF5500;
+    border-color: #70c141;
 }
 
 /* Style des éléments de résultats */
 .result-item h4 {
     margin: 0 0 10px;
-    color: #FF5500;
+    color: #70c141;
     font-size: 16px;
 }
 
@@ -397,9 +397,9 @@
 }
 
 .locate-on-map:hover {
-    background: #FF5500;
+    background: #70c141;
     color: white;
-    border-color: #FF5500;
+    border-color: #70c141;
 }
 
 /* Pagination */
@@ -435,9 +435,9 @@
 }
 
 .pagination-btn:not(:disabled):hover {
-    background: #FF5500;
+    background: #70c141;
     color: white;
-    border-color: #FF5500;
+    border-color: #70c141;
 }
 
 .pagination-btn:disabled {
@@ -482,7 +482,7 @@
 }
 
 .cta-button.primary {
-    background-color: #FF5500;
+    background-color: #70c141;
     color: white;
 }
 
@@ -498,13 +498,13 @@
 
 .cta-button.secondary:hover {
     background-color: #f8f8f8;
-    border-color: #FF5500;
-    color: #FF5500;
+    border-color: #70c141;
+    color: #70c141;
 }
 
 /* Styles pour les popups Leaflet */
 .panel-popup h3 {
-    color: #FF5500;
+    color: #70c141;
     font-size: 16px;
     margin-bottom: 10px;
 }
@@ -515,7 +515,7 @@
 }
 
 .panel-contact-btn {
-    background-color: #FF5500;
+    background-color: #70c141;
     color: white;
     padding: 8px 15px;
     text-decoration: none;
@@ -536,17 +536,17 @@
 }
 
 .select2-container--classic .select2-results__option--highlighted[aria-selected] {
-    background-color: #FF5500;
+    background-color: #70c141;
 }
 
 .select2-container--classic .select2-selection--multiple .select2-selection__choice {
     background-color: #ffefe6;
     border-color: #ffcfb8;
-    color: #FF5500;
+    color: #70c141;
 }
 
 .select2-container--classic .select2-selection--multiple .select2-selection__choice__remove:hover {
-    color: #FF5500;
+    color: #70c141;
 }
 
 /* Classes de statut pour les éléments de résultat */

@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 4) Styles pour les marqueurs de panneaux
     var markerStyle = {
         radius: 8,
-        fillColor: "#FF5500",
-        color: "#FF5500",
+        fillColor: "#70c141",
+        color: "#70c141",
         weight: 2,
         opacity: 1,
         fillOpacity: 0.6
@@ -93,18 +93,62 @@ document.addEventListener('DOMContentLoaded', function() {
         var selectedCategories = filters.categories || [];
         var selectedCity = filters.city || '';
         var selectedDepartment = filters.department || '';
+        var selectedRegion = filters.region || '';
         var selectedType = filters.type || '';
+        var selectedSupport = filters.support || '';
+        var selectedFormat = filters.format || '';
         var selectedStatus = filters.status || '';
-        var minSurface = parseFloat(filters.minSurface) || 0;
+        var minWidth = filters.minWidth || 0;
+        var maxWidth = filters.maxWidth || 0;
+        var minHeight = filters.minHeight || 0;
+        var maxHeight = filters.maxHeight || 0;
+
+        console.log("Filtres appliqués:", filters);
 
         // Clone des données pour ne pas modifier l'original
         var filteredData = JSON.parse(JSON.stringify(panneauxData));
         var displayedResults = [];
+        var invalidCoordinatesPOIs = [];
+
+        // Vérifier les POIs sans coordonnées valides
+        var validGeoData = filteredData.filter(function(feature) {
+            // Vérifier que la géométrie existe et que les coordonnées sont valides
+            if (!feature.geometry || 
+                !feature.geometry.coordinates || 
+                !Array.isArray(feature.geometry.coordinates) || 
+                feature.geometry.coordinates.length < 2 ||
+                !feature.geometry.coordinates[0] || 
+                !feature.geometry.coordinates[1]) {
+                
+                // Stocker les POIs invalides pour information
+                invalidCoordinatesPOIs.push({
+                    id: feature.properties.id,
+                    title: feature.properties.title
+                });
+                
+                return false;
+            }
+            return true;
+        });
+
+        console.log("POIs avec coordonnées valides: " + validGeoData.length + " sur " + filteredData.length);
+        
+        if (invalidCoordinatesPOIs.length > 0) {
+            console.warn("POIs sans coordonnées valides:", invalidCoordinatesPOIs);
+        }
+        
+        // Continuer avec les données valides uniquement
+        filteredData = validGeoData;
 
         // Normaliser la recherche (convertir en minuscules, supprimer les accents)
         var normalizedSearchQuery = '';
         if (searchQuery) {
             normalizedSearchQuery = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        // Debug des données avant filtrage pour comprendre leur structure
+        if (filteredData.length > 0) {
+            console.log("Exemple de données à filtrer:", filteredData[0].properties);
         }
 
         // Appliquer les filtres
@@ -113,9 +157,12 @@ document.addEventListener('DOMContentLoaded', function() {
             let matchesCategories = true;
             let matchesCity = true;
             let matchesDepartment = true;
+            let matchesRegion = true;
             let matchesType = true;
+            let matchesSupport = true;
             let matchesStatus = true;
-            let matchesSurface = true;
+            let matchesFormat = true;
+            let matchesDimensions = true;
             
             // Fonction pour normaliser le texte (minuscules, sans accents)
             function normalizeText(text) {
@@ -130,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Vérifier dans différents champs
                 const fields = [
                     'title', 'reference', 'address', 'postal_code', 'city_name', 
-                    'department', 'region', 'panel_type', 'notes'
+                    'department', 'region', 'panel_type', 'support_type', 'notes'
                 ];
                 
                 for (const field of fields) {
@@ -173,57 +220,136 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Filtre par ville (taxonomie)
-            if (selectedCity) {
-                if (!feature.properties.cities || feature.properties.cities.length === 0) {
-                    matchesCity = false;
-                } else {
-                    matchesCity = feature.properties.cities.some(function(city) {
-                        return city.slug === selectedCity;
+            // Filtre par ville (depuis city_name)
+            if (selectedCity && feature.properties.city_name) {
+                matchesCity = normalizeText(feature.properties.city_name) === normalizeText(selectedCity);
+            }
+            
+            // Filtre par département (depuis panel_departement)
+            if (selectedDepartment && feature.properties.department) {
+                matchesDepartment = normalizeText(feature.properties.department) === normalizeText(selectedDepartment);
+            }
+            
+            // Filtre par région (depuis panel_region)
+            if (selectedRegion && feature.properties.region) {
+                matchesRegion = normalizeText(feature.properties.region) === normalizeText(selectedRegion);
+            }
+            
+            // Filtre par type de panneau (panel_type)
+            if (selectedType && feature.properties.panel_type) {
+                matchesType = normalizeText(feature.properties.panel_type) === normalizeText(selectedType);
+            }
+            
+            // Filtre par type de support (panel_support converti en support_type)
+            if (selectedSupport) {
+                var panelSupport = feature.properties.support_type || feature.properties.panel_support || '';
+                matchesSupport = normalizeText(panelSupport) === normalizeText(selectedSupport);
+            }
+            
+            // Filtre par statut (panel_disponibilite converti en status)
+            if (selectedStatus && (feature.properties.status || feature.properties.panel_disponibilite)) {
+                var panelStatus = feature.properties.status || feature.properties.panel_disponibilite || '';
+                matchesStatus = normalizeText(panelStatus) === normalizeText(selectedStatus);
+            }
+            
+            // Filtre par format (panel_format_standard ou panel_format)
+            if (selectedFormat) {
+                matchesFormat = false;
+                
+                // Vérifier dans l'ordre: panel_format_standard, panel_format, format
+                // Utiliser une variable directe pour une meilleure lisibilité
+                var formatValue = normalizeText(selectedFormat);
+                
+                // Format standard est prioritaire - c'est celui qui est utilisé dans la metabox
+                if (feature.properties.panel_format_standard && 
+                    normalizeText(feature.properties.panel_format_standard) === formatValue) {
+                    matchesFormat = true;
+                }
+                // Ensuite essayer panel_format  
+                else if (feature.properties.panel_format && 
+                    normalizeText(feature.properties.panel_format) === formatValue) {
+                    matchesFormat = true;
+                }
+                // Enfin essayer le champ format qui pourrait être utilisé comme alternative
+                else if (feature.properties.format && 
+                    normalizeText(feature.properties.format) === formatValue) {
+                    matchesFormat = true;
+                }
+                
+                // Afficher un log pour debugging
+                if (!matchesFormat && (feature.properties.panel_format_standard || feature.properties.panel_format || feature.properties.format)) {
+                    console.log("Format non correspondant:", {
+                        filter: formatValue,
+                        panel_format_standard: feature.properties.panel_format_standard,
+                        panel_format: feature.properties.panel_format,
+                        format: feature.properties.format,
+                        id: feature.properties.id,
+                        title: feature.properties.title
                     });
                 }
             }
             
-            // Filtre par département
-            if (selectedDepartment && feature.properties.department) {
-                matchesDepartment = feature.properties.department === selectedDepartment;
-            }
-            
-            // Filtre par type de panneau
-            if (selectedType && feature.properties.panel_type) {
-                matchesType = feature.properties.panel_type === selectedType;
-            }
-            
-            // Filtre par statut
-            if (selectedStatus && feature.properties.status) {
-                matchesStatus = feature.properties.status === selectedStatus;
-            }
-            
-            // Filtre par surface minimale
-            if (minSurface > 0 && feature.properties.surface) {
-                var surface = parseFloat(feature.properties.surface);
-                matchesSurface = !isNaN(surface) && surface >= minSurface;
+            // Filtre par dimensions
+            if ((minWidth > 0 || maxWidth > 0 || minHeight > 0 || maxHeight > 0) && 
+                (feature.properties.width || feature.properties.height || feature.properties.panel_width || feature.properties.panel_height)) {
+                
+                const width = parseInt(feature.properties.width || feature.properties.panel_width) || 0;
+                const height = parseInt(feature.properties.height || feature.properties.panel_height) || 0;
+                
+                if (minWidth > 0 && width < minWidth) matchesDimensions = false;
+                if (maxWidth > 0 && width > maxWidth) matchesDimensions = false;
+                if (minHeight > 0 && height < minHeight) matchesDimensions = false;
+                if (maxHeight > 0 && height > maxHeight) matchesDimensions = false;
             }
             
             // Un panneau doit correspondre à tous les filtres pour être affiché
             const matches = matchesSearch && matchesCategories && matchesCity && 
-                        matchesDepartment && matchesType && matchesStatus && matchesSurface;
+                        matchesDepartment && matchesRegion && matchesType && 
+                        matchesSupport && matchesStatus && matchesFormat && matchesDimensions;
                         
             // Si le panneau correspond aux filtres, l'ajouter aux résultats à afficher
             if (matches) {
+                // Pour déterminer le format, chercher dans plusieurs champs possibles
+                let format = feature.properties.format || feature.properties.panel_format_standard || feature.properties.panel_format || '';
+                if (!format && feature.properties.surface) {
+                    const surface = parseFloat(feature.properties.surface);
+                    if (!isNaN(surface)) {
+                        if (surface >= 11 && surface <= 12.5) format = '12M2';
+                        else if (surface >= 7.5 && surface < 11) format = '8M2';
+                        else if (surface >= 5.5 && surface < 7.5) format = '6M2';
+                        else if (surface >= 3.5 && surface < 5.5) format = '4M2';
+                        else if (surface >= 1.75 && surface < 3.5) format = '2M2';
+                        else if (surface >= 1.25 && surface < 1.75) format = '1,5M2';
+                    }
+                }
+                
+                // Récupérer le statut depuis le bon champ
+                let status = feature.properties.status || feature.properties.panel_disponibilite || '';
+                
                 displayedResults.push({
                     id: feature.properties.id,
                     title: feature.properties.title,
                     reference: feature.properties.reference || '',
                     panel_type: feature.properties.panel_type || '',
+                    support_type: feature.properties.support_type || feature.properties.panel_support || '',
+                    format: format,
                     surface: feature.properties.surface || '',
                     dimensions: (feature.properties.width && feature.properties.height) ? 
-                              `${feature.properties.width}×${feature.properties.height} cm` : '',
+                              `${feature.properties.width}×${feature.properties.height} cm` : 
+                              (feature.properties.panel_width && feature.properties.panel_height) ?
+                              `${feature.properties.panel_width}×${feature.properties.panel_height} cm` : '',
                     address: getFullAddress(feature.properties),
                     city: feature.properties.city_name || '',
                     department: feature.properties.department || '',
-                    status: feature.properties.status || '',
-                    image: feature.properties.image || ''
+                    region: feature.properties.region || '',
+                    status: status,
+                    image: feature.properties.image || '',
+                    visibility_from: feature.properties.visibility_from || '',
+                    visibility_to: feature.properties.visibility_to || '',
+                    visibility_angle: feature.properties.visibility_angle || '',
+                    visibility_distance: feature.properties.visibility_distance || '',
+                    panel_traffic: feature.properties.panel_traffic || '',
+                    visibility_note: feature.properties.visibility_note || ''
                 });
             }
             
@@ -237,18 +363,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Créer et ajouter la nouvelle couche GeoJSON
         geoJSONLayer = L.geoJSON(filteredData, {
             pointToLayer: function(feature, latlng) {
-                // Si le POI a une icône personnalisée, l'utiliser
-                if (feature.properties.icon) {
-                    var icon = L.icon({
-                        iconUrl: feature.properties.icon.url,
-                        iconSize: [feature.properties.icon.width, feature.properties.icon.height],
-                        iconAnchor: [feature.properties.icon.anchor_x, feature.properties.icon.anchor_y]
-                    });
-                    return L.marker(latlng, { icon: icon });
-                } else {
-                    // Sinon, utiliser le marqueur circulaire par défaut
-                    return L.circleMarker(latlng, markerStyle);
-                }
+                // Utiliser l'icône SVG personnalisée pour tous les panneaux
+                var icon = L.icon({
+                    iconUrl: '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin (1).svg',
+                    iconSize: [30, 40],
+                    iconAnchor: [15, 40],
+                    popupAnchor: [0, -35]
+                });
+                return L.marker(latlng, { icon: icon });
             },
             onEachFeature: function(feature, layer) {
                 // Au clic sur le panneau
@@ -285,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ' color:' + (options.popup_font_color || '#333') + ';">';
         
         // Titre avec référence
-        content += '<h3 style="margin: 0 0 10px; color: #FF5500;">' + panel.title;
+        content += '<h3 style="margin: 0 0 10px; color: #70c141;">' + panel.title;
         if (panel.reference) {
             content += ' <span style="font-size: 0.8em; opacity: 0.8;">(Réf: ' + panel.reference + ')</span>';
         }
@@ -300,83 +422,110 @@ document.addEventListener('DOMContentLoaded', function() {
         
         content += '<div class="panel-details" style="margin-top: 10px;">';
         
-        // Type et dimensions
+        // Section 1: Détails techniques
+        content += '<div class="details-section" style="margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px;">';
+        content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Informations techniques</h4>';
+        
+        // Type et support
         if (panel.panel_type) {
-            content += '<p><strong>Type:</strong> ' + panel.panel_type + '</p>';
+            content += '<p style="margin: 3px 0;"><strong>Type:</strong> ' + panel.panel_type + '</p>';
+        }
+        if (panel.support_type || panel.panel_support) {
+            content += '<p style="margin: 3px 0;"><strong>Support:</strong> ' + (panel.support_type || panel.panel_support || '') + '</p>';
         }
         
-        if (panel.width && panel.height) {
-            content += '<p><strong>Dimensions:</strong> ' + panel.width + '×' + panel.height + ' cm';
+        // Dimensions et format
+        if ((panel.width && panel.height) || (panel.panel_width && panel.panel_height)) {
+            var width = panel.width || panel.panel_width;
+            var height = panel.height || panel.panel_height;
+            content += '<p style="margin: 3px 0;"><strong>Dimensions:</strong> ' + width + '×' + height + ' cm';
             if (panel.surface) {
                 content += ' (' + panel.surface + ' m²)';
             }
             content += '</p>';
         } else if (panel.surface) {
-            content += '<p><strong>Surface:</strong> ' + panel.surface + ' m²</p>';
+            content += '<p style="margin: 3px 0;"><strong>Surface:</strong> ' + panel.surface + ' m²</p>';
         }
         
-        // Adresse complète si activée
+        // Format standard
+        if (panel.format || panel.panel_format || panel.panel_format_standard) {
+            content += '<p style="margin: 3px 0;"><strong>Format:</strong> ' + (panel.panel_format_standard || panel.format || panel.panel_format || '') + '</p>';
+        }
+        
+        // Annonceur actuel et date de fin
+        if (panel.panel_annonceur) {
+            content += '<p style="margin: 3px 0;"><strong>Annonceur:</strong> ' + panel.panel_annonceur + '</p>';
+        }
+        if (panel.panel_date_fin) {
+            content += '<p style="margin: 3px 0;"><strong>Fin d\'engagement:</strong> ' + panel.panel_date_fin + '</p>';
+        }
+        content += '</div>';
+        
+        // Section 2: Localisation
+        content += '<div class="details-section" style="margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px;">';
+        content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Localisation</h4>';
+        
+        // Adresse complète
         if (parseInt(options.popup_show_address) === 1) {
             var address = getFullAddress(panel);
             if (address) {
-                content += '<p><strong>Adresse:</strong> ' + address + '</p>';
+                content += '<p style="margin: 3px 0;"><strong>Adresse:</strong> ' + address + '</p>';
             }
         }
         
-        // Visibilité
-        if (panel.visibility) {
-            content += '<p><strong>Visibilité:</strong> ' + panel.visibility + '</p>';
+        // Département et région
+        if (panel.department || panel.panel_departement) {
+            content += '<p style="margin: 3px 0;"><strong>Département:</strong> ' + (panel.department || panel.panel_departement) + '</p>';
+        }
+        if (panel.region || panel.panel_region) {
+            content += '<p style="margin: 3px 0;"><strong>Région:</strong> ' + (panel.region || panel.panel_region) + '</p>';
         }
         
-        // Statut
-        if (panel.status) {
-            var statusLabel = panel.status;
-            var statusColor = '#777';
-            
-            switch (panel.status.toLowerCase()) {
-                case 'disponible':
-                    statusColor = '#28a745';
-                    break;
-                case 'reserve':
-                case 'réservé':
-                    statusColor = '#ffc107';
-                    break;
-                case 'loue':
-                case 'loué':
-                    statusColor = '#dc3545';
-                    break;
-                case 'maintenance':
-                    statusColor = '#17a2b8';
-                    break;
-            }
-            
-            content += '<p><strong>Statut:</strong> <span style="color:' + statusColor + '; font-weight: bold;">' + 
-                      statusLabel + '</span></p>';
+        // Coordonnées GPS
+        if (panel.panel_latitude && panel.panel_longitude) {
+            content += '<p style="margin: 3px 0;"><strong>Coordonnées GPS:</strong> ' + panel.panel_latitude + ', ' + panel.panel_longitude + '</p>';
         }
+        content += '</div>';
         
-        // Notes
-        if (panel.notes) {
-            content += '<p><strong>Notes:</strong> ' + panel.notes + '</p>';
-        }
+        // Section 3: Visibilité
+        content += '<div class="details-section">';
+        content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Visibilité</h4>';
         
-        // Afficher les catégories
-        if (panel.categories && panel.categories.length > 0) {
-            content += '<p><strong>Catégories:</strong> ';
-            panel.categories.forEach(function(cat, index) {
-                content += cat.name;
-                if (index < panel.categories.length - 1) {
-                    content += ', ';
-                }
-            });
+        // Informations de visibilité
+        if (panel.visibility_from || panel.visibility_to) {
+            content += '<p style="margin: 3px 0;"><strong>Visibilité:</strong> ';
+            if (panel.visibility_from) content += 'En venant de ' + panel.visibility_from;
+            if (panel.visibility_from && panel.visibility_to) content += ', ';
+            if (panel.visibility_to) content += 'En allant à ' + panel.visibility_to;
             content += '</p>';
         }
+        
+        if (panel.visibility_angle) {
+            content += '<p style="margin: 3px 0;"><strong>Angle de visibilité:</strong> ' + panel.visibility_angle + '°</p>';
+        }
+        
+        if (panel.visibility_distance) {
+            content += '<p style="margin: 3px 0;"><strong>Distance de visibilité:</strong> ' + panel.visibility_distance + ' m</p>';
+        }
+        
+        if (panel.panel_traffic) {
+            content += '<p style="margin: 3px 0;"><strong>Trafic quotidien:</strong> ' + panel.panel_traffic + ' passages</p>';
+        }
+        
+        // Notes sur la visibilité
+        if (panel.visibility_note) {
+            content += '<p style="margin: 3px 0;"><strong>Notes:</strong> ' + panel.visibility_note + '</p>';
+        }
+        content += '</div>';
+        
+
         
         content += '</div>'; // Fin panel-details
         
         // Bouton pour contacter / en savoir plus
         content += '<div class="panel-actions" style="margin-top: 15px; text-align: center;">' +
             '<a href="/contact?panel=' + panel.id + '" class="panel-contact-btn" style="' +
-            'background-color: #FF5500; color: white; padding: 8px 15px; text-decoration: none; ' +
+            'background-color: #70c141; color: white; padding: 8px 15px; text-decoration: none; ' +
             'border-radius: 4px; display: inline-block; font-weight: bold;">' +
             'Contacter / Réserver</a>' +
             '</div>';
@@ -498,31 +647,91 @@ document.addEventListener('DOMContentLoaded', function() {
                 
             html += `<div class="result-details">`;
             
+            // Section technique
+            html += `<div class="result-section">`;
+            
             // Référence
             if (result.reference) {
                 html += `<p><strong>Réf.:</strong> ${result.reference}</p>`;
             }
             
-            // Type et dimensions
+            // Type et support
             if (result.panel_type) {
                 html += `<p><strong>Type:</strong> ${result.panel_type}</p>`;
             }
             
+            if (result.support_type) {
+                html += `<p><strong>Support:</strong> ${result.support_type}</p>`;
+            }
+            
+            // Dimensions et format
             if (result.dimensions) {
-                html += `<p><strong>Dimensions:</strong> ${result.dimensions}`;
-                if (result.surface) {
-                    html += ` (${result.surface} m²)`;
-                }
-                html += `</p>`;
-            } else if (result.surface) {
+                html += `<p><strong>Dimensions:</strong> ${result.dimensions}</p>`;
+            }
+            
+            if (result.surface) {
                 html += `<p><strong>Surface:</strong> ${result.surface} m²</p>`;
             }
             
+            if (result.format) {
+                html += `<p><strong>Format:</strong> ${result.format}</p>`;
+            }
+            html += `</div>`;
+            
+            // Section localisation
+            html += `<div class="result-section">`;
             // Adresse
             if (result.address) {
                 html += `<p><strong>Adresse:</strong> ${result.address}</p>`;
             } else if (result.city) {
                 html += `<p><strong>Ville:</strong> ${result.city}</p>`;
+            }
+            
+            // Département et région
+            if (result.department) {
+                html += `<p><strong>Département:</strong> ${result.department}</p>`;
+            }
+            
+            if (result.region) {
+                html += `<p><strong>Région:</strong> ${result.region}</p>`;
+            }
+            html += `</div>`;
+            
+            // Section visibilité (nouvelle section)
+            if (result.visibility_from || result.visibility_to || result.visibility_angle || 
+                result.visibility_distance || result.panel_traffic || result.visibility_note) {
+                html += `<div class="result-section">
+                    <h5>Visibilité</h5>`;
+                
+                // Visibilité directionnelle
+                if (result.visibility_from || result.visibility_to) {
+                    html += `<p><strong>Direction:</strong> `;
+                    if (result.visibility_from) html += `de ${result.visibility_from}`;
+                    if (result.visibility_from && result.visibility_to) html += ` `;
+                    if (result.visibility_to) html += `vers ${result.visibility_to}`;
+                    html += `</p>`;
+                }
+                
+                // Angle et distance
+                if (result.visibility_angle) {
+                    html += `<p><strong>Angle:</strong> ${result.visibility_angle}°</p>`;
+                }
+                
+                if (result.visibility_distance) {
+                    html += `<p><strong>Distance:</strong> ${result.visibility_distance} m</p>`;
+                }
+                
+                // Trafic quotidien
+                if (result.panel_traffic) {
+                    html += `<p><strong>Trafic:</strong> ${result.panel_traffic} passages/jour</p>`;
+                }
+                
+                // Notes
+                if (result.visibility_note) {
+                    html += `<p><strong>Notes:</strong> ${result.visibility_note}</p>`;
+                }
+                
+                html += `</div>`;
             }
             
             // Statut avec badge coloré
@@ -537,14 +746,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     case 'maintenance': statusColor = '#17a2b8'; break;
                 }
                 
-                html += `<p><strong>Statut:</strong> <span class="status-badge" style="background-color:${statusColor};">
-                    ${result.status}</span></p>`;
+                html += `<div class="result-section status-section">
+                    <p><strong>Statut:</strong> <span class="status-badge" style="background-color:${statusColor}; color: white; 
+                    padding: 2px 8px; border-radius: 12px; font-size: 12px; display: inline-block;">
+                    ${result.status}</span></p>
+                </div>`;
             }
             
             html += `</div>
                 <button class="locate-on-map" data-id="${result.id}">
                     Localiser sur la carte
                 </button>
+                <a href="/contact?panel=${result.id}" class="contact-button">
+                    Contacter / Réserver
+                </a>
             </div>`;
         });
 
@@ -605,7 +820,7 @@ document.addEventListener('DOMContentLoaded', function() {
             closeOnSelect: false
         });
 
-        jQuery('#city-filter, #department-filter, #type-filter, #status-filter').select2({
+        jQuery('#city-filter, #department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter').select2({
             width: '100%',
             placeholder: "Sélectionner...",
             allowClear: true
@@ -615,35 +830,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // 14) Gestionnaires d'événements pour les filtres
     var applyFilterBtn = document.getElementById('apply-filter');
     var resetFilterBtn = document.getElementById('reset-filter');
-    var surfaceFilter = document.getElementById('surface-filter');
-    var surfaceValue = document.getElementById('surface-value');
     
-    // Mise à jour du texte de la valeur de surface
-    if (surfaceFilter && surfaceValue) {
-        surfaceFilter.addEventListener('input', function() {
-            surfaceValue.textContent = this.value;
-        });
+    // Fonction pour obtenir la valeur d'un élément DOM de manière sécurisée
+    function getElementValue(id) {
+        var element = document.getElementById(id);
+        return element ? element.value : '';
     }
-
+    
+    // Fonction pour obtenir une valeur numérique d'un élément DOM de manière sécurisée
+    function getElementNumericValue(id) {
+        var element = document.getElementById(id);
+        return element && element.value ? parseInt(element.value) : 0;
+    }
+    
     // Appliquer les filtres
     if (applyFilterBtn) {
         applyFilterBtn.addEventListener('click', function() {
             // Récupérer les valeurs de filtres
             var selectedCategories = [];
-            if (typeof jQuery !== 'undefined') {
+            if (typeof jQuery !== 'undefined' && jQuery('#category-filter').length) {
                 selectedCategories = jQuery('#category-filter').val() || [];
             }
             
             var filters = {
-                search: document.getElementById('search-filter').value,
+                search: getElementValue('search-filter'),
                 categories: selectedCategories,
-                city: document.getElementById('city-filter').value,
-                department: document.getElementById('department-filter').value,
-                type: document.getElementById('type-filter').value,
-                status: document.getElementById('status-filter').value,
-                minSurface: document.getElementById('surface-filter').value
+                city: getElementValue('city-filter'),
+                department: getElementValue('department-filter'),
+                region: getElementValue('region-filter'),
+                type: getElementValue('type-filter'),
+                support: getElementValue('support-filter'),
+                format: getElementValue('format-filter'),
+                status: getElementValue('status-filter'),
+                minWidth: getElementNumericValue('min-width'),
+                maxWidth: getElementNumericValue('max-width'),
+                minHeight: getElementNumericValue('min-height'),
+                maxHeight: getElementNumericValue('max-height')
             };
 
+            console.log("Application des filtres:", filters);
             // Appliquer les filtres
             filterAndRenderData(filters);
         });
@@ -652,23 +877,52 @@ document.addEventListener('DOMContentLoaded', function() {
     // Réinitialiser les filtres
     if (resetFilterBtn) {
         resetFilterBtn.addEventListener('click', function() {
-            // Réinitialiser les valeurs de filtres
-            document.getElementById('search-filter').value = '';
+            // Réinitialiser les valeurs de filtres de manière sécurisée
+            var searchFilter = document.getElementById('search-filter');
+            if (searchFilter) searchFilter.value = '';
+            
+            var minWidth = document.getElementById('min-width');
+            if (minWidth) minWidth.value = '';
+            
+            var maxWidth = document.getElementById('max-width');
+            if (maxWidth) maxWidth.value = '';
+            
+            var minHeight = document.getElementById('min-height');
+            if (minHeight) minHeight.value = '';
+            
+            var maxHeight = document.getElementById('max-height');
+            if (maxHeight) maxHeight.value = '';
             
             if (typeof jQuery !== 'undefined') {
-                jQuery('#category-filter').val(null).trigger('change');
-                jQuery('#city-filter').val(null).trigger('change');
-                jQuery('#department-filter').val(null).trigger('change');
-                jQuery('#type-filter').val(null).trigger('change');
-                jQuery('#status-filter').val(null).trigger('change');
-            }
-            
-            // Réinitialiser le curseur de surface
-            if (surfaceFilter) {
-                surfaceFilter.value = 0;
-            }
-            if (surfaceValue) {
-                surfaceValue.textContent = '0';
+                if (jQuery('#category-filter').length) jQuery('#category-filter').val(null).trigger('change');
+                if (jQuery('#city-filter').length) jQuery('#city-filter').val(null).trigger('change');
+                if (jQuery('#department-filter').length) jQuery('#department-filter').val(null).trigger('change');
+                if (jQuery('#region-filter').length) jQuery('#region-filter').val(null).trigger('change');
+                if (jQuery('#type-filter').length) jQuery('#type-filter').val(null).trigger('change');
+                if (jQuery('#support-filter').length) jQuery('#support-filter').val(null).trigger('change');
+                if (jQuery('#format-filter').length) jQuery('#format-filter').val(null).trigger('change');
+                if (jQuery('#status-filter').length) jQuery('#status-filter').val(null).trigger('change');
+            } else {
+                var cityFilter = document.getElementById('city-filter');
+                if (cityFilter) cityFilter.value = '';
+                
+                var departmentFilter = document.getElementById('department-filter');
+                if (departmentFilter) departmentFilter.value = '';
+                
+                var regionFilter = document.getElementById('region-filter');
+                if (regionFilter) regionFilter.value = '';
+                
+                var typeFilter = document.getElementById('type-filter');
+                if (typeFilter) typeFilter.value = '';
+                
+                var supportFilter = document.getElementById('support-filter');
+                if (supportFilter) supportFilter.value = '';
+                
+                var formatFilter = document.getElementById('format-filter');
+                if (formatFilter) formatFilter.value = '';
+                
+                var statusFilter = document.getElementById('status-filter');
+                if (statusFilter) statusFilter.value = '';
             }
 
             // Afficher toutes les données

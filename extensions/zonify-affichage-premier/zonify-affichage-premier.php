@@ -19,7 +19,7 @@ add_action('admin_notices', function() {
 /**
  * Classe principale de l'extension Affichage Premier
  */
-class Zonify_Affichage_Premier {
+class ZonifyAffichagePremier {
     
     /**
      * Instance unique de la classe
@@ -84,6 +84,9 @@ class Zonify_Affichage_Premier {
         
         // Personnalisation de l'administration
         require_once $this->extension_path . 'includes/admin-customization.php';
+
+        require_once $this->extension_path . 'includes/import-csv.php';
+
     }
     
     /**
@@ -190,8 +193,8 @@ class Zonify_Affichage_Premier {
 /**
  * Initialiser l'extension
  */
-function zonify_affichage_premier_init() {
+function ZonifyAffichagePremier_init() {
     // Initialiser directement sans vérifier la classe Zonify
-    Zonify_Affichage_Premier::get_instance();
+    ZonifyAffichagePremier::get_instance();
 }
-add_action('plugins_loaded', 'zonify_affichage_premier_init', 20); // Augmenter la priorité pour s'assurer que le plugin principal est chargé
+add_action('plugins_loaded', 'ZonifyAffichagePremier_init', 20); // Augmenter la priorité pour s'assurer que le plugin principal est chargé
