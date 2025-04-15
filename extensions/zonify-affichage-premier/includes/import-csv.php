@@ -272,16 +272,13 @@ function zap_get_standard_format($format, $largeur, $hauteur) {
 }
 
 /**
- * Analyse et convertit l'angle de visibilité en nombre entier
+ * Conserve l'angle de visibilité sous forme de texte
  * 
- * @param string $angle_text L'angle sous forme de texte (ex: "90°")
- * @return int L'angle en degrés sous forme d'entier
+ * @param string $angle_text L'angle sous forme de texte
+ * @return string L'angle non modifié
  */
 function zap_normalize_angle($angle_text) {
-    // Si la valeur est vide, retourner 0
-    if (empty($angle_text)) {
-        return 0;
-    }
+    // Retourner simplement la valeur telle quelle
     return $angle_text;
 }
 

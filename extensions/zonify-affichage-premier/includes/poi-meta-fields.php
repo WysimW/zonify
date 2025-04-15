@@ -484,13 +484,6 @@ function zap_save_panel_meta_boxes($post_id) {
                     update_post_meta($post_id, $field, absint($_POST[$field]));
                     break;
                     
-                case 'visibility_angle':
-                    // Traiter l'angle (supprimer le symbole ° et convertir en nombre)
-                    $angle = sanitize_text_field($_POST[$field]);
-                    $numeric_angle = intval(str_replace('°', '', $angle));
-                    update_post_meta($post_id, $field, $numeric_angle);
-                    break;
-                    
                 case 'visibility_note':
                     // Pour les zones de texte
                     update_post_meta($post_id, $field, sanitize_textarea_field($_POST[$field]));
