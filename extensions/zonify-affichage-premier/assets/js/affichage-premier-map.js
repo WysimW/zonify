@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         filters = filters || {};
         var searchQuery = filters.search || '';
         var selectedCategories = filters.categories || [];
-        var selectedCity = filters.city || '';
+        var selectedCities = filters.cities || [];
         var selectedDepartment = filters.department || '';
         var selectedRegion = filters.region || '';
         var selectedType = filters.type || '';
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         filteredData = filteredData.filter(function(feature) {
             let matchesSearch = true;
             let matchesCategories = true;
-            let matchesCity = true;
+            let matchesCities = true;
             let matchesDepartment = true;
             let matchesRegion = true;
             let matchesType = true;
@@ -220,9 +220,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Filtre par ville (depuis city_name)
-            if (selectedCity && feature.properties.city_name) {
-                matchesCity = normalizeText(feature.properties.city_name) === normalizeText(selectedCity);
+            // Filtre par villes (multi-select)
+            if (selectedCities.length > 0) {
+                matchesCities = false;
+                
+                // Vérifier d'abord dans la taxonomie poi_city
+                if (feature.properties.cities && feature.properties.cities.length > 0) {
+                    matchesCities = feature.properties.cities.some(function(city) {
+                        return selectedCities.includes(city.slug);
+                    });
+                }
+                
+                // Si pas trouvé dans la taxonomie, vérifier dans le champ city_name
+                if (!matchesCities && feature.properties.city_name) {
+                    matchesCities = selectedCities.includes(feature.properties.city_name);
+                }
             }
             
             // Filtre par département (depuis panel_departement)
@@ -303,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Un panneau doit correspondre à tous les filtres pour être affiché
-            const matches = matchesSearch && matchesCategories && matchesCity && 
+            const matches = matchesSearch && matchesCategories && matchesCities && 
                         matchesDepartment && matchesRegion && matchesType && 
                         matchesSupport && matchesStatus && matchesFormat && matchesDimensions;
                         
@@ -524,7 +536,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Bouton pour contacter / en savoir plus
         content += '<div class="panel-actions" style="margin-top: 15px; text-align: center;">' +
-            '<a href="/contact?panel=' + panel.id + '" class="panel-contact-btn" style="' +
+            '<a href="/contact/?panel_id=' + panel.id + 
+            '&panel_ref=' + encodeURIComponent(panel.reference || '') + 
+            '&panel_type=' + encodeURIComponent(panel.panel_type || '') +
+            '&panel_address=' + encodeURIComponent(getFullAddress(panel) || '') +
+            '&panel_city=' + encodeURIComponent(panel.city_name || '') +
+            '&panel_format=' + encodeURIComponent(panel.panel_format_standard || panel.format || panel.panel_format || '') +
+            '" class="panel-contact-btn" style="' +
             'background-color: #70c141; color: white; padding: 8px 15px; text-decoration: none; ' +
             'border-radius: 4px; display: inline-block; font-weight: bold;">' +
             'Contacter / Réserver</a>' +
@@ -757,7 +775,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button class="locate-on-map" data-id="${result.id}">
                     Localiser sur la carte
                 </button>
-                <a href="/contact?panel=${result.id}" class="contact-button">
+                <a href="/contact/?panel_id=${result.id}' + 
+                    '&panel_ref=' + encodeURIComponent(result.reference || '') +
+                    '&panel_type=' + encodeURIComponent(result.panel_type || '') +
+                    '&panel_address=' + encodeURIComponent(result.address || '') +
+                    '&panel_city=' + encodeURIComponent(result.city || '') +
+                    '&panel_format=' + encodeURIComponent(result.format || '') +
+                '" class="contact-button">
                     Contacter / Réserver
                 </a>
             </div>`;
@@ -820,7 +844,14 @@ document.addEventListener('DOMContentLoaded', function() {
             closeOnSelect: false
         });
 
-        jQuery('#city-filter, #department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter').select2({
+        jQuery('#city-filter').select2({
+            placeholder: "Sélectionnez une ou plusieurs villes",
+            allowClear: true,
+            width: '100%',
+            closeOnSelect: false
+        });
+
+        jQuery('#department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter').select2({
             width: '100%',
             placeholder: "Sélectionner...",
             allowClear: true
@@ -852,10 +883,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedCategories = jQuery('#category-filter').val() || [];
             }
             
+            var selectedCities = [];
+            if (typeof jQuery !== 'undefined' && jQuery('#city-filter').length) {
+                selectedCities = jQuery('#city-filter').val() || [];
+            }
+            
             var filters = {
                 search: getElementValue('search-filter'),
                 categories: selectedCategories,
-                city: getElementValue('city-filter'),
+                cities: selectedCities,
                 department: getElementValue('department-filter'),
                 region: getElementValue('region-filter'),
                 type: getElementValue('type-filter'),

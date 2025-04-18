@@ -24,22 +24,24 @@ function zap_customize_dashboard_text($content) {
             </p>
         </section>
         
-        <section class="zonify-section">
+        <section class="zonify-section blueprint-grid">
             <h3>Guide rapide</h3>
-            <ol>
-                <li>
-                    <strong>Gérer les panneaux :</strong> Pour ajouter ou modifier des panneaux d\'affichage,
-                    utilisez la section <a href="' . admin_url('edit.php?post_type=poi') . '">Panneaux d\'affichage</a>.
-                </li>
-                <li>
-                    <strong>Visualiser la carte :</strong> La carte interactive vous permet de voir l\'ensemble de vos panneaux
-                    et de les filtrer par type ou par ville.
-                </li>
-                <li>
-                    <strong>Ajouter un nouveau panneau :</strong> Depuis la carte, vous pouvez directement positionner
-                    un nouveau panneau en cliquant sur l\'emplacement souhaité.
-                </li>
-            </ol>
+            <div class="blueprint-note">
+                <ol>
+                    <li>
+                        <strong>Gérer les panneaux :</strong> Pour ajouter ou modifier des panneaux d\'affichage,
+                        utilisez la section <a href="' . admin_url('edit.php?post_type=poi') . '">Panneaux d\'affichage</a>.
+                    </li>
+                    <li>
+                        <strong>Visualiser la carte :</strong> La carte interactive vous permet de voir l\'ensemble de vos panneaux
+                        et de les filtrer par type ou par ville.
+                    </li>
+                    <li>
+                        <strong>Ajouter un nouveau panneau :</strong> Depuis la carte, vous pouvez directement positionner
+                        un nouveau panneau en cliquant sur l\'emplacement souhaité.
+                    </li>
+                </ol>
+            </div>
         </section>
     </div>';
     
@@ -54,18 +56,26 @@ function zap_customize_header() {
     ?>
     <style>
         .zonify-title {
-            color: #70c141 !important;
+            color: var(--zonify-secondary) !important;
+            font-weight: 600 !important;
+            letter-spacing: -0.5px !important;
         }
         .zonify-banner {
-            border-bottom-color: #70c141 !important;
+            border-bottom: 2px solid var(--zonify-secondary) !important;
+            box-shadow: 0 2px 10px var(--zonify-shadow) !important;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        .zonify-header {
+            border-bottom: 2px solid var(--zonify-secondary) !important;
         }
         .zap-version-badge {
-            background-color: #70c141;
+            background-color: var(--zonify-secondary);
             color: white;
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 0.9em;
             margin-left: 10px;
+            font-weight: 500;
         }
     </style>
     <script>
@@ -111,34 +121,169 @@ add_action('admin_menu', 'zap_customize_admin_menu', 999);
  */
 function zap_customize_admin_ui() {
     echo '<style>
-        /* Couleurs personnalisées */
+        /* Variables globales pour unifier le style */
+        :root {
+            --zap-primary: #70c141;
+            --zap-secondary: #E04D00;
+            --zap-dark: #5da834;
+            --zap-text: #333f4d;
+        }
+        
+        /* Base de style blueprint pour Affichage Premier */
         .zonify-section h2, 
         .zonify-section h3 {
-            color: #70c141;
+            color: var(--zap-primary);
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .zonify-section h2::after,
+        .zonify-section h3::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background-color: var(--zap-primary);
+            border-radius: 3px;
         }
         
         /* Personnalisation des boutons */
         .zonify-content .button-primary,
+        .wp-core-ui .button-primary,
         .zap-btn-primary {
-            background: #70c141;
-            border-color: #E04D00;
+            background: var(--zap-primary);
+            border: none;
             color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            text-shadow: none;
+            box-shadow: 0 2px 4px var(--zonify-shadow);
+            transition: all 0.2s ease;
         }
+        
         .zonify-content .button-primary:hover,
+        .wp-core-ui .button-primary:hover,
         .zap-btn-primary:hover {
-            background: #E04D00;
-            border-color: #CC4600;
+            background: var(--zap-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px var(--zonify-shadow);
         }
         
         /* Badge Affichage Premier */
         .zap-badge {
             display: inline-block;
-            background: #70c141;
+            background: var(--zap-primary);
             color: white;
             font-size: 0.8em;
-            padding: 2px 8px;
-            border-radius: 3px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
             margin-left: 10px;
+        }
+        
+        /* Carte et cartographie */
+        #map {
+            border: none !important;
+            border-radius: 8px !important;
+            margin-top: 20px !important;
+            height: 65vh !important;
+            box-shadow: 0 4px 15px var(--zonify-shadow);
+        }
+        
+        /* Tableau de données des panneaux */
+        .wp-list-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--zonify-border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px var(--zonify-shadow);
+        }
+        
+        .wp-list-table th {
+            background-color: var(--zonify-light);
+            border-bottom: 2px solid var(--zap-primary);
+            padding: 12px 15px;
+            font-weight: 600;
+            color: var(--zonify-dark);
+        }
+        
+        .wp-list-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--zonify-border);
+        }
+        
+        .wp-list-table tr:hover td {
+            background-color: rgba(112, 193, 65, 0.05);
+        }
+        
+        /* Formulaires des métaboxes */
+        .postbox {
+            border: none;
+            box-shadow: 0 3px 10px var(--zonify-shadow);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .postbox .hndle {
+            border-bottom: 2px solid var(--zap-primary);
+            padding: 12px 15px;
+            font-weight: 600;
+        }
+        
+        .postbox .inside {
+            padding: 15px;
+        }
+        
+        .form-field label {
+            font-weight: 600;
+            color: var(--zonify-dark);
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        /* Dashboard widget */
+        .zap-dashboard-stats {
+            background-color: var(--zonify-light);
+            border-left: 3px solid var(--zap-primary);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .zap-dashboard-stats ul {
+            margin-left: 20px;
+        }
+        
+        .zap-dashboard-stats p strong {
+            color: var(--zonify-dark);
+        }
+        
+        /* Style blueprint pour la page d\'aide */
+        .blueprint-grid {
+            background-size: 20px 20px;
+            background-image:
+                linear-gradient(to right, rgba(112, 193, 65, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(112, 193, 65, 0.1) 1px, transparent 1px);
+            position: relative;
+        }
+        
+        .blueprint-detail {
+            border-left: 2px solid var(--zap-primary);
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+        
+        .blueprint-note {
+            background-color: rgba(112, 193, 65, 0.05);
+            border-left: 3px solid var(--zap-primary);
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
         }
     </style>';
 }
@@ -174,43 +319,49 @@ function zap_help_page_content() {
         </div>
         
         <div class="zonify-content">
-            <section class="zonify-section">
+            <section class="zonify-section blueprint-grid">
                 <h2>Guide d'utilisation</h2>
                 <p>Cette page contient des informations pour vous aider à utiliser Zonify pour la gestion de vos panneaux d'affichage.</p>
                 
-                <h3>Gestion des panneaux d'affichage</h3>
-                <ol>
-                    <li>
-                        <strong>Ajouter un panneau :</strong> Depuis la section "Panneaux d'affichage", cliquez sur "Ajouter".
-                        Remplissez les informations demandées, notamment la position géographique du panneau.
-                    </li>
-                    <li>
-                        <strong>Modifier un panneau existant :</strong> Cliquez sur le panneau concerné dans la liste, puis effectuez vos modifications.
-                    </li>
-                    <li>
-                        <strong>Géolocalisation :</strong> Pour positionner précisément un panneau, vous pouvez utiliser la carte interactive.
-                        Placez le marqueur à l'emplacement exact du panneau.
-                    </li>
-                </ol>
+                <div class="blueprint-detail">
+                    <h3>Gestion des panneaux d'affichage</h3>
+                    <ol>
+                        <li>
+                            <strong>Ajouter un panneau :</strong> Depuis la section "Panneaux d'affichage", cliquez sur "Ajouter".
+                            Remplissez les informations demandées, notamment la position géographique du panneau.
+                        </li>
+                        <li>
+                            <strong>Modifier un panneau existant :</strong> Cliquez sur le panneau concerné dans la liste, puis effectuez vos modifications.
+                        </li>
+                        <li>
+                            <strong>Géolocalisation :</strong> Pour positionner précisément un panneau, vous pouvez utiliser la carte interactive.
+                            Placez le marqueur à l'emplacement exact du panneau.
+                        </li>
+                    </ol>
+                </div>
                 
-                <h3>Informations techniques</h3>
-                <p>Pour chaque panneau, vous pouvez renseigner :</p>
-                <ul>
-                    <li><strong>Référence :</strong> Code unique d'identification du panneau</li>
-                    <li><strong>Type :</strong> 4x3, 8x3, mural, etc.</li>
-                    <li><strong>Dimensions :</strong> Largeur et hauteur en centimètres</li>
-                    <li><strong>Visibilité :</strong> Information sur la visibilité et l'angle du panneau</li>
-                    <li><strong>Localisation :</strong> Adresse précise, ville, code postal</li>
-                </ul>
+                <div class="blueprint-note">
+                    <h3>Informations techniques</h3>
+                    <p>Pour chaque panneau, vous pouvez renseigner :</p>
+                    <ul>
+                        <li><strong>Référence :</strong> Code unique d'identification du panneau</li>
+                        <li><strong>Type :</strong> 4x3, 8x3, mural, etc.</li>
+                        <li><strong>Dimensions :</strong> Largeur et hauteur en centimètres</li>
+                        <li><strong>Visibilité :</strong> Information sur la visibilité et l'angle du panneau</li>
+                        <li><strong>Localisation :</strong> Adresse précise, ville, code postal</li>
+                    </ul>
+                </div>
             </section>
             
             <section class="zonify-section">
                 <h2>Contacter le support</h2>
                 <p>Pour toute question ou problème technique, contactez notre équipe de support :</p>
-                <ul>
-                    <li>Email: <a href="mailto:support@votresociete.com">support@votresociete.com</a></li>
-                    <li>Téléphone: 01 23 45 67 89</li>
-                </ul>
+                <div class="blueprint-detail">
+                    <ul>
+                        <li>Email: <a href="mailto:support@votresociete.com">support@votresociete.com</a></li>
+                        <li>Téléphone: 01 23 45 67 89</li>
+                    </ul>
+                </div>
             </section>
         </div>
     </div>
@@ -343,10 +494,18 @@ function zap_add_contextual_help() {
             'id'      => 'zap_panel_help',
             'title'   => 'Aide Panneau',
             'content' => '
-                <h2>Comment remplir les informations du panneau</h2>
-                <p><strong>Caractéristiques techniques :</strong> Renseignez le type de panneau, ses dimensions et sa référence unique.</p>
-                <p><strong>Localisation :</strong> Vous pouvez soit saisir manuellement l\'adresse, soit utiliser le bouton "Remplir automatiquement l\'adresse" après avoir positionné le panneau sur la carte.</p>
-                <p><strong>Visibilité :</strong> Ces informations sont importantes pour évaluer l\'efficacité du panneau. Indiquez la direction de visibilité, l\'angle et la distance de visibilité.</p>
+                <div class="blueprint-grid" style="padding: 15px;">
+                    <h2>Comment remplir les informations du panneau</h2>
+                    <div class="blueprint-detail">
+                        <p><strong>Caractéristiques techniques :</strong> Renseignez le type de panneau, ses dimensions et sa référence unique.</p>
+                    </div>
+                    <div class="blueprint-detail">
+                        <p><strong>Localisation :</strong> Vous pouvez soit saisir manuellement l\'adresse, soit utiliser le bouton "Remplir automatiquement l\'adresse" après avoir positionné le panneau sur la carte.</p>
+                    </div>
+                    <div class="blueprint-detail">
+                        <p><strong>Visibilité :</strong> Ces informations sont importantes pour évaluer l\'efficacité du panneau. Indiquez la direction de visibilité, l\'angle et la distance de visibilité.</p>
+                    </div>
+                </div>
             ',
         ));
     }
@@ -357,14 +516,18 @@ function zap_add_contextual_help() {
             'id'      => 'zap_panel_list_help',
             'title'   => 'Gestion des panneaux',
             'content' => '
-                <h2>Gestion de votre parc de panneaux d\'affichage</h2>
-                <p>Cette page liste tous vos panneaux d\'affichage. Vous pouvez :</p>
-                <ul>
-                    <li>Trier les panneaux par référence, type ou localisation en cliquant sur les en-têtes de colonne</li>
-                    <li>Filtrer les panneaux par ville ou type en utilisant les menus déroulants au-dessus de la liste</li>
-                    <li>Ajouter un nouveau panneau en cliquant sur le bouton "Ajouter"</li>
-                    <li>Modifier un panneau existant en cliquant sur son nom</li>
-                </ul>
+                <div class="blueprint-grid" style="padding: 15px;">
+                    <h2>Gestion de votre parc de panneaux d\'affichage</h2>
+                    <div class="blueprint-note">
+                        <p>Cette page liste tous vos panneaux d\'affichage. Vous pouvez :</p>
+                        <ul>
+                            <li>Trier les panneaux par référence, type ou localisation en cliquant sur les en-têtes de colonne</li>
+                            <li>Filtrer les panneaux par ville ou type en utilisant les menus déroulants au-dessus de la liste</li>
+                            <li>Ajouter un nouveau panneau en cliquant sur le bouton "Ajouter"</li>
+                            <li>Modifier un panneau existant en cliquant sur son nom</li>
+                        </ul>
+                    </div>
+                </div>
             ',
         ));
     }
@@ -421,19 +584,139 @@ function zap_dashboard_widget_content() {
         }
     }
     
-    echo '<div class="zap-dashboard-stats">';
-    echo '<p><strong>Total des panneaux :</strong> ' . $panels_count . '</p>';
+    echo '<div class="zap-dashboard-stats blueprint-grid">';
+    echo '<p><strong>Total des panneaux :</strong> <span class="zap-badge">' . $panels_count . '</span></p>';
     
+    echo '<div class="blueprint-detail">';
     echo '<p><strong>Répartition par type :</strong></p>';
     echo '<ul>';
     foreach ($panel_types as $type => $count) {
         if ($count > 0) {
             $label = ucfirst(str_replace('-', ' ', $type));
-            echo '<li>' . esc_html($label) . ' : ' . $count . '</li>';
+            echo '<li>' . esc_html($label) . ' : <span class="zap-badge" style="font-size: 0.7em; padding: 2px 6px;">' . $count . '</span></li>';
         }
     }
     echo '</ul>';
+    echo '</div>';
     
-    echo '<p><a href="' . admin_url('edit.php?post_type=poi') . '" class="button button-primary">Gérer les panneaux</a></p>';
+    echo '<p style="margin-top: 15px;"><a href="' . admin_url('edit.php?post_type=poi') . '" class="button button-primary">Gérer les panneaux</a> <a href="' . admin_url('admin.php?page=zonify_poi') . '" class="button button-secondary">Voir la carte</a></p>';
     echo '</div>';
 }
+
+/**
+ * Ajouter des styles CSS personnalisés pour les marqueurs de carte
+ */
+function zap_add_custom_marker_styles() {
+    ?>
+    <style>
+        /* Personnalisation des marqueurs de carte */
+        .custom-marker-icon {
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            border-radius: 50%;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .marker-type-mural {
+            background-color: #70c141;
+        }
+        
+        .marker-type-preenseigne {
+            background-color: #E04D00;
+        }
+        
+        .marker-type-4x3 {
+            background-color: #2c5aa0;
+        }
+        
+        .marker-type-8x3 {
+            background-color: #1e3c68;
+        }
+        
+        .marker-type-deroulant {
+            background-color: #9C27B0;
+        }
+        
+        .marker-type-totem {
+            background-color: #FF9800;
+        }
+        
+        .custom-marker-icon:hover {
+            transform: scale(1.1);
+            z-index: 1000 !important;
+        }
+        
+        /* Amélioration des popups */
+        .marker-popup {
+            font-family: var(--zonify-font);
+        }
+        
+        .marker-popup h3 {
+            color: var(--zap-primary);
+            margin: 0 0 10px;
+            border-bottom: 2px solid var(--zap-primary);
+            padding-bottom: 5px;
+        }
+        
+        .marker-popup-details {
+            margin-top: 10px;
+        }
+        
+        .marker-popup-detail-group {
+            margin-bottom: 8px;
+            padding-left: 10px;
+            border-left: 2px solid var(--zap-primary);
+        }
+        
+        .marker-popup-label {
+            font-weight: bold;
+            color: var(--zonify-dark);
+        }
+        
+        .marker-popup-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .marker-popup-btn {
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9em;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .marker-popup-btn-primary {
+            background-color: var(--zap-primary);
+            color: white;
+        }
+        
+        .marker-popup-btn-primary:hover {
+            background-color: var(--zap-dark);
+            color: white;
+        }
+        
+        .marker-popup-btn-secondary {
+            background-color: var(--zonify-light);
+            color: var(--zonify-dark);
+            border: 1px solid var(--zonify-border);
+        }
+        
+        .marker-popup-btn-secondary:hover {
+            background-color: white;
+        }
+    </style>
+    <?php
+}
+add_action('admin_head', 'zap_add_custom_marker_styles');

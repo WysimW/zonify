@@ -1,112 +1,1154 @@
-.zonify-home {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #444;
+/* Blueprint-style Modern Admin UI for Zonify Mapping Plugin */
+
+/* Base Styles */
+:root {
+  --zonify-primary: #2c5aa0;
+  --zonify-secondary: #70c141;
+  --zonify-dark: #1e3c68;
+  --zonify-light: #f0f5fa;
+  --zonify-border: #cfd8e3;
+  --zonify-text: #333f4d;
+  --zonify-text-light: #6e7c8c;
+  --zonify-shadow: rgba(0, 27, 71, 0.1);
+  --zonify-font: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.zonify-header {
+
+/* Global styles */
+.zonify-home,
+.zonify-map-page,
+.wrap.zonify-map-page,
+.zonify-content {
+  font-family: var(--zonify-font);
+  color: var(--zonify-text);
+  background-color: #f8fafc;
+  position: relative;
+}
+
+/* Blueprint background effect */
+.zonify-map-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.7) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-color: #f8fafc;
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Header Styles */
+.zonify-header,
+.zonify-banner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #e5e5e5;
-  padding-bottom: 15px;
-  margin-bottom: 20px;
+  border-bottom: 2px solid var(--zonify-primary);
+  padding: 20px 0;
+  margin-bottom: 25px;
+  background-color: white;
+  box-shadow: 0 2px 10px var(--zonify-shadow);
+  border-radius: 8px 8px 0 0;
 }
-.zonify-header-left {
+
+.zonify-header-left,
+.zonify-banner-left {
   display: flex;
   align-items: center;
+  padding-left: 15px;
 }
+
 .zonify-icon {
-  width: 60px;
+  width: 48px;
+  height: 48px;
   margin-right: 15px;
+  filter: drop-shadow(0 2px 4px var(--zonify-shadow));
 }
+
 .zonify-title {
-  font-size: 2em;
+  font-size: 1.8em;
   margin: 0;
+  color: var(--zonify-primary);
+  font-weight: 600;
+  letter-spacing: -0.5px;
 }
+
 .zonify-version {
   font-size: 0.9em;
-  color: #888;
+  color: var(--zonify-text-light);
+  background-color: var(--zonify-light);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
 }
+
+/* Content Sections */
 .zonify-content {
-  margin-top: 20px;
+  margin-top: 25px;
+  padding: 0 15px;
 }
+
 .zonify-section {
-  margin-bottom: 30px;
+  margin-bottom: 35px;
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px var(--zonify-shadow);
 }
+
 .zonify-section h2,
 .zonify-section h3 {
-  color: #333;
-  margin-bottom: 10px;
+  color: var(--zonify-primary);
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
 }
+
+.zonify-section h2::after,
+.zonify-section h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 3px;
+  background-color: var(--zonify-secondary);
+  border-radius: 3px;
+}
+
 .zonify-section p {
   font-size: 1em;
-  line-height: 1.6;
-  color: #555;
+  line-height: 1.7;
+  color: var(--zonify-text);
+  margin-bottom: 15px;
 }
+
+/* Form Elements */
+.zonify-form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.zonify-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--zonify-dark);
+  font-size: 0.95em;
+}
+
+.zonify-select,
+.zonify-form-group select,
+.zonify-form-group input[type="text"] {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px 15px;
+  border: 1px solid var(--zonify-border);
+  border-radius: 6px;
+  background-color: var(--zonify-light);
+  font-family: var(--zonify-font);
+  font-size: 0.95em;
+  color: var(--zonify-text);
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
+}
+
+.zonify-select:focus,
+.zonify-form-group select:focus,
+.zonify-form-group input[type="text"]:focus {
+  outline: none;
+  border-color: var(--zonify-primary);
+  box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2);
+}
+
+/* Select2 Customization */
+.select2-container--default .select2-selection--multiple,
+.select2-container--default .select2-selection--single {
+  border: 1px solid var(--zonify-border) !important;
+  border-radius: 6px !important;
+  min-height: 38px !important;
+  padding: 2px !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: var(--zonify-primary) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+  color: white !important;
+  margin-right: 5px !important;
+}
+
+/* Buttons */
+.button.button-primary,
+.zonify-content .button-primary,
+.wp-core-ui .button-primary {
+  background: var(--zonify-primary);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  text-shadow: none;
+  box-shadow: 0 2px 4px var(--zonify-shadow);
+  transition: all 0.2s ease;
+}
+
+.button.button-primary:hover,
+.zonify-content .button-primary:hover,
+.wp-core-ui .button-primary:hover {
+  background: var(--zonify-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px var(--zonify-shadow);
+}
+
+.button.button-secondary,
+.zonify-content .button-secondary {
+  background: white;
+  border: 1px solid var(--zonify-border);
+  color: var(--zonify-text);
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  box-shadow: 0 1px 3px var(--zonify-shadow);
+  transition: all 0.2s ease;
+}
+
+.button.button-secondary:hover,
+.zonify-content .button-secondary:hover {
+  background: var(--zonify-light);
+  border-color: var(--zonify-primary);
+  color: var(--zonify-primary);
+}
+
+/* Map Container */
+#map {
+  border: none !important;
+  border-radius: 8px !important;
+  margin-top: 20px !important;
+  height: 65vh !important;
+  box-shadow: 0 4px 15px var(--zonify-shadow);
+}
+
+/* Link Styles */
 .zonify-links {
-  list-style-type: disc;
-  margin-left: 20px;
+  list-style-type: none;
+  margin-left: 5px;
+  padding-left: 0;
 }
+
 .zonify-links li {
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  padding-left: 22px;
+  position: relative;
 }
+
+.zonify-links li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--zonify-secondary);
+  border-radius: 50%;
+}
+
 .zonify-links a {
-  color: #0073aa;
+  color: var(--zonify-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.zonify-links a:hover {
+  color: var(--zonify-secondary);
   text-decoration: none;
 }
-.zonify-links a:hover {
-  text-decoration: underline;
+
+/* Cards for items */
+.result-item, .panel-item {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px var(--zonify-shadow);
+  transition: all 0.3s ease;
+  border-left: 3px solid var(--zonify-primary);
 }
 
-.wrap h1 {
-    color: #2c3e50;
-    font-size: 24px;
-    margin-bottom: 20px;
+.result-item:hover, .panel-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--zonify-shadow);
+}
+
+.result-item h4 {
+  color: var(--zonify-primary);
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+.result-section {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--zonify-border);
+}
+
+.result-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Pagination */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.pagination-controls button {
+  background-color: white;
+  border: 1px solid var(--zonify-border);
+  padding: 8px 15px;
+  border-radius: 4px;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: var(--zonify-light);
+  border-color: var(--zonify-primary);
+  color: var(--zonify-primary);
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  margin: 0 10px;
+  color: var(--zonify-text-light);
+}
+
+/* Status Indicators */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-disponible .status-badge {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-reserve .status-badge,
+.status-réservé .status-badge {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.status-loue .status-badge,
+.status-loué .status-badge {
+  background-color: #dc3545;
+  color: white;
+}
+
+.status-maintenance .status-badge {
+  background-color: #17a2b8;
+  color: white;
+}
+
+/* Map Controls and Popups */
+.leaflet-control-container .leaflet-bar {
+  border-radius: 6px;
+  box-shadow: 0 2px 5px var(--zonify-shadow);
+  overflow: hidden;
+}
+
+.leaflet-control-container .leaflet-bar a {
+  border-bottom: 1px solid var(--zonify-border);
+  color: var(--zonify-primary);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 3px 14px var(--zonify-shadow);
+}
+
+.leaflet-popup-content {
+  margin: 15px;
+  font-family: var(--zonify-font);
+}
+
+.panel-popup h3 {
+  color: var(--zonify-primary);
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+
+.panel-popup .panel-details {
+  margin-top: 15px;
+}
+
+.panel-popup .details-section {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--zonify-border);
+}
+
+.panel-popup .details-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.panel-popup .details-section h4 {
+  color: var(--zonify-primary);
+  margin: 0 0 10px;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.panel-popup .panel-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.panel-popup .panel-contact-btn {
+  background-color: var(--zonify-secondary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-block;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.panel-popup .panel-contact-btn:hover {
+  background-color: #5da834;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 782px) {
+  .zonify-section {
+    padding: 15px;
   }
   
-
-  #map {
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    margin-top: 10px !important;
-    height:60vh !important;
+  .zonify-header, .zonify-banner {
+    flex-direction: column;
+    align-items: flex-start;
   }
   
-  .zonify-form-group {
-    margin-bottom: 20px;
-}
-.zonify-form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-.zonify-select {
-    width: 100%;
-    max-width: 400px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.button.button-primary {
-    background: #0073aa;
-    border: 1px solid #006799;
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 3px;
-    font-size: 1em;
-    cursor: pointer;
-}
-.button.button-primary:hover {
-    background: #006799;
+  .zonify-header-right {
+    margin-top: 10px;
+  }
 }
 
-.zonify-section p,
-.zonify-section ol,
-.zonify-section ul {
-    font-size: 1em;
-    line-height: 1.6;
-    color: #555;
+/* Sidebar Panel Styles */
+.map-sidebar {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 3px 15px var(--zonify-shadow);
 }
 
-.zonify-links li {
-    margin-bottom: 5px;
+.sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--zonify-border);
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  color: var(--zonify-text-light);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.tab-btn.active {
+  color: var(--zonify-primary);
+}
+
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--zonify-primary);
+}
+
+.sidebar-panel {
+  display: none;
+  padding: 20px;
+}
+
+.sidebar-panel.active {
+  display: block;
+}
+
+/* Filter Accordion */
+.accordion-item {
+  border-bottom: 1px solid var(--zonify-border);
+}
+
+.accordion-header {
+  padding: 15px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accordion-header h4 {
+  margin: 0;
+  color: var(--zonify-dark);
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.accordion-icon {
+  color: var(--zonify-primary);
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.accordion-content {
+  display: none;
+  padding: 0 0 15px;
+}
+
+.accordion-item.active .accordion-content {
+  display: block;
+}
+
+/* Control Panel */
+.map-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.map-control-btn {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--zonify-border);
+  color: var(--zonify-text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-control-btn svg {
+  margin-right: 5px;
+}
+
+.map-control-btn:hover {
+  background: var(--zonify-light);
+  border-color: var(--zonify-primary);
+  color: var(--zonify-primary);
+}
+
+/* Blueprint-specific details */
+.blueprint-grid {
+  background-size: 20px 20px;
+  background-image:
+    linear-gradient(to right, rgba(44, 90, 160, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(44, 90, 160, 0.1) 1px, transparent 1px);
+}
+
+.blueprint-detail {
+  border-left: 2px solid var(--zonify-primary);
+  padding-left: 15px;
+  margin: 15px 0;
+}
+
+.blueprint-note {
+  background-color: rgba(44, 90, 160, 0.05);
+  border-left: 3px solid var(--zonify-primary);
+  padding: 12px 15px;
+  margin: 15px 0;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Wrap existing WordPress styles */
+#wpbody-content .wrap.zonify-map-page {
+  margin: 15px 20px 0 2px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 3px 15px var(--zonify-shadow);
+  border-radius: 8px;
+  position: relative;
+}
+
+/* Map-specific styles */
+.leaflet-draw-toolbar a {
+  background-color: white;
+}
+
+.leaflet-draw-toolbar a:hover {
+  background-color: var(--zonify-light);
+}
+
+/* Result item styling */
+.result-image {
+  width: 100%;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.result-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.locate-on-map, .contact-button {
+  width: 100%;
+  display: block;
+  margin-top: 10px;
+  padding: 8px 10px;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.locate-on-map {
+  background-color: var(--zonify-primary);
+  color: white;
+}
+
+.locate-on-map:hover {
+  background-color: var(--zonify-dark);
+}
+
+.contact-button {
+  background-color: var(--zonify-secondary);
+  color: white;
+  text-decoration: none;
+  margin-top: 8px;
+}
+
+.contact-button:hover {
+  background-color: #5da834;
+}
+
+/* Blueprint-style Modern Admin Tables for CPTs */
+
+.widefat.wp-list-table {
+  border: none !important;
+  box-shadow: 0 3px 10px var(--zonify-shadow) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  background-color: white !important;
+  margin-top: 20px !important;
+}
+
+/* En-têtes des colonnes */
+.widefat.wp-list-table thead th {
+  background-color: var(--zonify-light) !important;
+  padding: 12px 15px !important;
+  border-bottom: 2px solid var(--zonify-primary) !important;
+  color: var(--zonify-dark) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 0.85em !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+}
+
+.widefat.wp-list-table thead th a {
+  color: var(--zonify-dark) !important;
+}
+
+.widefat.wp-list-table thead th a:hover {
+  color: var(--zonify-primary) !important;
+}
+
+/* Lignes du tableau */
+.widefat.wp-list-table tbody tr {
+  transition: all 0.2s ease !important;
+  border-bottom: 1px solid var(--zonify-border) !important;
+}
+
+.widefat.wp-list-table tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+.widefat.wp-list-table tbody tr:hover {
+  background-color: rgba(44, 90, 160, 0.05) !important;
+}
+
+.widefat.wp-list-table tbody tr.alternate,
+.widefat.wp-list-table tbody tr.alt {
+  background-color: rgba(240, 245, 250, 0.5) !important;
+}
+
+.widefat.wp-list-table tbody tr.alternate:hover,
+.widefat.wp-list-table tbody tr.alt:hover {
+  background-color: rgba(44, 90, 160, 0.05) !important;
+}
+
+/* Cellules du tableau */
+.widefat.wp-list-table td {
+  padding: 15px !important;
+  vertical-align: middle !important;
+  color: var(--zonify-text) !important;
+  border-bottom: 1px solid var(--zonify-border) !important;
+}
+
+/* Style des liens dans le tableau */
+.widefat.wp-list-table .row-title {
+  font-weight: 600 !important;
+  color: var(--zonify-primary) !important;
+}
+
+.widefat.wp-list-table .row-actions {
+  margin-top: 6px !important;
+  color: var(--zonify-text-light) !important;
+  font-size: 0.85em !important;
+}
+
+.widefat.wp-list-table .row-actions span {
+  padding: 0 5px !important;
+}
+
+.widefat.wp-list-table .row-actions a {
+  color: var(--zonify-text-light) !important;
+  transition: all 0.2s ease !important;
+}
+
+.widefat.wp-list-table .row-actions a:hover {
+  color: var(--zonify-primary) !important;
+}
+
+/* Pagination des tableaux */
+.tablenav {
+  margin: 15px 0 !important;
+}
+
+.tablenav .tablenav-pages {
+  float: right !important;
+  margin-bottom: 10px !important;
+}
+
+.tablenav .tablenav-pages .pagination-links {
+  background-color: white !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  box-shadow: 0 1px 3px var(--zonify-shadow) !important;
+}
+
+.tablenav .tablenav-pages a,
+.tablenav .tablenav-pages span.current {
+  display: inline-block !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  margin: 0 2px !important;
+  padding: 0 5px !important;
+  text-align: center !important;
+  line-height: 30px !important;
+  background-color: var(--zonify-light) !important;
+  border: 1px solid var(--zonify-border) !important;
+  border-radius: 4px !important;
+  color: var(--zonify-text) !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.tablenav .tablenav-pages span.current {
+  background-color: var(--zonify-primary) !important;
+  color: white !important;
+  border-color: var(--zonify-primary) !important;
+}
+
+.tablenav .tablenav-pages a:hover {
+  background-color: rgba(44, 90, 160, 0.1) !important;
+  border-color: var(--zonify-primary) !important;
+}
+
+/* Boutons de filtre et de recherche */
+.tablenav .actions {
+  padding: 15px 0 !important;
+}
+
+.tablenav .actions select,
+.tablenav #post-query-submit {
+  margin-right: 8px !important;
+  vertical-align: middle !important;
+}
+
+.tablenav .actions select {
+  height: 36px !important;
+  padding: 0 25px 0 10px !important;
+  border: 1px solid var(--zonify-border) !important;
+  border-radius: 6px !important;
+  background-color: white !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  color: var(--zonify-text) !important;
+  font-size: 0.9em !important;
+  transition: all 0.2s ease !important;
+}
+
+.tablenav .actions select:focus {
+  border-color: var(--zonify-primary) !important;
+  box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
+  outline: none !important;
+}
+
+/* Recherche */
+.search-box {
+  margin: 0 0 15px !important;
+  float: right !important;
+}
+
+.search-box input[type="search"] {
+  height: 36px !important;
+  width: 250px !important;
+  padding: 0 15px !important;
+  border: 1px solid var(--zonify-border) !important;
+  border-radius: 6px !important;
+  background-color: white !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  color: var(--zonify-text) !important;
+  font-size: 0.9em !important;
+  transition: all 0.2s ease !important;
+}
+
+.search-box input[type="search"]:focus {
+  border-color: var(--zonify-primary) !important;
+  box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
+  outline: none !important;
+}
+
+.search-box input[type="submit"] {
+  background: var(--zonify-primary) !important;
+  border: none !important;
+  color: white !important;
+  height: 36px !important;
+  padding: 0 15px !important;
+  border-radius: 6px !important;
+  font-size: 0.9em !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  text-shadow: none !important;
+  box-shadow: 0 1px 3px var(--zonify-shadow) !important;
+  transition: all 0.2s ease !important;
+}
+
+.search-box input[type="submit"]:hover {
+  background: var(--zonify-dark) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 6px var(--zonify-shadow) !important;
+}
+
+/* Statut des posts dans le tableau */
+.widefat.wp-list-table .post-state {
+  font-size: 0.8em !important;
+  text-transform: uppercase !important;
+  display: inline-block !important;
+  padding: 2px 8px !important;
+  border-radius: 10px !important;
+  background-color: #f0f0f0 !important;
+  margin-left: 5px !important;
+  color: var(--zonify-text) !important;
+  font-weight: bold !important;
+}
+
+.widefat.wp-list-table .post-state-draft {
+  background-color: #ffe066 !important;
+  color: #856404 !important;
+}
+
+.widefat.wp-list-table .post-state-pending {
+  background-color: #ff9f43 !important;
+  color: #602a00 !important;
+}
+
+.widefat.wp-list-table .post-state-future {
+  background-color: #70c141 !important;
+  color: white !important;
+}
+
+.widefat.wp-list-table .post-state-trash {
+  background-color: #ea5455 !important;
+  color: white !important;
+}
+
+/* Style spécifique pour les lignes du CPT POI (panneaux d'affichage) */
+.post-type-poi .widefat.wp-list-table tr .column-title strong a {
+  font-weight: 600 !important;
+  color: var(--zonify-primary) !important;
+}
+
+.post-type-poi .widefat.wp-list-table td.column-panel_type,
+.post-type-poi .widefat.wp-list-table td.column-panel_city,
+.post-type-poi .widefat.wp-list-table td.column-panel_status {
+  position: relative !important;
+}
+
+/* Style pour les badges de type et statut */
+.post-type-poi .column-panel_type span,
+.post-type-poi .column-panel_status span {
+  display: inline-block !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 0.8em !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+}
+
+/* Couleurs pour les types de panneaux */
+.post-type-poi .column-panel_type span.type-mural {
+  background-color: rgba(112, 193, 65, 0.2) !important;
+  color: #70c141 !important;
+}
+
+.post-type-poi .column-panel_type span.type-pre-enseigne {
+  background-color: rgba(224, 77, 0, 0.2) !important;
+  color: #E04D00 !important;
+}
+
+.post-type-poi .column-panel_type span.type-4x3 {
+  background-color: rgba(44, 90, 160, 0.2) !important;
+  color: #2c5aa0 !important;
+}
+
+.post-type-poi .column-panel_type span.type-8x3 {
+  background-color: rgba(30, 60, 104, 0.2) !important;
+  color: #1e3c68 !important;
+}
+
+.post-type-poi .column-panel_type span.type-deroulant {
+  background-color: rgba(156, 39, 176, 0.2) !important;
+  color: #9C27B0 !important;
+}
+
+.post-type-poi .column-panel_type span.type-totem {
+  background-color: rgba(255, 152, 0, 0.2) !important;
+  color: #FF9800 !important;
+}
+
+/* Couleurs pour les statuts */
+.post-type-poi .column-panel_status span.status-disponible {
+  background-color: rgba(40, 167, 69, 0.2) !important;
+  color: #28a745 !important;
+}
+
+.post-type-poi .column-panel_status span.status-reserve,
+.post-type-poi .column-panel_status span.status-réservé {
+  background-color: rgba(255, 193, 7, 0.2) !important;
+  color: #856404 !important;
+}
+
+.post-type-poi .column-panel_status span.status-loue,
+.post-type-poi .column-panel_status span.status-loué {
+  background-color: rgba(220, 53, 69, 0.2) !important;
+  color: #dc3545 !important;
+}
+
+.post-type-poi .column-panel_status span.status-maintenance {
+  background-color: rgba(23, 162, 184, 0.2) !important;
+  color: #17a2b8 !important;
+}
+
+/* Bouton d'ajout et de modification */
+.page-title-action,
+.wp-core-ui .button-secondary {
+  background: white !important;
+  border: 1px solid var(--zonify-border) !important;
+  color: var(--zonify-text) !important;
+  padding: 7px 15px !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  font-size: 0.9em !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px var(--zonify-shadow) !important;
+  transition: all 0.2s ease !important;
+  text-shadow: none !important;
+}
+
+.page-title-action:hover,
+.wp-core-ui .button-secondary:hover {
+  background: var(--zonify-light) !important;
+  border-color: var(--zonify-primary) !important;
+  color: var(--zonify-primary) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 6px var(--zonify-shadow) !important;
+}
+
+/* Entête de page des CPTs */
+.wrap > h1 {
+  margin-bottom: 20px !important;
+  padding: 20px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 10px var(--zonify-shadow) !important;
+  border-left: 4px solid var(--zonify-primary) !important;
+  color: var(--zonify-dark) !important;
+}
+
+/* Messages de notification dans les tableaux */
+.notice, div.updated, div.error {
+  margin: 15px 0 !important;
+  padding: 10px 15px !important;
+  border-radius: 6px !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-left-width: 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+div.updated {
+  background-color: rgba(40, 167, 69, 0.1) !important;
+  border-left-color: #28a745 !important;
+}
+
+div.error {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+  border-left-color: #dc3545 !important;
+}
+
+.notice-info {
+  background-color: rgba(23, 162, 184, 0.1) !important;
+  border-left-color: #17a2b8 !important;
+}
+
+.notice-warning {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+  border-left-color: #ffc107 !important;
+}
+
+/* Métaboxes dans les écrans d'édition */
+#poststuff .postbox {
+  border: none !important;
+  box-shadow: 0 2px 8px var(--zonify-shadow) !important;
+  border-radius: 8px !important;
+  margin-bottom: 20px !important;
+}
+
+#poststuff .postbox .hndle {
+  border-bottom: 2px solid var(--zonify-primary) !important;
+  padding: 12px 15px !important;
+  font-size: 1.1em !important;
+  font-weight: 600 !important;
+  color: var(--zonify-dark) !important;
+}
+
+#poststuff .postbox .inside {
+  padding: 15px !important;
+}
+
+/* Style pour les boîtes latérales */
+#side-sortables .postbox {
+  background-color: var(--zonify-light) !important;
+}
+
+#side-sortables .postbox .hndle {
+  border-bottom: 2px solid var(--zonify-secondary) !important;
+  color: var(--zonify-dark) !important;
+}
+
+/* Formulaires des métaboxes */
+.form-table th {
+  color: var(--zonify-dark) !important;
+  font-weight: 600 !important;
+  padding: 15px 10px 15px 0 !important;
+}
+
+.form-table td {
+  padding: 15px 10px !important;
+  vertical-align: top !important;
+}
+
+.form-table input[type="text"],
+.form-table input[type="password"],
+.form-table input[type="email"],
+.form-table input[type="number"],
+.form-table input[type="url"],
+.form-table textarea,
+.form-table select {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 8px 12px !important;
+  border: 1px solid var(--zonify-border) !important;
+  border-radius: 6px !important;
+  background-color: white !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07) !important;
+  color: var(--zonify-text) !important;
+  transition: all 0.2s ease !important;
+}
+
+.form-table input[type="text"]:focus,
+.form-table input[type="password"]:focus,
+.form-table input[type="email"]:focus,
+.form-table input[type="number"]:focus,
+.form-table input[type="url"]:focus,
+.form-table textarea:focus,
+.form-table select:focus {
+  border-color: var(--zonify-primary) !important;
+  box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
+  outline: none !important;
+}
+
+/* Message vide */
+.no-items {
+  padding: 20px !important;
+  text-align: center !important;
+  background-color: rgba(44, 90, 160, 0.05) !important;
+  border-radius: 8px !important;
+  margin: 20px 0 !important;
+  font-style: italic !important;
+  color: var(--zonify-text-light) !important;
+}
+
+/* Ajustement pour les écrans mobiles */
+@media screen and (max-width: 782px) {
+  .widefat.wp-list-table td {
+    padding: 10px !important;
+  }
+  
+  .widefat.wp-list-table td.column-primary {
+    padding-right: 50px !important;
+  }
+  
+  .search-box input[type="search"] {
+    width: 150px !important;
+  }
 }

@@ -1,0 +1,240 @@
+/**
+ * Styles améliorés pour les boutons et éléments de formulaire dans les tableaux WordPress
+ */
+
+/* Style général des boutons dans les tableaux */
+.wp-core-ui .button,
+.wp-core-ui .button-secondary,
+input[type="submit"].button-secondary,
+.tablenav #post-query-submit,
+.tablenav .actions .button,
+.bulkactions .button {
+    background: white !important;
+    border: 1px solid #cfd8e3 !important;
+    color: #333f4d !important;
+    padding: 6px 12px !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    font-size: 0.9em !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 3px rgba(0, 27, 71, 0.1) !important;
+    transition: all 0.2s ease !important;
+    text-shadow: none !important;
+    line-height: normal !important;
+}
+
+.wp-core-ui .button:hover,
+.wp-core-ui .button-secondary:hover,
+input[type="submit"].button-secondary:hover,
+.tablenav #post-query-submit:hover,
+.tablenav .actions .button:hover,
+.bulkactions .button:hover {
+    background: #f0f5fa !important;
+    border-color: #2c5aa0 !important;
+    color: #2c5aa0 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(0, 27, 71, 0.1) !important;
+}
+
+/* Boutons d'action (Apply, Filter) */
+.tablenav #post-query-submit,
+.tablenav .actions .button,
+input[name="filter_action"],
+.button.action {
+    background: #2c5aa0 !important;
+    color: white !important;
+    border-color: #2c5aa0 !important;
+}
+
+.tablenav #post-query-submit:hover,
+.tablenav .actions .button:hover,
+input[name="filter_action"]:hover,
+.button.action:hover {
+    background: #1e3c68 !important;
+    color: white !important;
+    border-color: #1e3c68 !important;
+}
+
+/* Sélecteurs (Bulk actions, Filters) */
+.tablenav .actions select,
+.bulkactions select,
+.wp-admin select,
+.postbox select {
+    height: 36px !important;
+    padding: 0 30px 0 12px !important;
+    border: 1px solid #cfd8e3 !important;
+    border-radius: 6px !important;
+    background-color: white !important;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%232c5aa0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    color: #333f4d !important;
+    font-size: 0.9em !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    min-width: 140px !important;
+}
+
+.tablenav .actions select:focus,
+.bulkactions select:focus,
+.wp-admin select:focus,
+.postbox select:focus {
+    border-color: #2c5aa0 !important;
+    box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
+    outline: none !important;
+}
+
+/* Zone des actions de masse */
+.tablenav .bulkactions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Ajustement pour le bouton de filtrage */
+.filter-items .button {
+    margin-left: 8px !important;
+    vertical-align: middle !important;
+}
+
+/* Style pour le bouton d'ajout (vert) */
+.page-title-action {
+    background: #70c141 !important;
+    border: 1px solid #70c141 !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    font-size: 0.9em !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 3px rgba(0, 27, 71, 0.1) !important;
+    transition: all 0.2s ease !important;
+    text-shadow: none !important;
+    margin-left: 15px !important;
+}
+
+.page-title-action:hover {
+    background: #5da834 !important;
+    border-color: #5da834 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(0, 27, 71, 0.1) !important;
+    color: white !important;
+}
+
+/* Style pour le champ de recherche */
+.search-box input[type="search"] {
+    height: 36px !important;
+    width: 250px !important;
+    padding: 0 15px !important;
+    border: 1px solid #cfd8e3 !important;
+    border-radius: 6px !important;
+    background-color: white !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    color: #333f4d !important;
+    font-size: 0.9em !important;
+    transition: all 0.2s ease !important;
+}
+
+.search-box input[type="search"]:focus {
+    border-color: #2c5aa0 !important;
+    box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
+    outline: none !important;
+}
+
+.search-box input[type="submit"] {
+    background: #2c5aa0 !important;
+    border: none !important;
+    color: white !important;
+    height: 36px !important;
+    padding: 0 15px !important;
+    border-radius: 6px !important;
+    font-size: 0.9em !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    text-shadow: none !important;
+    box-shadow: 0 1px 3px rgba(0, 27, 71, 0.1) !important;
+    transition: all 0.2s ease !important;
+    margin-left: 8px !important;
+}
+
+.search-box input[type="submit"]:hover {
+    background: #1e3c68 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(0, 27, 71, 0.1) !important;
+}
+
+/* Styles responsifs */
+@media screen and (max-width: 782px) {
+    .tablenav .actions select,
+    .bulkactions select {
+        height: 40px !important;
+        padding: 0 40px 0 15px !important;
+        font-size: 1em !important;
+    }
+    
+    .tablenav #post-query-submit,
+    .tablenav .actions .button,
+    .button.action {
+        padding: 8px 15px !important;
+        font-size: 1em !important;
+    }
+    
+    .search-box input[type="search"] {
+        width: 180px !important;
+    }
+}
+
+/* Animation pour les boutons */
+.button, 
+.button-secondary, 
+.page-title-action, 
+input[type="submit"],
+select {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.button:after, 
+.button-secondary:after, 
+.page-title-action:after, 
+input[type="submit"]:after {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 5px !important;
+    height: 5px !important;
+    background: rgba(255, 255, 255, 0.5) !important;
+    opacity: 0 !important;
+    border-radius: 100% !important;
+    transform: scale(1, 1) translate(-50%) !important;
+    transform-origin: 50% 50% !important;
+}
+
+.button:focus:not(:active)::after, 
+.button-secondary:focus:not(:active)::after, 
+.page-title-action:focus:not(:active)::after, 
+input[type="submit"]:focus:not(:active)::after {
+    animation: ripple 1s ease-out !important;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}

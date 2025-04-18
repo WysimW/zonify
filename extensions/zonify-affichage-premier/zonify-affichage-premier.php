@@ -1,9 +1,21 @@
 <?php
 /**
- * Extension Name: Zonify Affichage Premier
- * Description: Extension spécifique pour les fonctionnalités personnalisées du client Affichage Premier.
- * Version: 1.0.0
- * Author: Zonify Team
+ * Zonify - Extension personnalisée pour Affichage Premier
+ *
+ * @package     Zonify_Affichage_Premier
+ * @author      Votre Nom
+ * @copyright   2025 Affichage Premier
+ * @license     GPL-2.0+
+ *
+ * @wordpress-plugin
+ * Plugin Name: Zonify - Affichage Premier
+ * Plugin URI:  https://affichagepremier.com
+ * Description: Extension personnalisée de Zonify pour la gestion des panneaux d'affichage de la société Affichage Premier.
+ * Version:     1.0.0
+ * Author:      Votre Nom
+ * Author URI:  https://votresite.com
+ * Text Domain: zonify-affichage-premier
+ * Domain Path: /languages
  */
 
 // Si ce fichier est appelé directement, abandon
@@ -11,10 +23,70 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Ajouter une notification pour confirmer que l'extension est chargée
-add_action('admin_notices', function() {
-    echo '<div class="notice notice-success is-dismissible"><p>Extension Zonify Affichage Premier activée avec succès.</p></div>';
-});
+// Constants
+define('ZAP_VERSION', '1.0.0');
+define('ZAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('ZAP_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('ZAP_PLUGIN_BASENAME', plugin_basename(__FILE__));
+
+/**
+ * Vérifie si le plugin parent Zonify est actif
+ */
+function zap_check_parent_plugin() {
+    if (!is_plugin_active('zone-commercial-pluginwp/zone-commercial-pluginwp.php')) {
+        add_action('admin_notices', 'zap_admin_notice_missing_parent_plugin');
+        deactivate_plugins(ZAP_PLUGIN_BASENAME);
+        if (isset($_GET['activate'])) {
+            unset($_GET['activate']);
+        }
+    }
+}
+add_action('admin_init', 'zap_check_parent_plugin');
+
+/**
+ * Message d'erreur si le plugin parent n'est pas actif
+ */
+function zap_admin_notice_missing_parent_plugin() {
+   /* $message = sprintf(
+        __('L\'extension %1$s nécessite le plugin Zonify qui n\'est pas activé. Veuillez installer et activer %2$s d\'abord.', 'zonify-affichage-premier'),
+        '<strong>Zonify - Affichage Premier</strong>',
+        '<strong>Zonify</strong>'
+    );
+    echo '<div class="notice notice-error is-dismissible"><p>' . $message . '</p></div>'; */
+}
+
+/**
+ * Initialise l'extension
+ */
+function zap_init() {
+    // Charger les fichiers principaux
+    require_once ZAP_PLUGIN_DIR . 'includes/admin-customization.php';
+    
+    // Charger les assets style blueprint
+    require_once ZAP_PLUGIN_DIR . 'includes/blueprint-assets.php';
+    
+    // Charger la page de documentation
+    require_once ZAP_PLUGIN_DIR . 'includes/affichage-docs.php';
+    
+    // Autres initialisations si nécessaire
+}
+add_action('plugins_loaded', 'zap_init');
+
+/**
+ * Activation de l'extension
+ */
+function zap_activate() {
+    // Actions à effectuer lors de l'activation
+}
+register_activation_hook(__FILE__, 'zap_activate');
+
+/**
+ * Désactivation de l'extension
+ */
+function zap_deactivate() {
+    // Actions à effectuer lors de la désactivation
+}
+register_deactivation_hook(__FILE__, 'zap_deactivate');
 
 /**
  * Classe principale de l'extension Affichage Premier
@@ -86,7 +158,9 @@ class ZonifyAffichagePremier {
         require_once $this->extension_path . 'includes/admin-customization.php';
 
         require_once $this->extension_path . 'includes/import-csv.php';
-
+        
+        // Formulaire de contact pour réservation de panneaux
+        require_once $this->extension_path . 'includes/panel-contact-shortcode.php';
     }
     
     /**
