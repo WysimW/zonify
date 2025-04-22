@@ -298,6 +298,160 @@ function terralize_ap_import_csv_menu() {
 add_action('admin_menu', 'terralize_ap_import_csv_menu');
 
 /**
+ * Enregistre le CPT pour les communes (caché dans l'admin)
+ */
+function terralize_ap_register_commune_cpt() {
+    $args = array(
+        'public'             => false,
+        'publicly_queryable' => false,
+        'show_ui'            => false,
+        'show_in_menu'       => false,
+        'query_var'          => false,
+        'rewrite'            => false,
+        'capability_type'    => 'post',
+        'has_archive'        => false,
+        'hierarchical'       => false,
+        'supports'           => array('title'),
+    );
+    
+    register_post_type('terralize_commune', $args);
+}
+add_action('init', 'terralize_ap_register_commune_cpt');
+
+/**
+ * Importe les communes du CSV vers un CPT
+ * Ne conserve que les départements 59, 62 et 80
+ */
+function terralize_ap_import_communes_from_csv() {
+    // Vérifier si l'import a déjà été fait
+    $import_status = get_option('terralize_ap_communes_imported');
+    
+    // Si l'import a déjà été fait et qu'on ne force pas la réimportation
+    if ($import_status && !isset($_GET['force_reimport'])) {
+        return array(
+            'status' => 'info', 
+            'message' => 'Les communes sont déjà importées. ' . $import_status['count'] . ' communes des départements 59, 62 et 80 disponibles.',
+            'count' => $import_status['count']
+        );
+    }
+    
+    // Chemin vers le CSV
+    $csv_file = plugin_dir_path(dirname(__FILE__)) . 'csv/20230823-communes-departement-region.csv';
+    
+    if (!file_exists($csv_file)) {
+        return array(
+            'status' => 'error',
+            'message' => 'Le fichier CSV des communes est introuvable : ' . $csv_file
+        );
+    }
+    
+    // Départements à conserver (Nord, Pas-de-Calais, Somme)
+    $target_departments = array('59', '62', '80');
+    
+    // Supprimer les communes existantes si on réimporte
+    if (isset($_GET['force_reimport'])) {
+        $existing_communes = get_posts(array(
+            'post_type' => 'terralize_commune',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ));
+        
+        foreach ($existing_communes as $commune_id) {
+            wp_delete_post($commune_id, true);
+        }
+    }
+    
+    // Ouvrir et analyser le CSV
+    $communes_count = 0;
+    if (($handle = fopen($csv_file, "r")) !== FALSE) {
+        // Ignorer la première ligne (en-têtes)
+        fgetcsv($handle, 1000, ",");
+        
+        // Lire chaque ligne
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            if (count($data) >= 12) {
+                // Récupérer le code département (position 11 dans le CSV)
+                $code_dept = $data[11]; // index 11 = code_departement
+                
+                // Ne traiter que les départements ciblés
+                if (in_array($code_dept, $target_departments)) {
+                    // Créer une entrée pour cette commune
+                    $commune_title = $data[9] . ' (' . $data[2] . ')'; // nom_commune + code_postal
+                    $commune_id = wp_insert_post(array(
+                        'post_type' => 'terralize_commune',
+                        'post_title' => $commune_title,
+                        'post_status' => 'publish'
+                    ));
+                    
+                    // Stocker les métadonnées
+                    if (!is_wp_error($commune_id)) {
+                        update_post_meta($commune_id, 'nom', $data[9]); // nom_commune
+                        update_post_meta($commune_id, 'nom_complet', $data[10]); // nom_commune_complet
+                        update_post_meta($commune_id, 'code_postal', $data[2]); // code_postal
+                        update_post_meta($commune_id, 'latitude', $data[5]); // latitude
+                        update_post_meta($commune_id, 'longitude', $data[6]); // longitude
+                        update_post_meta($commune_id, 'departement', $data[12]); // nom_departement
+                        update_post_meta($commune_id, 'code_departement', $code_dept); // code_departement
+                        update_post_meta($commune_id, 'region', $data[14]); // nom_region
+                        
+                        $communes_count++;
+                    }
+                }
+            }
+        }
+        fclose($handle);
+        
+        // Marquer l'importation comme terminée avec la date et le nombre
+        update_option('terralize_ap_communes_imported', array(
+            'date' => current_time('mysql'),
+            'count' => $communes_count
+        ));
+        
+        return array(
+            'status' => 'success',
+            'message' => $communes_count . ' communes importées avec succès des départements 59, 62 et 80.',
+            'count' => $communes_count
+        );
+    }
+    
+    return array(
+        'status' => 'error',
+        'message' => 'Erreur lors de l\'ouverture du fichier CSV.'
+    );
+}
+
+/**
+ * Traitement du formulaire d'importation des communes
+ */
+function terralize_ap_process_import_communes() {
+    // Vérifier les permissions
+    if (!current_user_can('manage_options')) {
+        wp_die('Permission refusée');
+    }
+    
+    // Vérifier le nonce
+    check_admin_referer('terralize_ap_import_communes_nonce');
+    
+    // Forcer la réimportation si demandé
+    $force_reimport = isset($_POST['force_reimport']) && $_POST['force_reimport'] == '1';
+    
+    // Effectuer l'importation
+    $result = terralize_ap_import_communes_from_csv();
+    
+    // Rediriger avec le résultat
+    wp_redirect(add_query_arg(
+        array(
+            'page' => 'terralize_ap_import_csv',
+            'communes_import_status' => $result['status'],
+            'communes_import_message' => urlencode($result['message'])
+        ),
+        admin_url('admin.php')
+    ));
+    exit;
+}
+add_action('admin_post_terralize_ap_import_communes', 'terralize_ap_process_import_communes');
+
+/**
  * Affiche la page d'importation CSV
  */
 function terralize_ap_import_csv_page() {
@@ -323,94 +477,116 @@ function terralize_ap_import_csv_page() {
         $deleted = isset($_GET['deleted']) ? intval($_GET['deleted']) : 0;
         echo '<div class="updated notice"><p>Réinitialisation réussie : ' . $deleted . ' panneaux supprimés de la base de données.</p></div>';
     }
+    
+    // Notification pour l'importation des communes
+    if (isset($_GET['communes_import_status'])) {
+        $status_class = $_GET['communes_import_status'] === 'success' ? 'updated' : ($_GET['communes_import_status'] === 'error' ? 'error' : 'notice');
+        $message = isset($_GET['communes_import_message']) ? urldecode($_GET['communes_import_message']) : '';
+        echo '<div class="' . $status_class . ' notice"><p>' . $message . '</p></div>';
+    }
+    
+    // Vérifier le statut actuel de l'importation des communes
+    $import_status = get_option('terralize_ap_communes_imported');
+    $communes_status_message = '';
+    
+    if ($import_status) {
+        $communes_status_message = '<p style="color: green;"><strong>' . $import_status['count'] . '</strong> communes des départements 59, 62 et 80 ont été importées le ' . date_i18n(get_option('date_format') . ' à ' . get_option('time_format'), strtotime($import_status['date'])) . '.</p>';
+    } else {
+        $communes_status_message = '<p style="color: orange;">Aucune commune n\'a encore été importée. Utilisez le bouton ci-dessous pour importer les communes du Nord, Pas-de-Calais et Somme.</p>';
+    }
     ?>
     <div class="wrap">
         <h1>Importer des Panneaux d'Affichage (CSV)</h1>
         <p>Importez vos panneaux d'affichage à partir d'un fichier CSV au format "PATRIMOINE ED".</p>
 
-        <div class="card">
-            <h2>Instructions</h2>
-            <p>Le fichier CSV doit contenir au moins les colonnes suivantes :</p>
-            <ul>
-                <li>CODE REFERENCE PHOTO - Référence unique du panneau</li>
-                <li>VILLE - Ville du panneau</li>
-                <li>CODE POSTAL - Code postal</li>
-                <li>ADRESSE - Adresse du panneau</li>
-                <li>COORDONNEES GPS DU PANNEAU Y - Latitude (exemple: 50,23929)</li>
-                <li>COORDONNEES GPS DU PANNEAU X - Longitude (exemple: 2,65531)</li>
-                <li>FORMAT - Format du panneau (ex: MOBILIER URBAIN, GRAND FORMAT)</li>
-                <li>TYPE - Type de panneau (ex: DEROULANT, FIXE)</li>
-                <li>SUPPORT - Support du panneau (ex: VITRINE, TOLE)</li>
-                <li>LARGEUR EN CM - Largeur</li>
-                <li>HAUTEUR EN CM - Hauteur</li>
-            </ul>
-        </div>
-
-        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_import_csv')); ?>">
-            <?php wp_nonce_field('terralize_ap_import_csv_nonce'); ?>
+        <div class="card" style="margin-bottom: 20px;">
+            <h2>Importer les communes (Nord, Pas-de-Calais, Somme)</h2>
+            <?php echo $communes_status_message; ?>
             
-            <table class="form-table">
-                <tr valign="top">
-                    <th scope="row"><label for="panneaux_csv">Fichier CSV :</label></th>
-                    <td>
-                        <input type="file" name="panneaux_csv" id="panneaux_csv" accept=".csv,text/csv" required />
-                        <p class="description">Format attendu : CSV séparé par des virgules (,).<br>
-                        Encodage recommandé : UTF-8</p>
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row">Options d'importation :</th>
-                    <td>
-                        <label for="update_existing">
-                            <input type="checkbox" name="update_existing" id="update_existing" value="1" checked />
-                            Mettre à jour les panneaux existants (basé sur le CODE REFERENCE PHOTO)
-                        </label><br>
-                        
-                        <label for="skip_header">
-                            <input type="checkbox" name="skip_header" id="skip_header" value="1" checked />
-                            Ignorer la première ligne (en-têtes)
-                        </label>
-                    </td>
-                </tr>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_import_communes')); ?>">
+                <?php wp_nonce_field('terralize_ap_import_communes_nonce'); ?>
                 
-                <tr valign="top">
-                    <th scope="row">Catégorie par défaut :</th>
-                    <td>
-                        <select name="default_category" id="default_category">
-                            <option value="">-- Aucune catégorie --</option>
-                            <?php
-                            $categories = get_terms(array(
-                                'taxonomy' => 'terralize_category',
-                                'hide_empty' => false,
-                            ));
-                            
-                            if (!empty($categories) && !is_wp_error($categories)) {
-                                foreach ($categories as $category) {
-                                    echo '<option value="' . esc_attr($category->term_id) . '">' . esc_html($category->name) . '</option>';
-                                }
-                            }
-                            ?>
-                        </select>
-                        <p class="description">Catégorie à associer à tous les panneaux importés</p>
-                    </td>
-                </tr>
-            </table>
-
-            <p class="submit">
-                <input type="submit" name="submit" id="submit" class="button button-primary" value="Importer le CSV" />
-            </p>
-        </form>
-        
-        <div class="card" style="margin-top: 30px; background-color: #f8d7da; border-color: #f5c6cb;">
-            <h2>Zone Dangereuse</h2>
-            <p>Attention ! Cette action est <strong>irréversible</strong> et supprimera <strong>tous</strong> les panneaux d'affichage enregistrés dans la base de données.</p>
-            
-            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_reset_poi')); ?>" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer tous les POI (panneaux) de la base de données? Cette action est irréversible!');">
-                <?php wp_nonce_field('terralize_ap_reset_poi_nonce'); ?>
+                <label for="force_reimport">
+                    <input type="checkbox" name="force_reimport" id="force_reimport" value="1" />
+                    Forcer la réimportation (supprime les données existantes)
+                </label>
+                
                 <p class="submit">
-                    <input type="submit" name="reset_submit" id="reset_submit" class="button button-secondary" value="Réinitialiser tous les POI" style="background-color: #dc3545; border-color: #dc3545; color: white;" />
+                    <input type="submit" name="submit" id="submit_communes" class="button button-primary" value="<?php echo $import_status ? 'Réimporter les communes' : 'Importer les communes'; ?>" />
                 </p>
             </form>
+        </div>
+
+        <div class="card">
+            <h2>Importer les panneaux</h2>
+            <p>Sélectionnez un fichier CSV contenant la liste des panneaux à importer.</p>
+
+            <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_import_csv')); ?>">
+                <?php wp_nonce_field('terralize_ap_import_csv_nonce'); ?>
+                
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row"><label for="panneaux_csv">Fichier CSV :</label></th>
+                        <td>
+                            <input type="file" name="panneaux_csv" id="panneaux_csv" accept=".csv,text/csv" required />
+                            <p class="description">Format attendu : CSV séparé par des virgules (,).<br>
+                            Encodage recommandé : UTF-8</p>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">Options d'importation :</th>
+                        <td>
+                            <label for="update_existing">
+                                <input type="checkbox" name="update_existing" id="update_existing" value="1" checked />
+                                Mettre à jour les panneaux existants (basé sur le CODE REFERENCE PHOTO)
+                            </label><br>
+                            
+                            <label for="skip_header">
+                                <input type="checkbox" name="skip_header" id="skip_header" value="1" checked />
+                                Ignorer la première ligne (en-têtes)
+                            </label>
+                        </td>
+                    </tr>
+                    
+                    <tr valign="top">
+                        <th scope="row">Catégorie par défaut :</th>
+                        <td>
+                            <select name="default_category" id="default_category">
+                                <option value="">-- Aucune catégorie --</option>
+                                <?php
+                                $categories = get_terms(array(
+                                    'taxonomy' => 'terralize_category',
+                                    'hide_empty' => false,
+                                ));
+                                
+                                if (!empty($categories) && !is_wp_error($categories)) {
+                                    foreach ($categories as $category) {
+                                        echo '<option value="' . esc_attr($category->term_id) . '">' . esc_html($category->name) . '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
+                            <p class="description">Catégorie à associer à tous les panneaux importés</p>
+                        </td>
+                    </tr>
+                </table>
+
+                <p class="submit">
+                    <input type="submit" name="submit" id="submit" class="button button-primary" value="Importer le CSV" />
+                </p>
+            </form>
+            
+            <div class="card" style="margin-top: 30px; background-color: #f8d7da; border-color: #f5c6cb;">
+                <h2>Zone Dangereuse</h2>
+                <p>Attention ! Cette action est <strong>irréversible</strong> et supprimera <strong>tous</strong> les panneaux d'affichage enregistrés dans la base de données.</p>
+                
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_reset_poi')); ?>" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer tous les POI (panneaux) de la base de données? Cette action est irréversible!');">
+                    <?php wp_nonce_field('terralize_ap_reset_poi_nonce'); ?>
+                    <p class="submit">
+                        <input type="submit" name="reset_submit" id="reset_submit" class="button button-secondary" value="Réinitialiser tous les POI" style="background-color: #dc3545; border-color: #dc3545; color: white;" />
+                    </p>
+                </form>
+            </div>
         </div>
     </div>
     <?php

@@ -661,4 +661,44 @@ function terralize_ap_docs_page_content() {
     });
     </script>
     <?php
+}
+
+// Section sur l'importance d'importer les communes
+function terralize_ap_docs_communes_import_info() {
+    ?>
+    <div class="wrap">
+        <h2>Importation des communes - Information importante</h2>
+        
+        <div class="card" style="max-width: 100%;">
+            <h3>Pourquoi importer les communes ?</h3>
+            <p>L'importation des communes dans la base de données est une étape <strong>essentielle</strong> pour le bon fonctionnement de la carte des panneaux et de ses filtres géographiques.</p>
+            
+            <h3>Fonctionnalités dépendant de l'importation des communes :</h3>
+            <ul>
+                <li><strong>Filtre par ville centrale :</strong> Permet aux utilisateurs de sélectionner une ville comme point central et de filtrer les panneaux dans un certain rayon.</li>
+                <li><strong>Recherche géographique :</strong> Améliore la précision des recherches basées sur la localisation.</li>
+                <li><strong>Performance :</strong> Évite de charger et de parser le fichier CSV à chaque affichage de la carte.</li>
+            </ul>
+            
+            <h3>Comment vérifier si les communes sont importées ?</h3>
+            <p>Si les communes ne sont pas importées, vous verrez une notification en haut de l'interface d'administration. De plus, le menu déroulant "Ville centrale" sur la carte affichera un message indiquant qu'aucune commune n'est disponible.</p>
+            
+            <h3>Comment importer les communes ?</h3>
+            <ol>
+                <li>Accédez à <strong>Affichage Premier > Importer des panneaux</strong> dans le menu d'administration.</li>
+                <li>Dans la section "Importer les communes", cliquez sur le bouton "Importer les communes".</li>
+                <li>Le processus importera automatiquement toutes les communes des départements 59, 62 et 80 depuis le fichier CSV fourni avec le plugin.</li>
+            </ol>
+            
+            <div class="notice notice-info inline">
+                <p><strong>Note :</strong> L'importation peut prendre quelques minutes. Une fois terminée, un message de confirmation s'affichera avec le nombre de communes importées.</p>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+
+// Ajouter cette section à la documentation existante si elle est disponible
+if (function_exists('add_action')) {
+    add_action('terralize_ap_docs_section_after_import', 'terralize_ap_docs_communes_import_info');
 } 

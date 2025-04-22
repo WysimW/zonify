@@ -102,6 +102,8 @@ document.addEventListener('DOMContentLoaded', function() {
         var maxWidth = filters.maxWidth || 0;
         var minHeight = filters.minHeight || 0;
         var maxHeight = filters.maxHeight || 0;
+        var radiusKm = filters.radiusKm ? parseFloat(filters.radiusKm) : 0;
+        var centerCity = filters.centerCity || null;
 
         console.log("Filtres appliqués:", filters);
 
@@ -163,6 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let matchesStatus = true;
             let matchesFormat = true;
             let matchesDimensions = true;
+            let matchesRadius = true;
             
             // Fonction pour normaliser le texte (minuscules, sans accents)
             function normalizeText(text) {
@@ -314,10 +317,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (maxHeight > 0 && height > maxHeight) matchesDimensions = false;
             }
             
+            // Filtre par rayon kilométrique autour d'une ville
+            if (radiusKm > 0 && centerCity && centerCity.latitude && centerCity.longitude && feature.geometry && feature.geometry.coordinates) {
+                // Coordonnées de la ville centrale
+                const centerLat = parseFloat(centerCity.latitude);
+                const centerLng = parseFloat(centerCity.longitude);
+                
+                // Coordonnées du panneau
+                const panelLat = feature.geometry.coordinates[1];
+                const panelLng = feature.geometry.coordinates[0];
+                
+                // Calculer la distance
+                const distance = calculateDistance(centerLat, centerLng, panelLat, panelLng);
+                
+                // Vérifier si le panneau est dans le rayon spécifié
+                if (distance > radiusKm) {
+                    matchesRadius = false;
+                }
+            }
+            
             // Un panneau doit correspondre à tous les filtres pour être affiché
             const matches = matchesSearch && matchesCategories && matchesCities && 
                         matchesDepartment && matchesRegion && matchesType && 
-                        matchesSupport && matchesStatus && matchesFormat && matchesDimensions;
+                        matchesSupport && matchesStatus && matchesFormat && matchesDimensions && matchesRadius;
                         
             // Si le panneau correspond aux filtres, l'ajouter aux résultats à afficher
             if (matches) {
@@ -409,6 +431,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error("Impossible d'ajuster la vue:", e);
             }
         }
+    }
+
+    /**
+     * Fonction pour calculer la distance entre deux points GPS en kilomètres (formule de Haversine)
+     */
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Rayon de la Terre en kilomètres
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = R * c;
+        return distance; // Distance en kilomètres
     }
 
     // 6) Générer le contenu de la popup pour un panneau
@@ -851,9 +888,22 @@ document.addEventListener('DOMContentLoaded', function() {
             closeOnSelect: false
         });
 
-        jQuery('#department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter').select2({
+        jQuery('#department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter, #radius-filter').select2({
             width: '100%',
             placeholder: "Sélectionner...",
+            allowClear: true
+        });
+
+        // Nouveaux sélecteurs pour le filtre de rayon
+        jQuery('#center-city-filter').select2({
+            width: '100%',
+            placeholder: "Sélectionner une ville centrale",
+            allowClear: true
+        });
+
+        jQuery('#radius-km-filter').select2({
+            width: '100%',
+            placeholder: "Sélectionner un rayon",
             allowClear: true
         });
     }
@@ -874,6 +924,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return element && element.value ? parseInt(element.value) : 0;
     }
     
+    // Fonction pour parser les informations de la ville centrale
+    function parseCenterCity(centerCityValue) {
+        if (!centerCityValue) return null;
+        
+        var parts = centerCityValue.split('|');
+        if (parts.length >= 3) {
+            return {
+                id: parts[0],
+                latitude: parts[1],
+                longitude: parts[2]
+            };
+        }
+        return null;
+    }
+    
     // Appliquer les filtres
     if (applyFilterBtn) {
         applyFilterBtn.addEventListener('click', function() {
@@ -888,6 +953,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedCities = jQuery('#city-filter').val() || [];
             }
             
+            // Récupérer la ville centrale et le rayon
+            var centerCityValue = getElementValue('center-city-filter');
+            var centerCity = parseCenterCity(centerCityValue);
+            var radiusKm = getElementValue('radius-km-filter');
+            
             var filters = {
                 search: getElementValue('search-filter'),
                 categories: selectedCategories,
@@ -901,7 +971,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 minWidth: getElementNumericValue('min-width'),
                 maxWidth: getElementNumericValue('max-width'),
                 minHeight: getElementNumericValue('min-height'),
-                maxHeight: getElementNumericValue('max-height')
+                maxHeight: getElementNumericValue('max-height'),
+                centerCity: centerCity,
+                radiusKm: radiusKm
             };
 
             console.log("Application des filtres:", filters);
@@ -929,6 +1001,12 @@ document.addEventListener('DOMContentLoaded', function() {
             var maxHeight = document.getElementById('max-height');
             if (maxHeight) maxHeight.value = '';
             
+            var centerCityFilter = document.getElementById('center-city-filter');
+            if (centerCityFilter) centerCityFilter.value = '';
+            
+            var radiusKmFilter = document.getElementById('radius-km-filter');
+            if (radiusKmFilter) radiusKmFilter.value = '';
+            
             if (typeof jQuery !== 'undefined') {
                 if (jQuery('#category-filter').length) jQuery('#category-filter').val(null).trigger('change');
                 if (jQuery('#city-filter').length) jQuery('#city-filter').val(null).trigger('change');
@@ -938,6 +1016,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (jQuery('#support-filter').length) jQuery('#support-filter').val(null).trigger('change');
                 if (jQuery('#format-filter').length) jQuery('#format-filter').val(null).trigger('change');
                 if (jQuery('#status-filter').length) jQuery('#status-filter').val(null).trigger('change');
+                if (jQuery('#radius-filter').length) jQuery('#radius-filter').val(null).trigger('change');
+                if (jQuery('#center-city-filter').length) jQuery('#center-city-filter').val(null).trigger('change');
+                if (jQuery('#radius-km-filter').length) jQuery('#radius-km-filter').val(null).trigger('change');
             } else {
                 var cityFilter = document.getElementById('city-filter');
                 if (cityFilter) cityFilter.value = '';
@@ -959,6 +1040,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 var statusFilter = document.getElementById('status-filter');
                 if (statusFilter) statusFilter.value = '';
+                
+                var radiusFilter = document.getElementById('radius-filter');
+                if (radiusFilter) radiusFilter.value = '';
             }
 
             // Afficher toutes les données
