@@ -1,9 +1,9 @@
 <?php
-function zonify_import_csv(){
+function terralize_import_csv(){
     if(!current_user_can('manage_options')){
         wp_die('Permission refusée');
     }
-    check_admin_referer('zonify_import_csv_nonce');
+    check_admin_referer('terralize_import_csv_nonce');
 
     if(empty($_FILES['zones_csv']['tmp_name'])){
         wp_die('Aucun fichier CSV fourni.');
@@ -57,7 +57,7 @@ function zonify_import_csv(){
     }
     fclose($handle);
 
-    wp_redirect(admin_url('admin.php?page=zonify_import_export&csv_import_done=1&created='.$count_created.'&updated='.$count_updated));
+    wp_redirect(admin_url('admin.php?page=terralize_import_export&csv_import_done=1&created='.$count_created.'&updated='.$count_updated));
     exit;
 }
-add_action('admin_post_zonify_import_csv','zonify_import_csv');
+add_action('admin_post_terralize_import_csv','terralize_import_csv');

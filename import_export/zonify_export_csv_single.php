@@ -1,5 +1,5 @@
 <?php
-function zonify_export_csv_single() {
+function terralize_export_csv_single() {
     // Vérifier les capacités
     if (!current_user_can('manage_options')) {
         wp_die('Permission refusée');
@@ -37,11 +37,11 @@ function zonify_export_csv_single() {
     fclose($output);
     exit;
 }
-add_action('admin_post_zonify_export_csv_single', 'zonify_export_csv_single');
+add_action('admin_post_terralize_export_csv_single', 'terralize_export_csv_single');
 
 function zone_export_csv_meta_box_callback($post) {
     $zone_id = $post->ID;
-    $export_url = admin_url('admin-post.php?action=zonify_export_csv_single&zone_id=' . $zone_id);
+    $export_url = admin_url('admin-post.php?action=terralize_export_csv_single&zone_id=' . $zone_id);
     echo '<a href="' . esc_url($export_url) . '" class="button button-primary" target="_blank">Exporter cette zone en CSV</a>';
 }
 

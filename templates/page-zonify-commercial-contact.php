@@ -1,12 +1,12 @@
 <?php
 /*
-Template Name: Zonify Contact Commercial Template
+Template Name: Terralize Contact Commercial Template
 */
 get_header(); ?>
 
     <?php
     // Affichez le shortcode qui charge la carte
-    echo do_shortcode('[zonify_contact_form]');
+    echo do_shortcode('[terralize_contact_form]');
     ?>
 
 

@@ -1,5 +1,5 @@
 <?php
-function zonify_register_commercial_post_type() {
+function terralize_register_commercial_post_type() {
     $labels = array(
         'name'                  => 'Commerciaux',
         'singular_name'         => 'Commercial',
@@ -33,9 +33,9 @@ function zonify_register_commercial_post_type() {
 
     register_post_type('commercial', $args);
 }
-add_action('init', 'zonify_register_commercial_post_type');
+add_action('init', 'terralize_register_commercial_post_type');
 
-function zonify_meta_box_callback( $post ) {
+function terralize_meta_box_callback( $post ) {
     // Récupérer les valeurs enregistrées si elles existent
     $email           = get_post_meta( $post->ID, 'commercial_email', true );
     $telephone       = get_post_meta( $post->ID, 'commercial_telephone', true );
@@ -60,7 +60,7 @@ function zonify_meta_box_callback( $post ) {
     <label for="commercial_social_links">Liens sociaux (séparés par une virgule) :</label>
     <input type="text" name="commercial_social_links" id="commercial_social_links" value="<?php echo esc_attr( $social_links ); ?>" class="widefat" />
     <br><br>
-    <div class="zonify-color-fields" style="display: flex; gap: 20px; margin-top: 10px;">
+    <div class="terralize-color-fields" style="display: flex; gap: 20px; margin-top: 10px;">
         <div>
             <label for="commercial_border_color">Couleur de bordure :</label>
             <input type="color" name="commercial_border_color" id="commercial_border_color" value="<?php echo esc_attr( $border_color ); ?>" />
@@ -74,7 +74,7 @@ function zonify_meta_box_callback( $post ) {
     <?php
 }
 
-function zonify_save_meta_box( $post_id ) {
+function terralize_save_meta_box( $post_id ) {
     if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
     if ( ! current_user_can('edit_post', $post_id) ) return;
     
@@ -100,22 +100,22 @@ function zonify_save_meta_box( $post_id ) {
         update_post_meta( $post_id, 'commercial_fill_color', sanitize_hex_color( $_POST['commercial_fill_color'] ) );
     }
 }
-add_action( 'save_post', 'zonify_save_meta_box' );
+add_action( 'save_post', 'terralize_save_meta_box' );
 
-function zonify_add_commercial_meta_box() {
-    // id = 'zonify_commercial_info' => identifiant unique
+function terralize_add_commercial_meta_box() {
+    // id = 'terralize_commercial_info' => identifiant unique
     // title = 'Informations du commercial' => étiquette dans l'admin
-    // callback = 'zonify_meta_box_callback' => votre fonction qui affiche les champs
+    // callback = 'terralize_meta_box_callback' => votre fonction qui affiche les champs
     // screen = 'commercial' => sur quel post type
     // context = 'normal' => (ou 'side') => emplacement
     // priority = 'default'
     add_meta_box(
-        'zonify_commercial_info',
+        'terralize_commercial_info',
         'Informations du commercial',
-        'zonify_meta_box_callback',
+        'terralize_meta_box_callback',
         'commercial',
         'normal',
         'default'
     );
 }
-add_action('add_meta_boxes', 'zonify_add_commercial_meta_box');
+add_action('add_meta_boxes', 'terralize_add_commercial_meta_box');

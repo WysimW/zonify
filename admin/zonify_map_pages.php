@@ -1,11 +1,11 @@
 <?php
-function zonify_map_pages()
+function terralize_map_pages()
 {
     // Récupérer l'URL de l'icône
     $icon_url = plugin_dir_url(__FILE__) . '../assets/icons/icon.png';
 
     // Récupérer l’option toggle
-    $always_show_all_zones = get_option('zonify_always_show_all_zones', 0);
+    $always_show_all_zones = get_option('terralize_always_show_all_zones', 0);
 
     // Récupérer tous les commerciaux (pour le <select>)
     $args_com = array(
@@ -45,22 +45,22 @@ function zonify_map_pages()
         }
     }
 ?>
-    <div class="wrap zonify-map-page">
+    <div class="wrap terralize-map-page">
         <!-- Bandeau -->
-        <header class="zonify-banner">
-            <div class="zonify-banner-left">
-                <img src="<?php echo esc_url($icon_url); ?>" alt="Zonify Icon" class="zonify-icon" />
-                <h1 class="zonify-title">Zonify by MBS</h1>
+        <header class="terralize-banner">
+            <div class="terralize-banner-left">
+                <img src="<?php echo esc_url($icon_url); ?>" alt="Terralize Icon" class="terralize-icon" />
+                <h1 class="terralize-title">Terralize by MBS</h1>
             </div>
         </header>
 
-        <main class="zonify-content">
-            <section class="zonify-section">
+        <main class="terralize-content">
+            <section class="terralize-section">
                 <h2>Gestion des Zones Commerciales</h2>
                 <p>Sélectionnez un commercial et/ou une région pour afficher et gérer les zones géographiques.</p>
-                <div class="zonify-form-group">
+                <div class="terralize-form-group">
                     <label for="commercial-select">Commercial :</label>
-                    <select id="commercial-select" class="zonify-select" multiple>
+                    <select id="commercial-select" class="terralize-select" multiple>
                         <option value="0">-- Aucun commercial --</option>
                         <?php
                         if ($commercials_query->have_posts()) :
@@ -73,9 +73,9 @@ function zonify_map_pages()
                     </select>
                 </div>
 
-                <div class="zonify-form-group">
+                <div class="terralize-form-group">
                     <label for="region-select">Région :</label>
-                    <select id="region-select" class="zonify-select" multiple>
+                    <select id="region-select" class="terralize-select" multiple>
                         <option value="0">-- Aucune région --</option>
                         <?php
                         // Récupération des régions
@@ -94,7 +94,7 @@ function zonify_map_pages()
                 </div>
             </section>
 
-            <section class="zonify-section">
+            <section class="terralize-section">
                 <h3>Carte Interactive</h3>
                 <div id="map" style="height: 500px; margin-top:20px;"></div>
             </section>
@@ -102,12 +102,12 @@ function zonify_map_pages()
     </div>
 
     <style>
-        .zonify-map-page {
+        .terralize-map-page {
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             color: #444;
         }
 
-        .zonify-banner {
+        .terralize-banner {
             display: flex;
             align-items: center;
             border-bottom: 2px solid #e5e5e5;
@@ -115,17 +115,17 @@ function zonify_map_pages()
             padding-bottom: 15px;
         }
 
-        .zonify-banner-left {
+        .terralize-banner-left {
             display: flex;
             align-items: center;
         }
 
-        .zonify-icon {
+        .terralize-icon {
             width: 60px;
             margin-right: 15px;
         }
 
-        .zonify-title {
+        .terralize-title {
             font-size: 2em;
             margin: 0;
         }
@@ -136,6 +136,6 @@ function zonify_map_pages()
 
     // Passer la liste (potentielle) des zones au script
     // On passe aussi la valeur always_show_all_zones (0 ou 1)
-    wp_localize_script('zonify-script', 'zonesAdminData', $zones);
-    wp_localize_script('zonify-script', 'alwaysShowAllZones', $always_show_all_zones);
+    wp_localize_script('terralize-script', 'zonesAdminData', $zones);
+    wp_localize_script('terralize-script', 'alwaysShowAllZones', $always_show_all_zones);
 }

@@ -1,5 +1,5 @@
 <?php
-function zonify_register_poi_post_type() {
+function terralize_register_poi_post_type() {
     $labels = array(
         'name'               => 'Points d’intérêt',
         'singular_name'      => 'Point d’intérêt',
@@ -19,17 +19,17 @@ function zonify_register_poi_post_type() {
         'labels'             => $labels,
         'public'             => false, // on le gère en back-office
         'show_ui'            => true,
-        'show_in_menu'       => false, // intégration dans le menu Zonify
+        'show_in_menu'       => false, // intégration dans le menu Terralize
         'supports'           => array('title', 'revisions'),
         'has_archive'        => false,
         'rewrite'            => array('slug' => 'poi'),
     );
     register_post_type('poi', $args);
 }
-add_action('init', 'zonify_register_poi_post_type');
+add_action('init', 'terralize_register_poi_post_type');
 
 // Remplacer l'ancienne fonction par la nouvelle taxonomie partagée
-function zonify_register_shared_taxonomy() {
+function terralize_register_shared_taxonomy() {
     $labels = array(
         'name'              => 'Catégories',
         'singular_name'     => 'Catégorie',
@@ -49,18 +49,18 @@ function zonify_register_shared_taxonomy() {
         'show_ui'           => true,
         'show_admin_column' => true,
         'query_var'         => true,
-        'rewrite'           => array('slug' => 'zonify-category'),
+        'rewrite'           => array('slug' => 'terralize-category'),
     );
     // Associer la taxonomie aux deux CPTs
-    register_taxonomy('zonify_category', array('poi', 'zone'), $args);
+    register_taxonomy('terralize_category', array('poi', 'zone'), $args);
 }
 // Supprimer l'ancienne action et ajouter la nouvelle
-add_action('init', 'zonify_register_shared_taxonomy');
+add_action('init', 'terralize_register_shared_taxonomy');
 
 /**
  * Enregistre la taxonomie 'region' partagée entre les zones et les poi
  */
-function zonify_register_region_taxonomy() {
+function terralize_register_region_taxonomy() {
     $labels = array(
         'name'              => 'Régions',
         'singular_name'     => 'Région',
@@ -89,7 +89,7 @@ function zonify_register_region_taxonomy() {
 }
 
 // Enregistrer la taxonomie région
-add_action('init', 'zonify_register_region_taxonomy');
+add_action('init', 'terralize_register_region_taxonomy');
 
 function poi_add_meta_boxes() {
     add_meta_box(
@@ -128,7 +128,7 @@ function poi_icon_meta_box_callback($post) {
     
     // Récupérer toutes les icônes disponibles
     $icons = get_posts(array(
-        'post_type' => 'zonify_icon',
+        'post_type' => 'terralize_icon',
         'posts_per_page' => -1,
         'orderby' => 'title',
         'order' => 'ASC'
@@ -154,7 +154,7 @@ function poi_icon_meta_box_callback($post) {
             echo '</div>';
         }
     } else {
-        echo '<p>Aucune icône disponible. <a href="' . admin_url('post-new.php?post_type=zonify_icon') . '">Créez une icône</a>.</p>';
+        echo '<p>Aucune icône disponible. <a href="' . admin_url('post-new.php?post_type=terralize_icon') . '">Créez une icône</a>.</p>';
     }
     
     // Ajouter un nonce pour la sécurité

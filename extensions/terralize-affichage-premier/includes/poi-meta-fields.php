@@ -12,12 +12,12 @@ if (!defined('ABSPATH')) {
 /**
  * Ajouter des meta boxes pour les champs supplémentaires
  */
-function zap_add_poi_meta_boxes() {
+function terralize_ap_add_poi_meta_boxes() {
     // Metabox pour les détails techniques
     add_meta_box(
         'panel_details_meta_box',
         'Détails techniques du panneau',
-        'zap_panel_details_callback',
+        'terralize_ap_panel_details_callback',
         'poi',
         'normal',
         'high'
@@ -27,7 +27,7 @@ function zap_add_poi_meta_boxes() {
     add_meta_box(
         'panel_location_meta_box',
         'Localisation du panneau',
-        'zap_panel_location_callback',
+        'terralize_ap_panel_location_callback',
         'poi',
         'normal',
         'high'
@@ -37,20 +37,20 @@ function zap_add_poi_meta_boxes() {
     add_meta_box(
         'panel_visibility_meta_box',
         'Visibilité du panneau',
-        'zap_panel_visibility_callback',
+        'terralize_ap_panel_visibility_callback',
         'poi',
         'normal',
         'high'
     );
 }
-add_action('add_meta_boxes', 'zap_add_poi_meta_boxes');
+add_action('add_meta_boxes', 'terralize_ap_add_poi_meta_boxes');
 
 /**
  * Callback pour la metabox des détails techniques
  */
-function zap_panel_details_callback($post) {
+function terralize_ap_panel_details_callback($post) {
     // Nonce pour la sécurité
-    wp_nonce_field('zap_panel_save', 'zap_panel_nonce');
+    wp_nonce_field('terralize_ap_panel_save', 'terralize_ap_panel_nonce');
 
     // Récupérer les valeurs existantes
     $reference = get_post_meta($post->ID, 'panel_reference', true);
@@ -65,14 +65,14 @@ function zap_panel_details_callback($post) {
     $date_fin = get_post_meta($post->ID, 'panel_date_fin', true);
     ?>
 
-    <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field">
         <label for="panel_reference">Référence :</label>
         <input type="text" id="panel_reference" name="panel_reference" value="<?php echo esc_attr($reference); ?>" />
         <p class="description">Code ou référence unique du panneau</p>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_type">Type :</label>
             <select id="panel_type" name="panel_type">
                 <option value="" <?php selected($type, ''); ?>>- Sélectionner -</option>
@@ -84,7 +84,7 @@ function zap_panel_details_callback($post) {
             </select>
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_support">Support :</label>
             <select id="panel_support" name="panel_support">
                 <option value="" <?php selected($support, ''); ?>>- Sélectionner -</option>
@@ -97,25 +97,25 @@ function zap_panel_details_callback($post) {
         </div>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_width">Largeur (cm) :</label>
             <input type="number" id="panel_width" name="panel_width" value="<?php echo esc_attr($width); ?>" min="0" step="1" />
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_height">Hauteur (cm) :</label>
             <input type="number" id="panel_height" name="panel_height" value="<?php echo esc_attr($height); ?>" min="0" step="1" />
         </div>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_format">Format brut :</label>
             <input type="text" id="panel_format" name="panel_format" value="<?php echo esc_attr($format); ?>" placeholder="Ex: MOBILIER URBAIN" />
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_format_standard">Format standard :</label>
             <select id="panel_format_standard" name="panel_format_standard">
                 <option value="" <?php selected($format_standard, ''); ?>>- Sélectionner -</option>
@@ -131,8 +131,8 @@ function zap_panel_details_callback($post) {
         </div>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_disponibilite">Disponibilité :</label>
             <select id="panel_disponibilite" name="panel_disponibilite">
                 <option value="" <?php selected($disponibilite, ''); ?>>- Sélectionner -</option>
@@ -142,13 +142,13 @@ function zap_panel_details_callback($post) {
             </select>
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_annonceur">Annonceur :</label>
             <input type="text" id="panel_annonceur" name="panel_annonceur" value="<?php echo esc_attr($annonceur); ?>" />
         </div>
     </div>
 
-    <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field">
         <label for="panel_date_fin">Date de fin d'engagement :</label>
         <input type="text" id="panel_date_fin" name="panel_date_fin" class="date-picker" value="<?php echo esc_attr($date_fin); ?>" placeholder="JJ/MM/AAAA" />
         <p class="description">Date de fin du contrat</p>
@@ -160,7 +160,7 @@ function zap_panel_details_callback($post) {
 /**
  * Callback pour la metabox de localisation
  */
-function zap_panel_location_callback($post) {
+function terralize_ap_panel_location_callback($post) {
     // Récupérer les valeurs existantes
     $address = get_post_meta($post->ID, 'panel_address', true);
     $postal_code = get_post_meta($post->ID, 'panel_postal_code', true);
@@ -172,50 +172,50 @@ function zap_panel_location_callback($post) {
     $longitude = get_post_meta($post->ID, 'panel_longitude', true);
     ?>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_address">Adresse :</label>
             <input type="text" id="panel_address" name="panel_address" value="<?php echo esc_attr($address); ?>" />
         </div>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_postal_code">Code postal :</label>
             <input type="text" id="panel_postal_code" name="panel_postal_code" value="<?php echo esc_attr($postal_code); ?>" />
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_city_name">Ville :</label>
             <input type="text" id="panel_city_name" name="panel_city_name" value="<?php echo esc_attr($city_name); ?>" />
         </div>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_departement">Département :</label>
             <input type="text" id="panel_departement" name="panel_departement" value="<?php echo esc_attr($departement); ?>" readonly />
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_code_departement">Code département :</label>
             <input type="text" id="panel_code_departement" name="panel_code_departement" value="<?php echo esc_attr($code_dept); ?>" readonly />
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_region">Région :</label>
             <input type="text" id="panel_region" name="panel_region" value="<?php echo esc_attr($region); ?>" readonly />
         </div>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="panel_latitude">Latitude :</label>
             <input type="text" id="panel_latitude" name="panel_latitude" value="<?php echo esc_attr($latitude); ?>" placeholder="Ex: 50.23929" />
             <p class="description">Format décimal avec virgule ou point (ex: 50,23929)</p>
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="panel_longitude">Longitude :</label>
             <input type="text" id="panel_longitude" name="panel_longitude" value="<?php echo esc_attr($longitude); ?>" placeholder="Ex: 2.65531" />
             <p class="description">Format décimal avec virgule ou point (ex: 2,65531)</p>
@@ -223,7 +223,7 @@ function zap_panel_location_callback($post) {
     </div>
 
     <div id="map_container" style="height: 300px; margin-top: 20px;">
-        <div id="zap_map" style="height: 100%; width: 100%;"></div>
+        <div id="terralize_ap_map" style="height: 100%; width: 100%;"></div>
     </div>
 
     <script type="text/javascript">
@@ -237,9 +237,9 @@ function zap_panel_location_callback($post) {
                     url: ajaxurl,
                     type: 'POST',
                     data: {
-                        action: 'zap_get_dept_info',
+                        action: 'terralize_ap_get_dept_info',
                         postal_code: postalCode,
-                        nonce: '<?php echo wp_create_nonce('zap_get_dept_info_nonce'); ?>'
+                        nonce: '<?php echo wp_create_nonce('terralize_ap_get_dept_info_nonce'); ?>'
                     },
                     success: function(response) {
                         if (response.success) {
@@ -263,7 +263,7 @@ function zap_panel_location_callback($post) {
             lat = parseFloat(lat.replace(',', '.'));
             lng = parseFloat(lng.replace(',', '.'));
             
-            var map = L.map('zap_map').setView([lat, lng], 13);
+            var map = L.map('terralize_ap_map').setView([lat, lng], 13);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -327,25 +327,25 @@ function zap_panel_location_callback($post) {
     </script>
 
     <style>
-        .zap-meta-field-row {
+        .terralize_ap-meta-field-row {
             display: flex;
             gap: 15px;
             margin-bottom: 15px;
         }
-        .zap-meta-field {
+        .terralize_ap-meta-field {
             flex: 1;
             margin-bottom: 15px;
         }
-        .zap-meta-field label {
+        .terralize_ap-meta-field label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
-        .zap-meta-field input,
-        .zap-meta-field select {
+        .terralize_ap-meta-field input,
+        .terralize_ap-meta-field select {
             width: 100%;
         }
-        .zap-meta-field .description {
+        .terralize_ap-meta-field .description {
             font-size: 0.85em;
             font-style: italic;
             color: #666;
@@ -358,7 +358,7 @@ function zap_panel_location_callback($post) {
 /**
  * Callback pour la metabox de visibilité
  */
-function zap_panel_visibility_callback($post) {
+function terralize_ap_panel_visibility_callback($post) {
     // Récupérer les valeurs existantes
     $visibility_from = get_post_meta($post->ID, 'visibility_from', true);
     $visibility_to = get_post_meta($post->ID, 'visibility_to', true);
@@ -368,38 +368,38 @@ function zap_panel_visibility_callback($post) {
     $panel_traffic = get_post_meta($post->ID, 'panel_traffic', true);
     ?>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="visibility_from">Visible en venant de :</label>
             <input type="text" id="visibility_from" name="visibility_from" value="<?php echo esc_attr($visibility_from); ?>" placeholder="Ex: DOULLENS" />
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="visibility_to">Visible en allant à :</label>
             <input type="text" id="visibility_to" name="visibility_to" value="<?php echo esc_attr($visibility_to); ?>" placeholder="Ex: ARRAS" />
         </div>
     </div>
 
-    <div class="zap-meta-field-row">
-        <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field-row">
+        <div class="terralize_ap-meta-field">
             <label for="visibility_angle">Angle de visibilité (degrés) :</label>
             <input type="text" id="visibility_angle" name="visibility_angle" value="<?php echo esc_attr($visibility_angle); ?>" min="0" max="360" placeholder="Ex: 90" />
             <p class="description">Angle de visibilité en degrés (ex: 90)</p>
         </div>
 
-        <div class="zap-meta-field">
+        <div class="terralize_ap-meta-field">
             <label for="visibility_distance">Distance de visibilité (m) :</label>
             <input type="number" id="visibility_distance" name="visibility_distance" value="<?php echo esc_attr($visibility_distance); ?>" min="0" placeholder="Ex: 50" />
         </div>
     </div>
 
-    <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field">
         <label for="panel_traffic">Traffic journalier estimé :</label>
         <input type="number" id="panel_traffic" name="panel_traffic" value="<?php echo esc_attr($panel_traffic); ?>" min="0" step="1" placeholder="Ex: 10000" />
         <p class="description">Nombre de passages quotidiens estimés devant le panneau</p>
     </div>
 
-    <div class="zap-meta-field">
+    <div class="terralize_ap-meta-field">
         <label for="visibility_note">Notes sur la visibilité :</label>
         <textarea id="visibility_note" name="visibility_note" rows="3"><?php echo esc_textarea($visibility_note); ?></textarea>
     </div>
@@ -410,7 +410,7 @@ function zap_panel_visibility_callback($post) {
 /**
  * Sauvegarder les données des meta boxes
  */
-function zap_save_panel_meta_boxes($post_id) {
+function terralize_ap_save_panel_meta_boxes($post_id) {
     // Vérifier si c'est une sauvegarde automatique
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
         return;
@@ -427,7 +427,7 @@ function zap_save_panel_meta_boxes($post_id) {
     }
     
     // Vérifier le nonce
-    if (!isset($_POST['zap_panel_nonce']) || !wp_verify_nonce($_POST['zap_panel_nonce'], 'zap_panel_save')) {
+    if (!isset($_POST['terralize_ap_panel_nonce']) || !wp_verify_nonce($_POST['terralize_ap_panel_nonce'], 'terralize_ap_panel_save')) {
         return;
     }
     
@@ -502,10 +502,10 @@ function zap_save_panel_meta_boxes($post_id) {
         $postal_code = sanitize_text_field($_POST['panel_postal_code']);
         if (!empty($postal_code)) {
             // Utiliser la fonction existante
-            $loc_info = zap_get_dept_region_from_postal($postal_code);
+            $loc_info = terralize_ap_get_dept_region_from_postal($postal_code);
             
             // Mettre à jour le département et la région si la fonction existe
-            if (function_exists('zap_get_dept_region_from_postal')) {
+            if (function_exists('terralize_ap_get_dept_region_from_postal')) {
                 update_post_meta($post_id, 'panel_departement', $loc_info['departement']);
                 update_post_meta($post_id, 'panel_code_departement', $loc_info['code_departement']);
                 update_post_meta($post_id, 'panel_region', $loc_info['region']);
@@ -526,12 +526,12 @@ function zap_save_panel_meta_boxes($post_id) {
         update_post_meta($post_id, 'poi_geojson', wp_json_encode($point));
     }
 }
-add_action('save_post', 'zap_save_panel_meta_boxes');
+add_action('save_post', 'terralize_ap_save_panel_meta_boxes');
 
 /**
  * Ajouter des colonnes personnalisées à la liste des panneaux
  */
-function zap_add_panel_admin_columns($columns) {
+function terralize_ap_add_panel_admin_columns($columns) {
     $new_columns = array();
     foreach ($columns as $key => $value) {
         $new_columns[$key] = $value;
@@ -547,12 +547,12 @@ function zap_add_panel_admin_columns($columns) {
     
     return $new_columns;
 }
-add_filter('manage_poi_posts_columns', 'zap_add_panel_admin_columns');
+add_filter('manage_poi_posts_columns', 'terralize_ap_add_panel_admin_columns');
 
 /**
  * Remplir les colonnes personnalisées
  */
-function zap_fill_panel_admin_columns($column, $post_id) {
+function terralize_ap_fill_panel_admin_columns($column, $post_id) {
     switch ($column) {
         case 'panel_reference':
             echo esc_html(get_post_meta($post_id, 'panel_reference', true));
@@ -588,24 +588,24 @@ function zap_fill_panel_admin_columns($column, $post_id) {
             break;
     }
 }
-add_action('manage_poi_posts_custom_column', 'zap_fill_panel_admin_columns', 10, 2);
+add_action('manage_poi_posts_custom_column', 'terralize_ap_fill_panel_admin_columns', 10, 2);
 
 /**
  * Rendre les colonnes triables
  */
-function zap_sortable_panel_columns($columns) {
+function terralize_ap_sortable_panel_columns($columns) {
     $columns['panel_reference'] = 'panel_reference';
     $columns['panel_type'] = 'panel_type';
     $columns['panel_location'] = 'panel_city_name';
     
     return $columns;
 }
-add_filter('manage_edit-poi_sortable_columns', 'zap_sortable_panel_columns');
+add_filter('manage_edit-poi_sortable_columns', 'terralize_ap_sortable_panel_columns');
 
 /**
  * Gérer le tri des colonnes personnalisées
  */
-function zap_sort_panel_columns($query) {
+function terralize_ap_sort_panel_columns($query) {
     if (!is_admin() || !$query->is_main_query()) {
         return;
     }
@@ -629,26 +629,26 @@ function zap_sort_panel_columns($query) {
             break;
     }
 }
-add_action('pre_get_posts', 'zap_sort_panel_columns');
+add_action('pre_get_posts', 'terralize_ap_sort_panel_columns');
 
 /**
  * Ajouter un script pour calculer automatiquement la surface
  */
-function zap_panel_admin_scripts() {
+function terralize_ap_panel_admin_scripts() {
     global $post_type;
     
     if ($post_type === 'poi') {
-        wp_enqueue_script('zap-panel-admin-js', plugin_dir_url(__FILE__) . '../../assets/js/panel-admin.js', array('jquery'), '1.0', true);
+        wp_enqueue_script('terralize_ap-panel-admin-js', plugin_dir_url(__FILE__) . '../../assets/js/panel-admin.js', array('jquery'), '1.0', true);
     }
 }
-add_action('admin_enqueue_scripts', 'zap_panel_admin_scripts');
+add_action('admin_enqueue_scripts', 'terralize_ap_panel_admin_scripts');
 
 /**
  * Fonction AJAX pour récupérer les informations de département et région à partir d'un code postal
  */
-function zap_ajax_get_dept_info() {
+function terralize_ap_ajax_get_dept_info() {
     // Vérifier le nonce
-    check_ajax_referer('zap_get_dept_info_nonce', 'nonce');
+    check_ajax_referer('terralize_ap_get_dept_info_nonce', 'nonce');
     
     // Récupérer le code postal
     $postal_code = isset($_POST['postal_code']) ? sanitize_text_field($_POST['postal_code']) : '';
@@ -659,17 +659,17 @@ function zap_ajax_get_dept_info() {
     }
     
     // Utiliser la fonction existante pour obtenir les informations
-    $loc_info = zap_get_dept_region_from_postal($postal_code);
+    $loc_info = terralize_ap_get_dept_region_from_postal($postal_code);
     
     // Renvoyer les données
     wp_send_json_success($loc_info);
 }
-add_action('wp_ajax_zap_get_dept_info', 'zap_ajax_get_dept_info');
+add_action('wp_ajax_terralize_ap_get_dept_info', 'terralize_ap_ajax_get_dept_info');
 
 /**
  * Enregistrer les scripts et styles nécessaires
  */
-function zap_enqueue_poi_admin_scripts() {
+function terralize_ap_enqueue_poi_admin_scripts() {
     $screen = get_current_screen();
     
     // N'enregistrer les scripts que sur la page d'édition des POI
@@ -679,14 +679,14 @@ function zap_enqueue_poi_admin_scripts() {
         wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
         
         // Styles personnalisés
-        wp_enqueue_style('zap-admin-styles', plugin_dir_url(dirname(__FILE__)) . 'assets/css/admin.css', array(), '1.0.0');
+        wp_enqueue_style('terralize_ap-admin-styles', plugin_dir_url(dirname(__FILE__)) . 'assets/css/admin.css', array(), '1.0.0');
         
         // Script personnalisé pour la gestion des dates
         wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_style('jquery-ui-css', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
         
         // Script d'initialisation des éléments
-        wp_enqueue_script('zap-poi-admin-js', plugin_dir_url(dirname(__FILE__)) . 'assets/js/poi-admin.js', array('jquery', 'jquery-ui-datepicker'), '1.0.0', true);
+        wp_enqueue_script('terralize_ap-poi-admin-js', plugin_dir_url(dirname(__FILE__)) . 'assets/js/poi-admin.js', array('jquery', 'jquery-ui-datepicker'), '1.0.0', true);
     }
 }
-add_action('admin_enqueue_scripts', 'zap_enqueue_poi_admin_scripts');
+add_action('admin_enqueue_scripts', 'terralize_ap_enqueue_poi_admin_scripts');

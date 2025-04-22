@@ -1,8 +1,8 @@
 <?php
-function zonify_handle_contact_form() {
-    if ( isset( $_POST['zonify_submit_contact'] ) && isset( $_POST['zonify_contact_nonce_field'] ) ) {
+function terralize_handle_contact_form() {
+    if ( isset( $_POST['terralize_submit_contact'] ) && isset( $_POST['terralize_contact_nonce_field'] ) ) {
         // Vérification du nonce pour la sécurité
-        if ( ! wp_verify_nonce( $_POST['zonify_contact_nonce_field'], 'zonify_contact_nonce' ) ) {
+        if ( ! wp_verify_nonce( $_POST['terralize_contact_nonce_field'], 'terralize_contact_nonce' ) ) {
             return;
         }
         
@@ -15,7 +15,7 @@ function zonify_handle_contact_form() {
         
         // Insertion du contact sous forme de post
         $post_id = wp_insert_post( array(
-            'post_type'    => 'zonify_contact',
+            'post_type'    => 'terralize_contact',
             'post_title'   => $subject,
             'post_content' => $message,
             'post_status'  => 'publish',
@@ -23,9 +23,9 @@ function zonify_handle_contact_form() {
         
         if ( $post_id ) {
             // Sauvegarde des métadonnées associées
-            update_post_meta( $post_id, 'zonify_contact_name', $name );
-            update_post_meta( $post_id, 'zonify_contact_email', $email );
-            update_post_meta( $post_id, 'zonify_commercial_id', $commercial_id );
+            update_post_meta( $post_id, 'terralize_contact_name', $name );
+            update_post_meta( $post_id, 'terralize_contact_email', $email );
+            update_post_meta( $post_id, 'terralize_commercial_id', $commercial_id );
             
             // Récupération de l'email du commercial via son CPT ou via ses métadonnées
             $commercial_email = get_post_meta( $commercial_id, 'email', true );
@@ -54,4 +54,4 @@ function zonify_handle_contact_form() {
         }
     }
 }
-add_action( 'init', 'zonify_handle_contact_form' );
+add_action( 'init', 'terralize_handle_contact_form' );

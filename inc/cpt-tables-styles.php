@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 /**
  * Ajoute le JavaScript inline pour transformer les colonnes en badges
  */
-function zap_add_cpt_table_scripts() {
+function terralize_ap_add_cpt_table_scripts() {
     // S'assurer que nous sommes sur une page d'administration
     if (!is_admin()) {
         return;
@@ -209,4 +209,4 @@ function zap_add_cpt_table_scripts() {
     wp_add_inline_script('jquery', $script);
     wp_add_inline_style('wp-admin', $styles);
 }
-add_action('admin_enqueue_scripts', 'zap_add_cpt_table_scripts');
+add_action('admin_enqueue_scripts', 'terralize_ap_add_cpt_table_scripts');

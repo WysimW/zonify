@@ -1,8 +1,8 @@
 <?php /**
  * Récupérer les zones (get_zone)
  */
-function zonify_get_zone_callback() {
-    check_ajax_referer('zonify_ajax_nonce', '_ajax_nonce');
+function terralize_get_zone_callback() {
+    check_ajax_referer('terralize_ajax_nonce', '_ajax_nonce');
     
     $commercial_id = isset($_POST['commercial_id']) ? intval($_POST['commercial_id']) : 0;
     $region_id = isset($_POST['region_id']) ? intval($_POST['region_id']) : 0;

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 /**
  * Renommer les Points d'Intérêt en Panneaux d'affichage
  */
-function zap_customize_poi_labels($labels) {
+function terralize_ap_customize_poi_labels($labels) {
     $new_labels = array(
         'name'               => 'Panneaux d\'affichage',
         'singular_name'      => 'Panneau d\'affichage',
@@ -31,15 +31,15 @@ function zap_customize_poi_labels($labels) {
     
     return $new_labels;
 }
-add_filter('register_post_type_args', 'zap_modify_poi_post_type', 10, 2);
+add_filter('register_post_type_args', 'terralize_ap_modify_poi_post_type', 10, 2);
 
 /**
  * Modifie les arguments du type de publication POI
  */
-function zap_modify_poi_post_type($args, $post_type) {
+function terralize_ap_modify_poi_post_type($args, $post_type) {
     if ($post_type === 'poi') {
         // Modifier les étiquettes
-        $args['labels'] = zap_customize_poi_labels($args['labels']);
+        $args['labels'] = terralize_ap_customize_poi_labels($args['labels']);
         
         // Modifier l'icône dans le menu
         $args['menu_icon'] = 'dashicons-format-image';
@@ -57,7 +57,7 @@ function zap_modify_poi_post_type($args, $post_type) {
 /**
  * Modifier le titre des colonnes dans la liste des POI
  */
-function zap_modify_poi_admin_columns($columns) {
+function terralize_ap_modify_poi_admin_columns($columns) {
     // Renommer la colonne "title" en "Panneau"
     if (isset($columns['title'])) {
         $columns['title'] = 'Panneau';
@@ -65,12 +65,12 @@ function zap_modify_poi_admin_columns($columns) {
     
     return $columns;
 }
-add_filter('manage_poi_posts_columns', 'zap_modify_poi_admin_columns');
+add_filter('manage_poi_posts_columns', 'terralize_ap_modify_poi_admin_columns');
 
 /**
  * Ajouter des filtres spécifiques pour les panneaux d'affichage
  */
-function zap_add_poi_admin_filters() {
+function terralize_ap_add_poi_admin_filters() {
     global $typenow;
     
     if ($typenow === 'poi') {
@@ -111,12 +111,12 @@ function zap_add_poi_admin_filters() {
         echo '</select>';
     }
 }
-add_action('restrict_manage_posts', 'zap_add_poi_admin_filters');
+add_action('restrict_manage_posts', 'terralize_ap_add_poi_admin_filters');
 
 /**
  * Modifier la requête de liste des POI pour prendre en compte les filtres personnalisés
  */
-function zap_filter_poi_admin_list($query) {
+function terralize_ap_filter_poi_admin_list($query) {
     global $pagenow, $typenow;
     
     if (is_admin() && $pagenow === 'edit.php' && $typenow === 'poi' && $query->is_main_query()) {
@@ -127,12 +127,12 @@ function zap_filter_poi_admin_list($query) {
         }
     }
 }
-add_action('pre_get_posts', 'zap_filter_poi_admin_list');
+add_action('pre_get_posts', 'terralize_ap_filter_poi_admin_list');
 
 /**
  * Ajouter taxonomie pour les villes des panneaux
  */
-function zap_register_city_taxonomy() {
+function terralize_ap_register_city_taxonomy() {
     $labels = array(
         'name'              => 'Villes',
         'singular_name'     => 'Ville',
@@ -158,12 +158,12 @@ function zap_register_city_taxonomy() {
     
     register_taxonomy('city', array('poi'), $args);
 }
-add_action('init', 'zap_register_city_taxonomy');
+add_action('init', 'terralize_ap_register_city_taxonomy');
 
 /**
  * Changer le texte "Enregistrer" du bouton dans l'éditeur
  */
-function zap_change_publish_button($translation, $text) {
+function terralize_ap_change_publish_button($translation, $text) {
     global $post_type;
     
     if ($post_type === 'poi') {
@@ -176,4 +176,4 @@ function zap_change_publish_button($translation, $text) {
     
     return $translation;
 }
-add_filter('gettext', 'zap_change_publish_button', 10, 2);
+add_filter('gettext', 'terralize_ap_change_publish_button', 10, 2);

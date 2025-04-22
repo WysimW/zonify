@@ -1,5 +1,5 @@
 <?php
-function zonify_export_geojson_single() {
+function terralize_export_geojson_single() {
     if (!current_user_can('manage_options')) {
         wp_die('Permission refusée');
     }
@@ -47,4 +47,4 @@ function zonify_export_geojson_single() {
     echo json_encode($result);
     exit;
 }
-add_action('admin_post_zonify_export_geojson_single', 'zonify_export_geojson_single');
+add_action('admin_post_terralize_export_geojson_single', 'terralize_export_geojson_single');

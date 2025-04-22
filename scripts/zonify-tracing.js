@@ -1,12 +1,12 @@
-// zonify-tracing.js
+// terralize-tracing.js
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    // 1) Récupération du mode always_show_all_zones depuis zonifyMapVars
-    var alwaysShow = (typeof zonifyMapVars.alwaysShow !== 'undefined' && zonifyMapVars.alwaysShow == 1);
+    // 1) Récupération du mode always_show_all_zones depuis terralizeMapVars
+    var alwaysShow = (typeof terralizeMapVars.alwaysShow !== 'undefined' && terralizeMapVars.alwaysShow == 1);
 
-    // 2) Configuration de la carte depuis zonifyMapVars
-    var provider = zonifyMapVars.tile_provider || 'cartodb_light';
+    // 2) Configuration de la carte depuis terralizeMapVars
+    var provider = terralizeMapVars.tile_provider || 'cartodb_light';
     var tileLayerUrl, attribution;
     if (provider === 'cartodb_dark') {
         tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
@@ -21,16 +21,16 @@ document.addEventListener('DOMContentLoaded', function() {
         tileLayerUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
         attribution = 'Tiles © Esri — Source: Esri, USGS, NOAA';
     } else if (provider === 'custom') {
-        tileLayerUrl = zonifyMapVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        tileLayerUrl = terralizeMapVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         attribution = 'Personnalisé';
     } else {
         tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
         attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
     }
 
-    var zoom = zonifyMapVars.map_zoom || 9;
-    var centerLat = parseFloat(zonifyMapVars.map_center_lat) || 50.5;
-    var centerLng = parseFloat(zonifyMapVars.map_center_lng) || 2.5;
+    var zoom = terralizeMapVars.map_zoom || 9;
+    var centerLat = parseFloat(terralizeMapVars.map_center_lat) || 50.5;
+    var centerLng = parseFloat(terralizeMapVars.map_center_lng) || 2.5;
 
     // 3) Création de la carte Leaflet
     var map = L.map('map').setView([centerLat, centerLng], zoom);
@@ -38,9 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 4) Définir les styles par défaut et la surbrillance
     var defaultStyle = {
-        color: zonifyMapVars.zone_border_color || '#3388ff',
-        fillColor: zonifyMapVars.zone_fill_color || '#3388ff',
-        fillOpacity: parseFloat(zonifyMapVars.zone_opacity || 0.5),
+        color: terralizeMapVars.zone_border_color || '#3388ff',
+        fillColor: terralizeMapVars.zone_fill_color || '#3388ff',
+        fillOpacity: parseFloat(terralizeMapVars.zone_opacity || 0.5),
         weight: 2
     };
     var highlightStyle = { color: 'red', weight: 3 };
@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
         popupContent += '<select id="popup-region-select">';
         popupContent += '<option value="">-- Sélectionnez une région --</option>';
         // Si des régions sont disponibles via les variables JavaScript
-        if (zonifyMapVars.regions && Array.isArray(zonifyMapVars.regions)) {
-            zonifyMapVars.regions.forEach(function(region) {
+        if (terralizeMapVars.regions && Array.isArray(terralizeMapVars.regions)) {
+            terralizeMapVars.regions.forEach(function(region) {
                 popupContent += '<option value="' + region.id + '">' + region.name + '</option>';
             });
         } else if (regionSelect) {
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             action: 'save_zone',
                             zone_data: JSON.stringify(zoneGeoJSON),
                             commercial_id: layer.feature.properties.commercial_id,
-                            _ajax_nonce: zonifyMapVars.nonce
+                            _ajax_nonce: terralizeMapVars.nonce
                         };
                         
                         // Ajouter la région s'il y en a une
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             requestData.region_id = layer.feature.properties.region_id;
                         }
                         
-                        fetch(zonifyMapVars.ajax_url, {
+                        fetch(terralizeMapVars.ajax_url, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                             body: new URLSearchParams(requestData)
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const requestData = {
             action: 'get_zone',
             commercial_id: comId,
-            _ajax_nonce: zonifyMapVars.nonce
+            _ajax_nonce: terralizeMapVars.nonce
         };
         
         // Ajouter la région si fournie
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
             requestData.region_id = regionId;
         }
         
-        fetch(zonifyMapVars.ajax_url, {
+        fetch(terralizeMapVars.ajax_url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             body: new URLSearchParams(requestData)
@@ -382,13 +382,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
             console.log("DEBUG: polygonsData =>", polygonsData);
-            fetch(zonifyMapVars.ajax_url, {
+            fetch(terralizeMapVars.ajax_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: new URLSearchParams({
                     action: 'save_multiple_zones',
                     zones: JSON.stringify(polygonsData),
-                    _ajax_nonce: zonifyMapVars.nonce
+                    _ajax_nonce: terralizeMapVars.nonce
                 })
             })
             .then(r => r.json())
@@ -412,13 +412,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!confirm("Voulez-vous vraiment supprimer la zone #" + zoneId + " ?")) {
                 return;
             }
-            fetch(zonifyMapVars.ajax_url, {
+            fetch(terralizeMapVars.ajax_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: new URLSearchParams({
                     action: 'delete_zone',
                     zone_id: zoneId,
-                    _ajax_nonce: zonifyMapVars.nonce
+                    _ajax_nonce: terralizeMapVars.nonce
                 })
             })
             .then(r => r.json())
@@ -456,8 +456,8 @@ document.addEventListener('DOMContentLoaded', function() {
             popupHtml += `<br/><em>Régions : ${props.region_names.join(', ')}</em>`;
         }
         
-        if (zId > 0 && zonifyMapVars.edit_zone_base) {
-            let editUrl = `${zonifyMapVars.edit_zone_base}?post=${zId}&action=edit`;
+        if (zId > 0 && terralizeMapVars.edit_zone_base) {
+            let editUrl = `${terralizeMapVars.edit_zone_base}?post=${zId}&action=edit`;
             popupHtml += `<br/><a href="${editUrl}" target="_blank">Éditer cette zone</a>`;
         }
         if (zId > 0) {
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 zone_data: JSON.stringify(zoneGeoJSON),
                 commercial_id: commercialId,
                 zone_id: zoneId,
-                _ajax_nonce: zonifyMapVars.nonce
+                _ajax_nonce: terralizeMapVars.nonce
             };
             
             // Ajouter les régions s'il y en a
@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 requestData.region_ids = JSON.stringify(regionIds);
             }
             
-            fetch(zonifyMapVars.ajax_url, {
+            fetch(terralizeMapVars.ajax_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: new URLSearchParams(requestData)

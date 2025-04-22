@@ -1,6 +1,6 @@
 <?php
-add_action('wp_ajax_save_zone', 'zonify_save_zone');
-function zonify_save_zone() {
+add_action('wp_ajax_save_zone', 'terralize_save_zone');
+function terralize_save_zone() {
     // Vérifier les permissions et le nonce
     if ( ! current_user_can('manage_options') || ! check_ajax_referer('save_zone_nonce', '_ajax_nonce', false) ) {
         wp_send_json_error('Permission refusée');
@@ -71,8 +71,8 @@ function zonify_save_zone() {
 }
 
 // Fonction de sauvegarde de plusieurs zones à la fois (non utilisée par défaut)
-add_action('wp_ajax_save_multiple_zones', 'zonify_save_multiple_zones');
-function zonify_save_multiple_zones() {
+add_action('wp_ajax_save_multiple_zones', 'terralize_save_multiple_zones');
+function terralize_save_multiple_zones() {
     if (!current_user_can('manage_options') || !check_ajax_referer('save_zone_nonce', '_ajax_nonce', false)) {
         wp_send_json_error('Permission refusée');
     }

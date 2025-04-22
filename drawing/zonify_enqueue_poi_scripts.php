@@ -1,8 +1,8 @@
 <?php
-function zonify_enqueue_poi_scripts($hook) {
+function terralize_enqueue_poi_scripts($hook) {
     // Exécuter ce script uniquement sur la page de gestion des POI
     $allowed_hooks = array(
-        'zonify_page_zonify_poi'
+        'terralize_page_terralize_poi'
     );
     if ( ! in_array( $hook, $allowed_hooks ) ) {
         return;
@@ -15,22 +15,22 @@ function zonify_enqueue_poi_scripts($hook) {
     wp_enqueue_script('leaflet-draw-js', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js', array('leaflet-js'), '1.0.4', true);
 
     // Optionnel : Enqueue du style admin commun si besoin
-    wp_enqueue_style('zonify-admin-style', plugin_dir_url(__FILE__) . '../assets/css/admin-style.css', array(), '1.0');
+    wp_enqueue_style('terralize-admin-style', plugin_dir_url(__FILE__) . '../assets/css/admin-style.css', array(), '1.0');
 
     // Enqueue du script personnalisé pour la gestion des POI
-    wp_enqueue_script('zonify-poi-script', plugin_dir_url(__FILE__) . '../scripts/zonify-poi.js', array('leaflet-js', 'leaflet-draw-js'), '1.0', true);
+    wp_enqueue_script('terralize-poi-script', plugin_dir_url(__FILE__) . '../scripts/terralize-poi.js', array('leaflet-js', 'leaflet-draw-js'), '1.0', true);
 
     // Localiser d'abord les options pour le script des POI
     $poi_options = array(
-        'tile_provider'    => get_option('zonify_tile_provider_poi', 'cartodb_light'),
-        'tile_custom_url'  => get_option('zonify_tile_custom_url_poi', ''),
-        'map_zoom'         => intval(get_option('zonify_map_zoom_poi', 9)),
-        'map_center_lat'   => get_option('zonify_map_center_lat_poi', '50.5'),
-        'map_center_lng'   => get_option('zonify_map_center_lng_poi', '2.5'),
+        'tile_provider'    => get_option('terralize_tile_provider_poi', 'cartodb_light'),
+        'tile_custom_url'  => get_option('terralize_tile_custom_url_poi', ''),
+        'map_zoom'         => intval(get_option('terralize_map_zoom_poi', 9)),
+        'map_center_lat'   => get_option('terralize_map_center_lat_poi', '50.5'),
+        'map_center_lng'   => get_option('terralize_map_center_lng_poi', '2.5'),
         'ajax_url'         => admin_url('admin-ajax.php'),
         'nonce'            => wp_create_nonce('save_poi_nonce')
     );
-    wp_localize_script('zonify-poi-script', 'zonifyPoiVars', $poi_options);
+    wp_localize_script('terralize-poi-script', 'terralizePoiVars', $poi_options);
 
     // Ensuite, récupérer et localiser les POI existants
     $args = array(
@@ -56,23 +56,23 @@ function zonify_enqueue_poi_scripts($hook) {
         }
         wp_reset_postdata();
     }
-    wp_localize_script('zonify-poi-script', 'poisData', $pois);
+    wp_localize_script('terralize-poi-script', 'poisData', $pois);
 
      // Récupération des options issues des settings spécifiques aux POI (similaire à back_options)
      $poi_options = array(
-'tile_provider'   => get_option('zonify_tile_provider', 'cartodb_light'),
-        'tile_custom_url' => get_option('zonify_tile_custom_url', ''),
-        'zone_fill_color' => get_option('zonify_zone_fill_color', '#3388ff'),
-        'zone_border_color' => get_option('zonify_zone_border_color', '#3388ff'),
-        'zone_opacity'    => floatval(get_option('zonify_zone_opacity', 0.5)),
-        'map_zoom'        => intval(get_option('zonify_map_zoom', 9)),
-        'map_center_lat'  => get_option('zonify_map_center_lat', '50.5'),
-        'map_center_lng'  => get_option('zonify_map_center_lng', '2.5'),
+'tile_provider'   => get_option('terralize_tile_provider', 'cartodb_light'),
+        'tile_custom_url' => get_option('terralize_tile_custom_url', ''),
+        'zone_fill_color' => get_option('terralize_zone_fill_color', '#3388ff'),
+        'zone_border_color' => get_option('terralize_zone_border_color', '#3388ff'),
+        'zone_opacity'    => floatval(get_option('terralize_zone_opacity', 0.5)),
+        'map_zoom'        => intval(get_option('terralize_map_zoom', 9)),
+        'map_center_lat'  => get_option('terralize_map_center_lat', '50.5'),
+        'map_center_lng'  => get_option('terralize_map_center_lng', '2.5'),
         'ajax_url'         => admin_url('admin-ajax.php'),
         'nonce'            => wp_create_nonce('save_poi_nonce')
     );
 
-    wp_localize_script('zonify-poi-script', 'zonifyPoiVars', $poi_options);
+    wp_localize_script('terralize-poi-script', 'terralizePoiVars', $poi_options);
 }
 
-add_action('admin_enqueue_scripts', 'zonify_enqueue_poi_scripts');
+add_action('admin_enqueue_scripts', 'terralize_enqueue_poi_scripts');

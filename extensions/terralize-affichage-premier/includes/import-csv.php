@@ -1,6 +1,6 @@
 <?php
 /**
- * Fonctionnalités d'importation CSV pour Zonify Affichage Premier
+ * Fonctionnalités d'importation CSV pour Terralize Affichage Premier
  * Permet d'importer des données de panneaux d'affichage depuis un fichier CSV
  */
 
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
  * @param string $code_postal Le code postal à analyser
  * @return array Tableau associatif contenant 'departement' et 'region'
  */
-function zap_get_dept_region_from_postal($code_postal) {
+function terralize_ap_get_dept_region_from_postal($code_postal) {
     // Si code postal vide, retourner valeurs par défaut
     if (empty($code_postal)) {
         return array(
@@ -162,7 +162,7 @@ function zap_get_dept_region_from_postal($code_postal) {
  * @param string $type Le type brut du panneau
  * @return string Type normalisé
  */
-function zap_normalize_panel_type($type) {
+function terralize_ap_normalize_panel_type($type) {
     $type = strtolower(trim($type));
     
     // Correspondance des types spécifiés
@@ -194,7 +194,7 @@ function zap_normalize_panel_type($type) {
  * @param string $support Le support brut du panneau
  * @return string Support normalisé
  */
-function zap_normalize_panel_support($support) {
+function terralize_ap_normalize_panel_support($support) {
     $support = strtolower(trim($support));
     
     // Correspondance des supports spécifiés
@@ -225,7 +225,7 @@ function zap_normalize_panel_support($support) {
  * @param float $hauteur Hauteur en cm
  * @return string Format standard
  */
-function zap_get_standard_format($format, $largeur, $hauteur) {
+function terralize_ap_get_standard_format($format, $largeur, $hauteur) {
     // Si le format est déjà spécifié (par ex. "2M2"), on le conserve tel quel
     if (!empty($format) && preg_match('/(\d+[,.]?\d*)M2/i', $format)) {
         return strtoupper(trim($format)); // Retourne le format brut en majuscules
@@ -277,7 +277,7 @@ function zap_get_standard_format($format, $largeur, $hauteur) {
  * @param string $angle_text L'angle sous forme de texte
  * @return string L'angle non modifié
  */
-function zap_normalize_angle($angle_text) {
+function terralize_ap_normalize_angle($angle_text) {
     // Retourner simplement la valeur telle quelle
     return $angle_text;
 }
@@ -285,22 +285,22 @@ function zap_normalize_angle($angle_text) {
 /**
  * Ajouter une page de menu pour l'import CSV dans l'administration
  */
-function zap_import_csv_menu() {
+function terralize_ap_import_csv_menu() {
     add_submenu_page(
-        'zonify',
+        'terralize',
         'Importer des Panneaux (CSV)',
         'Importer Panneaux',
         'manage_options',
-        'zonify_ap_import_csv',
-        'zap_import_csv_page'
+        'terralize_ap_import_csv',
+        'terralize_ap_import_csv_page'
     );
 }
-add_action('admin_menu', 'zap_import_csv_menu');
+add_action('admin_menu', 'terralize_ap_import_csv_menu');
 
 /**
  * Affiche la page d'importation CSV
  */
-function zap_import_csv_page() {
+function terralize_ap_import_csv_page() {
     // Vérifier les droits
     if (!current_user_can('manage_options')) {
         wp_die('Permission refusée');
@@ -346,8 +346,8 @@ function zap_import_csv_page() {
             </ul>
         </div>
 
-        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php?action=zonify_ap_import_csv')); ?>">
-            <?php wp_nonce_field('zonify_ap_import_csv_nonce'); ?>
+        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_import_csv')); ?>">
+            <?php wp_nonce_field('terralize_ap_import_csv_nonce'); ?>
             
             <table class="form-table">
                 <tr valign="top">
@@ -380,7 +380,7 @@ function zap_import_csv_page() {
                             <option value="">-- Aucune catégorie --</option>
                             <?php
                             $categories = get_terms(array(
-                                'taxonomy' => 'zonify_category',
+                                'taxonomy' => 'terralize_category',
                                 'hide_empty' => false,
                             ));
                             
@@ -405,8 +405,8 @@ function zap_import_csv_page() {
             <h2>Zone Dangereuse</h2>
             <p>Attention ! Cette action est <strong>irréversible</strong> et supprimera <strong>tous</strong> les panneaux d'affichage enregistrés dans la base de données.</p>
             
-            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php?action=zonify_ap_reset_poi')); ?>" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer tous les POI (panneaux) de la base de données? Cette action est irréversible!');">
-                <?php wp_nonce_field('zonify_ap_reset_poi_nonce'); ?>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_reset_poi')); ?>" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer tous les POI (panneaux) de la base de données? Cette action est irréversible!');">
+                <?php wp_nonce_field('terralize_ap_reset_poi_nonce'); ?>
                 <p class="submit">
                     <input type="submit" name="reset_submit" id="reset_submit" class="button button-secondary" value="Réinitialiser tous les POI" style="background-color: #dc3545; border-color: #dc3545; color: white;" />
                 </p>
@@ -419,7 +419,7 @@ function zap_import_csv_page() {
 /**
  * Fonction utilitaire pour rechercher une colonne dans les en-têtes de manière flexible
  */
-function zap_find_column_index($header, $column_name) {
+function terralize_ap_find_column_index($header, $column_name) {
     // Recherche exacte
     $exact_match = array_search($column_name, $header);
     if ($exact_match !== false) {
@@ -477,7 +477,7 @@ function zap_find_column_index($header, $column_name) {
 /**
  * Crée un GeoJSON Point à partir des coordonnées
  */
-function zap_create_geojson_point($lat, $lng) {
+function terralize_ap_create_geojson_point($lat, $lng) {
     if (empty($lat) || empty($lng)) {
         return '';
     }
@@ -503,7 +503,7 @@ function zap_create_geojson_point($lat, $lng) {
  * @param string $code_postal Le code postal
  * @return string Une référence unique générée
  */
-function zap_generate_auto_reference($ville, $adresse, $code_postal) {
+function terralize_ap_generate_auto_reference($ville, $adresse, $code_postal) {
     // Nettoyer les valeurs d'entrée
     $ville = trim(preg_replace('/[^A-Za-z0-9]/', '', strtoupper($ville)));
     $adresse = trim(preg_replace('/[^A-Za-z0-9]/', '', strtoupper($adresse)));
@@ -530,7 +530,7 @@ function zap_generate_auto_reference($ville, $adresse, $code_postal) {
 /**
  * Traitement de l'importation du fichier CSV
  */
-function zap_process_csv_import() {
+function terralize_ap_process_csv_import() {
     // Vérifier les permissions
     if (!current_user_can('manage_options')) {
         wp_die('Permission refusée');
@@ -538,7 +538,7 @@ function zap_process_csv_import() {
     
     try {
         // Vérifier le nonce
-        check_admin_referer('zonify_ap_import_csv_nonce');
+        check_admin_referer('terralize_ap_import_csv_nonce');
         
         // Vérifier le fichier
         if (!isset($_FILES['panneaux_csv']) || empty($_FILES['panneaux_csv']['tmp_name'])) {
@@ -610,24 +610,24 @@ function zap_process_csv_import() {
         
         // Définir les colonnes requises et leurs indices en utilisant notre fonction flexible
         $column_indices = array(
-            'reference' => zap_find_column_index($header, 'CODE REFERENCE PHOTO'),
-            'ville' => zap_find_column_index($header, 'VILLE'),
-            'code_postal' => zap_find_column_index($header, 'CODE POSTAL'),
-            'adresse' => zap_find_column_index($header, 'ADRESSE'),
-            'latitude' => zap_find_column_index($header, 'COORDONNEES GPS DU PANNEAU Y'),
-            'longitude' => zap_find_column_index($header, 'COORDONNEES GPS DU PANNEAU X'),
-            'format' => zap_find_column_index($header, 'FORMAT'),
-            'type' => zap_find_column_index($header, 'TYPE'),
-            'support' => zap_find_column_index($header, 'SUPPORT'),
-            'largeur' => zap_find_column_index($header, 'LARGEUR EN CM'),
-            'hauteur' => zap_find_column_index($header, 'HAUTEUR EN CM'),
-            'annonceur' => zap_find_column_index($header, 'ANNONCEUR'),
-            'disponibilite' => zap_find_column_index($header, 'DISPONIBILITE'),
-            'date_fin' => zap_find_column_index($header, 'DATE DE FIN DENGAGEMENT  DU BON DE COMMANDE'),
-            'visible_de' => zap_find_column_index($header, 'VISIBLE EN VENANT DE'),
-            'visible_vers' => zap_find_column_index($header, 'VISIBLE EN ALLANT A'),
-            'angle_visibilite' => zap_find_column_index($header, 'ANGLE DE VISIBILITE'),
-            'surface' => zap_find_column_index($header, 'SURFACE')
+            'reference' => terralize_ap_find_column_index($header, 'CODE REFERENCE PHOTO'),
+            'ville' => terralize_ap_find_column_index($header, 'VILLE'),
+            'code_postal' => terralize_ap_find_column_index($header, 'CODE POSTAL'),
+            'adresse' => terralize_ap_find_column_index($header, 'ADRESSE'),
+            'latitude' => terralize_ap_find_column_index($header, 'COORDONNEES GPS DU PANNEAU Y'),
+            'longitude' => terralize_ap_find_column_index($header, 'COORDONNEES GPS DU PANNEAU X'),
+            'format' => terralize_ap_find_column_index($header, 'FORMAT'),
+            'type' => terralize_ap_find_column_index($header, 'TYPE'),
+            'support' => terralize_ap_find_column_index($header, 'SUPPORT'),
+            'largeur' => terralize_ap_find_column_index($header, 'LARGEUR EN CM'),
+            'hauteur' => terralize_ap_find_column_index($header, 'HAUTEUR EN CM'),
+            'annonceur' => terralize_ap_find_column_index($header, 'ANNONCEUR'),
+            'disponibilite' => terralize_ap_find_column_index($header, 'DISPONIBILITE'),
+            'date_fin' => terralize_ap_find_column_index($header, 'DATE DE FIN DENGAGEMENT  DU BON DE COMMANDE'),
+            'visible_de' => terralize_ap_find_column_index($header, 'VISIBLE EN VENANT DE'),
+            'visible_vers' => terralize_ap_find_column_index($header, 'VISIBLE EN ALLANT A'),
+            'angle_visibilite' => terralize_ap_find_column_index($header, 'ANGLE DE VISIBILITE'),
+            'surface' => terralize_ap_find_column_index($header, 'SURFACE')
         );
         
         // Journaliser les indices trouvés pour le débogage
@@ -738,20 +738,20 @@ function zap_process_csv_import() {
                 }
                 
                 // Appliquer les normalisations et extractions
-                $angle_visibilite = zap_normalize_angle($angle_visibilite_brut);
-                $type = zap_normalize_panel_type($type_brut);
-                $support = zap_normalize_panel_support($support_brut);
-                $format_standard = zap_get_standard_format($surface_brut ? $surface_brut : $format_brut, $largeur, $hauteur);
+                $angle_visibilite = terralize_ap_normalize_angle($angle_visibilite_brut);
+                $type = terralize_ap_normalize_panel_type($type_brut);
+                $support = terralize_ap_normalize_panel_support($support_brut);
+                $format_standard = terralize_ap_get_standard_format($surface_brut ? $surface_brut : $format_brut, $largeur, $hauteur);
                 
                 // Récupérer le département et la région à partir du code postal
-                $loc_info = zap_get_dept_region_from_postal($code_postal);
+                $loc_info = terralize_ap_get_dept_region_from_postal($code_postal);
                 $departement = $loc_info['departement'];
                 $code_departement = $loc_info['code_departement'];
                 $region = $loc_info['region'];
                 
                 // Générer une référence automatique si elle est vide
                 if (empty($reference) && !empty($adresse)) {
-                    $reference = zap_generate_auto_reference($ville, $adresse, $code_postal);
+                    $reference = terralize_ap_generate_auto_reference($ville, $adresse, $code_postal);
                     error_log("Ligne {$row_count}: Référence générée automatiquement: {$reference}");
                 }
                 
@@ -765,7 +765,7 @@ function zap_process_csv_import() {
                 // Créer un point GeoJSON si des coordonnées sont disponibles
                 $geojson = '';
                 if (!empty($latitude) && !empty($longitude)) {
-                    $geojson = zap_create_geojson_point($latitude, $longitude);
+                    $geojson = terralize_ap_create_geojson_point($latitude, $longitude);
                 }
                 
                 // Vérifier si le panneau existe déjà (recherche par référence)
@@ -853,7 +853,7 @@ function zap_process_csv_import() {
                         
                         // Associer à la catégorie par défaut si elle est définie
                         if ($default_category > 0) {
-                            wp_set_object_terms($panneau_id, $default_category, 'zonify_category');
+                            wp_set_object_terms($panneau_id, $default_category, 'terralize_category');
                         }
                         
                         $count_created++;
@@ -874,7 +874,7 @@ function zap_process_csv_import() {
         fclose($handle);
         
         // Rediriger vers la page d'import avec un message de confirmation
-        wp_redirect(admin_url('admin.php?page=zonify_ap_import_csv&import_done=1&created=' . $count_created . '&updated=' . $count_updated . '&errors=' . $count_errors));
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&import_done=1&created=' . $count_created . '&updated=' . $count_updated . '&errors=' . $count_errors));
         exit;
         
     } catch (Exception $e) {
@@ -882,16 +882,16 @@ function zap_process_csv_import() {
         if (isset($handle) && is_resource($handle)) {
             fclose($handle);
         }
-        wp_redirect(admin_url('admin.php?page=zonify_ap_import_csv&import_error=' . urlencode($e->getMessage())));
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&import_error=' . urlencode($e->getMessage())));
         exit;
     }
 }
-add_action('admin_post_zonify_ap_import_csv', 'zap_process_csv_import');
+add_action('admin_post_terralize_ap_import_csv', 'terralize_ap_process_csv_import');
 
 /**
  * Traitement de la réinitialisation de tous les POI
  */
-function zap_process_reset_poi() {
+function terralize_ap_process_reset_poi() {
     // Vérifier les permissions
     if (!current_user_can('manage_options')) {
         wp_die('Permission refusée');
@@ -899,7 +899,7 @@ function zap_process_reset_poi() {
     
     try {
         // Vérifier le nonce
-        check_admin_referer('zonify_ap_reset_poi_nonce');
+        check_admin_referer('terralize_ap_reset_poi_nonce');
         
         global $wpdb;
         
@@ -930,13 +930,13 @@ function zap_process_reset_poi() {
         error_log("Réinitialisation des POI: {$count_deleted} POI supprimés");
         
         // Rediriger vers la page d'import avec message de confirmation
-        wp_redirect(admin_url('admin.php?page=zonify_ap_import_csv&reset_done=1&deleted=' . $count_deleted));
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&reset_done=1&deleted=' . $count_deleted));
         exit;
         
     } catch (Exception $e) {
         error_log('Erreur lors de la réinitialisation des POI: ' . $e->getMessage());
-        wp_redirect(admin_url('admin.php?page=zonify_ap_import_csv&import_error=' . urlencode('Erreur lors de la réinitialisation: ' . $e->getMessage())));
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&import_error=' . urlencode('Erreur lors de la réinitialisation: ' . $e->getMessage())));
         exit;
     }
 }
-add_action('admin_post_zonify_ap_reset_poi', 'zap_process_reset_poi');
+add_action('admin_post_terralize_ap_reset_poi', 'terralize_ap_process_reset_poi');

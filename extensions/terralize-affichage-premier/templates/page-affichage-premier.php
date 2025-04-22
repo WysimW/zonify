@@ -43,7 +43,7 @@ if ($panneaux_query->have_posts()) {
 
             // Récupérer les catégories du panneau
             $panel_categories = array();
-            $terms = get_the_terms(get_the_ID(), 'zonify_category');
+            $terms = get_the_terms(get_the_ID(), 'terralize_category');
             if ($terms && !is_wp_error($terms)) {
                 foreach ($terms as $term) {
                     $panel_categories[] = array(
@@ -120,7 +120,7 @@ if ($panneaux_query->have_posts()) {
 
 // Récupérer toutes les catégories pour les filtres
 $categories = get_terms(array(
-    'taxonomy' => 'zonify_category',
+    'taxonomy' => 'terralize_category',
     'hide_empty' => true,
 ));
 
@@ -161,22 +161,22 @@ if ($dept_results) {
     }
 }
 
-// Récupérer les options front-end de Zonify
+// Récupérer les options front-end de Terralize
 $front_options = array(
-    'tile_provider'    => get_option('zonify_tile_provider_front', 'cartodb_light'),
-    'tile_custom_url'  => get_option('zonify_tile_custom_url_front', ''),
-    'map_zoom'         => intval(get_option('zonify_map_zoom_front', 9)),
-    'map_center_lat'   => get_option('zonify_map_center_lat_front', '46.2276'),
-    'map_center_lng'   => get_option('zonify_map_center_lng_front', '2.2137'),
+    'tile_provider'    => get_option('terralize_tile_provider_front', 'cartodb_light'),
+    'tile_custom_url'  => get_option('terralize_tile_custom_url_front', ''),
+    'map_zoom'         => intval(get_option('terralize_map_zoom_front', 9)),
+    'map_center_lat'   => get_option('terralize_map_center_lat_front', '46.2276'),
+    'map_center_lng'   => get_option('terralize_map_center_lng_front', '2.2137'),
     'show_category_filter' => true,
 );
 
 $popup_options = array(
     'popup_show_address'       => 1,
     'popup_show_details'       => 1,
-    'popup_font_family'        => get_option('zonify_popup_font_family', 'Arial, sans-serif'),
-    'popup_font_size'          => get_option('zonify_popup_font_size', '14px'),
-    'popup_font_color'         => get_option('zonify_popup_font_color', '#333333'),
+    'popup_font_family'        => get_option('terralize_popup_font_family', 'Arial, sans-serif'),
+    'popup_font_size'          => get_option('terralize_popup_font_size', '14px'),
+    'popup_font_color'         => get_option('terralize_popup_font_color', '#333333'),
 );
 
 $combined_options = $front_options + $popup_options;

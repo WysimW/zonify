@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 /**
  * Ajoute les styles directement dans l'en-tête des pages admin
  */
-function zonify_inject_table_button_styles() {
+function terralize_inject_table_button_styles() {
     // S'assurer que nous sommes sur une page d'administration
     if (!is_admin()) {
         return;
@@ -188,4 +188,4 @@ function zonify_inject_table_button_styles() {
     // Ajouter le CSS directement dans l'en-tête
     echo '<style type="text/css">' . $styles . '</style>';
 }
-add_action('admin_head', 'zonify_inject_table_button_styles');
+add_action('admin_head', 'terralize_inject_table_button_styles');

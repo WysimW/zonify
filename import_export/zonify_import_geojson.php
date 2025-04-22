@@ -1,9 +1,9 @@
 <?php
-function zonify_import_geojson() {
+function terralize_import_geojson() {
     if ( ! current_user_can('manage_options') ) {
         wp_die('Permission refusée');
     }
-    check_admin_referer('zonify_import_geojson_nonce');
+    check_admin_referer('terralize_import_geojson_nonce');
 
     if ( empty($_FILES['zones_geojson']['tmp_name']) ) {
         wp_die('Aucun fichier GeoJSON fourni.');
@@ -65,7 +65,7 @@ function zonify_import_geojson() {
         }
     }
 
-    wp_redirect(admin_url('admin.php?page=zonify_import_export&geojson_import_done=1&created=' . $count_created . '&updated=' . $count_updated));
+    wp_redirect(admin_url('admin.php?page=terralize_import_export&geojson_import_done=1&created=' . $count_created . '&updated=' . $count_updated));
     exit;
 }
-add_action('admin_post_zonify_import_geojson', 'zonify_import_geojson');
+add_action('admin_post_terralize_import_geojson', 'terralize_import_geojson');

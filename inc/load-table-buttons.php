@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 /**
  * Ajoute les styles CSS pour les boutons des tableaux
  */
-function zonify_load_table_buttons_styles() {
+function terralize_load_table_buttons_styles() {
     // S'assurer que nous sommes sur une page d'administration
     if (!is_admin()) {
         return;
@@ -22,13 +22,13 @@ function zonify_load_table_buttons_styles() {
     
     // Enregistrer et charger le fichier CSS
     wp_register_style(
-        'zonify-table-buttons',
+        'terralize-table-buttons',
         $plugin_url . 'assets/css/table-buttons.css',
         array(),
         '1.0.0'
     );
     
     // Charger le style sur toutes les pages admin
-    wp_enqueue_style('zonify-table-buttons');
+    wp_enqueue_style('terralize-table-buttons');
 }
-add_action('admin_enqueue_scripts', 'zonify_load_table_buttons_styles');
+add_action('admin_enqueue_scripts', 'terralize_load_table_buttons_styles');

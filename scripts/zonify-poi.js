@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Récupération des options depuis zonifyPoiVars (à définir via wp_localize_script)
-    var provider = zonifyPoiVars.tile_provider || 'cartodb_light';
+    // Récupération des options depuis terralizePoiVars (à définir via wp_localize_script)
+    var provider = terralizePoiVars.tile_provider || 'cartodb_light';
     
     var tileLayerUrl, attribution;
 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tileLayerUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
         attribution = 'Tiles © Esri — Source: Esri, USGS, NOAA';
     } else if (provider === 'custom') {
-        tileLayerUrl = zonifyPoiVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        tileLayerUrl = terralizePoiVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         attribution = 'Personnalisé';
     } else {
         // Par défaut (CartoDB light)
@@ -23,9 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
         attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
     }
 
-    var zoom = zonifyPoiVars.map_zoom || 9;
-    var centerLat = parseFloat(zonifyPoiVars.map_center_lat) || 50.5;
-    var centerLng = parseFloat(zonifyPoiVars.map_center_lng) || 2.5;
+    var zoom = terralizePoiVars.map_zoom || 9;
+    var centerLat = parseFloat(terralizePoiVars.map_center_lat) || 50.5;
+    var centerLng = parseFloat(terralizePoiVars.map_center_lng) || 2.5;
 
     // Création de la carte dans le conteneur avec l'id "poi-map"
     var map = L.map('poi-map').setView([centerLat, centerLng], zoom);
@@ -86,13 +86,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Enregistrement du POI via AJAX
         var poiGeoJSON = layer.toGeoJSON().geometry;
-        fetch(zonifyPoiVars.ajax_url, {
+        fetch(terralizePoiVars.ajax_url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             body: new URLSearchParams({
                 action: 'save_poi',
                 poi_data: JSON.stringify(poiGeoJSON),
-                _ajax_nonce: zonifyPoiVars.nonce
+                _ajax_nonce: terralizePoiVars.nonce
             })
         })
         .then(function(response) { return response.json(); })
@@ -116,14 +116,14 @@ document.addEventListener('DOMContentLoaded', function() {
         e.layers.eachLayer(function(layer) {
             var poiGeoJSON = layer.toGeoJSON().geometry;
             var poiId = (layer.feature && layer.feature.properties) ? layer.feature.properties.poi_id : 0;
-            fetch(zonifyPoiVars.ajax_url, {
+            fetch(terralizePoiVars.ajax_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: new URLSearchParams({
                     action: 'save_poi',
                     poi_data: JSON.stringify(poiGeoJSON),
                     poi_id: poiId,
-                    _ajax_nonce: zonifyPoiVars.nonce
+                    _ajax_nonce: terralizePoiVars.nonce
                 })
             })
             .then(function(response) { return response.json(); })
@@ -148,13 +148,13 @@ document.addEventListener('DOMContentLoaded', function() {
         e.layers.eachLayer(function(layer) {
             var poiId = (layer.feature && layer.feature.properties) ? layer.feature.properties.poi_id : 0;
             if (poiId) {
-                fetch(zonifyPoiVars.ajax_url, {
+                fetch(terralizePoiVars.ajax_url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                     body: new URLSearchParams({
                         action: 'delete_poi',
                         poi_id: poiId,
-                        _ajax_nonce: zonifyPoiVars.nonce
+                        _ajax_nonce: terralizePoiVars.nonce
                     })
                 })
                 .then(function(response) { return response.json(); })

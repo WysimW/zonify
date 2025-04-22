@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var options = zonifyFrontendOptions || {};
+    var options = terralizeFrontendOptions || {};
     console.log("Options : ", options);
     
     // Afficher les données pour le debug
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         attribution = 'Tiles © Esri — Source: Esri, USGS, NOAA';
     }
      else if (provider === 'custom') {
-        tileLayerUrl = zonifyMapVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        tileLayerUrl = terralizeMapVars.tile_custom_url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         attribution = 'Personnalisé';
     }  
     else {

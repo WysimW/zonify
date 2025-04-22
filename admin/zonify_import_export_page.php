@@ -1,12 +1,12 @@
 <?php
-function zonify_import_export_page() {
+function terralize_import_export_page() {
     $icon_url = plugin_dir_url(__FILE__) . '../assets/icons/icon.png';
     ?>
     <div class="wrap">
-    <div class="zonify-header">
-            <div class="zonify-header-left">
-                <img src="<?php echo esc_url( $icon_url ); ?>" alt="Zonify Icon" class="zonify-icon" />
-                <h1 class="zonify-title">Zonify by MBS</h1>
+    <div class="terralize-header">
+            <div class="terralize-header-left">
+                <img src="<?php echo esc_url( $icon_url ); ?>" alt="Terralize Icon" class="terralize-icon" />
+                <h1 class="terralize-title">Terralize by MBS</h1>
             </div>
         </div>
         
@@ -48,11 +48,11 @@ function zonify_import_export_page() {
         <h2>Export global</h2>
         <p>
             <!-- Bouton pour exporter en GeoJSON -->
-            <a href="<?php echo esc_url( admin_url('admin-post.php?action=zonify_export_geojson') ); ?>" class="button button-primary">
+            <a href="<?php echo esc_url( admin_url('admin-post.php?action=terralize_export_geojson') ); ?>" class="button button-primary">
                 Exporter toutes les zones (GeoJSON)
             </a>
             <!-- Bouton pour exporter en CSV -->
-            <a href="<?php echo esc_url( admin_url('admin-post.php?action=zonify_export_csv') ); ?>" class="button button-secondary">
+            <a href="<?php echo esc_url( admin_url('admin-post.php?action=terralize_export_csv') ); ?>" class="button button-secondary">
                 Exporter toutes les zones (CSV)
             </a>
         </p>
@@ -63,8 +63,8 @@ function zonify_import_export_page() {
         <p>Choisissez un fichier GeoJSON ou CSV pour importer (créer / mettre à jour) vos zones.</p>
 
         <!-- Formulaire d'import GeoJSON -->
-        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url('admin-post.php?action=zonify_import_geojson') ); ?>">
-            <?php wp_nonce_field('zonify_import_geojson_nonce'); ?>
+        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url('admin-post.php?action=terralize_import_geojson') ); ?>">
+            <?php wp_nonce_field('terralize_import_geojson_nonce'); ?>
             <p>
                 <label for="zones_geojson">Fichier GeoJSON :</label>
                 <input type="file" name="zones_geojson" id="zones_geojson" accept=".geojson,.json,application/json" />
@@ -73,8 +73,8 @@ function zonify_import_export_page() {
         </form>
         
         <!-- Formulaire d'import CSV pour les zones -->
-        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url('admin-post.php?action=zonify_import_csv') ); ?>" style="margin-top: 20px;">
-            <?php wp_nonce_field('zonify_import_csv_nonce'); ?>
+        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url('admin-post.php?action=terralize_import_csv') ); ?>" style="margin-top: 20px;">
+            <?php wp_nonce_field('terralize_import_csv_nonce'); ?>
             <p>
                 <label for="zones_csv">Fichier CSV des zones :</label>
                 <input type="file" name="zones_csv" id="zones_csv" accept=".csv,text/csv" />
@@ -86,7 +86,7 @@ function zonify_import_export_page() {
         
         <?php
         // Vérifier si l'extension Affichage Premier est active
-        if (class_exists('ZonifyAffichagePremier')) {
+        if (class_exists('TerralizeAffichagePremier')) {
             ?>
             <hr/>
             
@@ -111,8 +111,8 @@ function zonify_import_export_page() {
                 </ul>
             </div>
 
-            <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php?action=zonify_ap_import_csv')); ?>" style="margin-top: 20px;">
-                <?php wp_nonce_field('zonify_ap_import_csv_nonce'); ?>
+            <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_import_csv')); ?>" style="margin-top: 20px;">
+                <?php wp_nonce_field('terralize_ap_import_csv_nonce'); ?>
                 
                 <table class="form-table">
                     <tr valign="top">

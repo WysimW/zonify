@@ -1,5 +1,5 @@
 <?php
-function zonify_import_zones_geojson() {
+function terralize_import_zones_geojson() {
     if (!current_user_can('manage_options')) {
         wp_die('Permission refusée.');
     }

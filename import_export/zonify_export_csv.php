@@ -1,5 +1,5 @@
 <?php
-function zonify_export_csv() {
+function terralize_export_csv() {
     if (!current_user_can('manage_options')) {
         wp_die('Permission refusée');
     }
@@ -31,4 +31,4 @@ function zonify_export_csv() {
     fclose($output);
     exit;
 }
-add_action('admin_post_zonify_export_csv', 'zonify_export_csv');
+add_action('admin_post_terralize_export_csv', 'terralize_export_csv');

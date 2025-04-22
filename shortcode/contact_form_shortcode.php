@@ -1,15 +1,15 @@
 <?php
-function zonify_enqueue_styles() {
+function terralize_enqueue_styles() {
     wp_enqueue_style(
-        'zonify-contact-style', // Handle unique
-        plugins_url( '../assets/css/zonify-contact.css', __FILE__ ), // Chemin vers le fichier CSS
+        'terralize-contact-style', // Handle unique
+        plugins_url( '../assets/css/terralize-contact.css', __FILE__ ), // Chemin vers le fichier CSS
         array(), // Dépendances éventuelles
         '1.0.0' // Version
     );
 }
-add_action( 'wp_enqueue_scripts', 'zonify_enqueue_styles' );
+add_action( 'wp_enqueue_scripts', 'terralize_enqueue_styles' );
 
-function zonify_contact_form_shortcode( $atts ) {
+function terralize_contact_form_shortcode( $atts ) {
     // Récupération de l'ID du commercial passé en GET
     $commercial_id = isset( $_GET['commercial_id'] ) ? intval( $_GET['commercial_id'] ) : 0;
     $commercial_name = '';
@@ -43,8 +43,8 @@ function zonify_contact_form_shortcode( $atts ) {
         }
     }
     ?>
-    <form method="post" action="" class="zonify-contact-form">
-        <?php wp_nonce_field( 'zonify_contact_nonce', 'zonify_contact_nonce_field' ); ?>
+    <form method="post" action="" class="terralize-contact-form">
+        <?php wp_nonce_field( 'terralize_contact_nonce', 'terralize_contact_nonce_field' ); ?>
         <input type="hidden" name="commercial_id" value="<?php echo esc_attr( $commercial_id ); ?>" />
         
         <?php if ( $commercial_name ): ?>
@@ -55,27 +55,27 @@ function zonify_contact_form_shortcode( $atts ) {
         <?php endif; ?>
         
         <p>
-            <label for="zonify_contact_name">Nom :</label>
-            <input type="text" name="name" id="zonify_contact_name" required value="<?php echo esc_html( $commercial_name ); ?>"/>
+            <label for="terralize_contact_name">Nom :</label>
+            <input type="text" name="name" id="terralize_contact_name" required value="<?php echo esc_html( $commercial_name ); ?>"/>
         </p>
         
         <p>
-            <label for="zonify_contact_email">Email :</label>
-            <input type="email" name="email" id="zonify_contact_email" required value="<?php echo esc_html( $commercial_email ); ?>"/>
+            <label for="terralize_contact_email">Email :</label>
+            <input type="email" name="email" id="terralize_contact_email" required value="<?php echo esc_html( $commercial_email ); ?>"/>
         </p>
         
         <p>
-            <label for="zonify_contact_subject">Sujet :</label>
-            <input type="text" name="subject" id="zonify_contact_subject" required value="<?php echo $commercial_name ? esc_attr( 'Demande de contact pour ' . $commercial_name ) : ''; ?>" />
+            <label for="terralize_contact_subject">Sujet :</label>
+            <input type="text" name="subject" id="terralize_contact_subject" required value="<?php echo $commercial_name ? esc_attr( 'Demande de contact pour ' . $commercial_name ) : ''; ?>" />
         </p>
         
         <p>
-            <label for="zonify_contact_message">Message :</label>
-            <textarea name="message" id="zonify_contact_message" required></textarea>
+            <label for="terralize_contact_message">Message :</label>
+            <textarea name="message" id="terralize_contact_message" required></textarea>
         </p>
         
         <p>
-            <input type="submit" name="zonify_submit_contact" value="Envoyer" />
+            <input type="submit" name="terralize_submit_contact" value="Envoyer" />
         </p>
     </form>
 
@@ -94,4 +94,4 @@ document.addEventListener('DOMContentLoaded', function() {
     <?php
     return ob_get_clean();
 }
-add_shortcode( 'zonify_contact_form', 'zonify_contact_form_shortcode' );
+add_shortcode( 'terralize_contact_form', 'terralize_contact_form_shortcode' );

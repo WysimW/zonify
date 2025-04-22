@@ -1,5 +1,5 @@
 <?php
-function zonify_delete_zone() {
+function terralize_delete_zone() {
     if (!current_user_can('manage_options') || !check_ajax_referer('save_zone_nonce', '_ajax_nonce', false)) {
         wp_send_json_error('Permission refusée');
     }
@@ -15,4 +15,4 @@ function zonify_delete_zone() {
         wp_send_json_error('Échec de la suppression de la zone');
     }
 }
-add_action('wp_ajax_delete_zone', 'zonify_delete_zone');
+add_action('wp_ajax_delete_zone', 'terralize_delete_zone');

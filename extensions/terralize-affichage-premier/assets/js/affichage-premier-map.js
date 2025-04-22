@@ -1,5 +1,5 @@
 /**
- * Script JavaScript pour la carte des panneaux d'affichage - Extension Zonify Affichage Premier
+ * Script JavaScript pour la carte des panneaux d'affichage - Extension Terralize Affichage Premier
  */
 document.addEventListener('DOMContentLoaded', function() {
     var options = mapOptions || {};
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pointToLayer: function(feature, latlng) {
                 // Utiliser l'icône SVG personnalisée pour tous les panneaux
                 var icon = L.icon({
-                    iconUrl: '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin (1).svg',
+                    iconUrl: '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin.svg',
                     iconSize: [30, 40],
                     iconAnchor: [15, 40],
                     popupAnchor: [0, -35]

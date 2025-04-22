@@ -65,7 +65,7 @@
 /* ===== STYLES POUR LE MULTI-SELECT SELECT2 ===== */
 
 /* Container du filtre */
-.zonify-filter-container {
+.terralize-filter-container {
     margin-bottom: 20px;
     font-family: 'Montserrat', 'Inter', sans-serif;
     padding: 15px;
@@ -75,7 +75,7 @@
 }
 
 /* Label du filtre */
-.zonify-filter-container label {
+.terralize-filter-container label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
@@ -160,14 +160,14 @@
 }
 
 /* Container des boutons de filtre */
-.zonify-filter-buttons {
+.terralize-filter-buttons {
     display: flex;
     gap: 10px;
     margin-top: 15px;
 }
 
 /* Boutons de filtre */
-.zonify-filter-button {
+.terralize-filter-button {
     padding: 10px 16px;
     border: none;
     border-radius: 5px;
@@ -180,16 +180,16 @@
     color: white;
 }
 
-.zonify-filter-button:hover {
+.terralize-filter-button:hover {
     background-color: #1e392a;
 }
 
 /* Bouton réinitialiser */
-.zonify-filter-button-reset {
+.terralize-filter-button-reset {
     background-color: #D9D9D9;
     color: #2A2A2A;
 }
 
-.zonify-filter-button-reset:hover {
+.terralize-filter-button-reset:hover {
     background-color: #c0c0c0;
 }

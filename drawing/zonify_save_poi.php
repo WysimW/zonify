@@ -1,6 +1,6 @@
 <?php
-add_action('wp_ajax_save_poi', 'zonify_save_poi');
-function zonify_save_poi() {
+add_action('wp_ajax_save_poi', 'terralize_save_poi');
+function terralize_save_poi() {
     if ( ! current_user_can('manage_options') || ! check_ajax_referer('save_poi_nonce', '_ajax_nonce', false) ) {
         wp_send_json_error('Permission refusée');
     }

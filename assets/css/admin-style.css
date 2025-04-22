@@ -1,31 +1,31 @@
-/* Blueprint-style Modern Admin UI for Zonify Mapping Plugin */
+/* Blueprint-style Modern Admin UI for Terralize Mapping Plugin */
 
 /* Base Styles */
 :root {
-  --zonify-primary: #2c5aa0;
-  --zonify-secondary: #70c141;
-  --zonify-dark: #1e3c68;
-  --zonify-light: #f0f5fa;
-  --zonify-border: #cfd8e3;
-  --zonify-text: #333f4d;
-  --zonify-text-light: #6e7c8c;
-  --zonify-shadow: rgba(0, 27, 71, 0.1);
-  --zonify-font: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+  --terralize-primary: #2c5aa0;
+  --terralize-secondary: #70c141;
+  --terralize-dark: #1e3c68;
+  --terralize-light: #f0f5fa;
+  --terralize-border: #cfd8e3;
+  --terralize-text: #333f4d;
+  --terralize-text-light: #6e7c8c;
+  --terralize-shadow: rgba(0, 27, 71, 0.1);
+  --terralize-font: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Global styles */
-.zonify-home,
-.zonify-map-page,
-.wrap.zonify-map-page,
-.zonify-content {
-  font-family: var(--zonify-font);
-  color: var(--zonify-text);
+.terralize-home,
+.terralize-map-page,
+.wrap.terralize-map-page,
+.terralize-content {
+  font-family: var(--terralize-font);
+  color: var(--terralize-text);
   background-color: #f8fafc;
   position: relative;
 }
 
 /* Blueprint background effect */
-.zonify-map-page::before {
+.terralize-map-page::before {
   content: "";
   position: absolute;
   top: 0;
@@ -42,67 +42,67 @@
 }
 
 /* Header Styles */
-.zonify-header,
-.zonify-banner {
+.terralize-header,
+.terralize-banner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid var(--zonify-primary);
+  border-bottom: 2px solid var(--terralize-primary);
   padding: 20px 0;
   margin-bottom: 25px;
   background-color: white;
-  box-shadow: 0 2px 10px var(--zonify-shadow);
+  box-shadow: 0 2px 10px var(--terralize-shadow);
   border-radius: 8px 8px 0 0;
 }
 
-.zonify-header-left,
-.zonify-banner-left {
+.terralize-header-left,
+.terralize-banner-left {
   display: flex;
   align-items: center;
   padding-left: 15px;
 }
 
-.zonify-icon {
+.terralize-icon {
   width: 48px;
   height: 48px;
   margin-right: 15px;
-  filter: drop-shadow(0 2px 4px var(--zonify-shadow));
+  filter: drop-shadow(0 2px 4px var(--terralize-shadow));
 }
 
-.zonify-title {
+.terralize-title {
   font-size: 1.8em;
   margin: 0;
-  color: var(--zonify-primary);
+  color: var(--terralize-primary);
   font-weight: 600;
   letter-spacing: -0.5px;
 }
 
-.zonify-version {
+.terralize-version {
   font-size: 0.9em;
-  color: var(--zonify-text-light);
-  background-color: var(--zonify-light);
+  color: var(--terralize-text-light);
+  background-color: var(--terralize-light);
   padding: 4px 10px;
   border-radius: 20px;
   font-weight: 500;
 }
 
 /* Content Sections */
-.zonify-content {
+.terralize-content {
   margin-top: 25px;
   padding: 0 15px;
 }
 
-.zonify-section {
+.terralize-section {
   margin-bottom: 35px;
   background: white;
   padding: 25px;
   border-radius: 8px;
-  box-shadow: 0 3px 10px var(--zonify-shadow);
+  box-shadow: 0 3px 10px var(--terralize-shadow);
 }
 
-.zonify-section h2,
-.zonify-section h3 {
-  color: var(--zonify-primary);
+.terralize-section h2,
+.terralize-section h3 {
+  color: var(--terralize-primary);
   margin-top: 0;
   margin-bottom: 20px;
   font-weight: 600;
@@ -110,74 +110,74 @@
   padding-bottom: 10px;
 }
 
-.zonify-section h2::after,
-.zonify-section h3::after {
+.terralize-section h2::after,
+.terralize-section h3::after {
   content: "";
   position: absolute;
   left: 0;
   bottom: 0;
   width: 50px;
   height: 3px;
-  background-color: var(--zonify-secondary);
+  background-color: var(--terralize-secondary);
   border-radius: 3px;
 }
 
-.zonify-section p {
+.terralize-section p {
   font-size: 1em;
   line-height: 1.7;
-  color: var(--zonify-text);
+  color: var(--terralize-text);
   margin-bottom: 15px;
 }
 
 /* Form Elements */
-.zonify-form-group {
+.terralize-form-group {
   margin-bottom: 20px;
   position: relative;
 }
 
-.zonify-form-group label {
+.terralize-form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: var(--zonify-dark);
+  color: var(--terralize-dark);
   font-size: 0.95em;
 }
 
-.zonify-select,
-.zonify-form-group select,
-.zonify-form-group input[type="text"] {
+.terralize-select,
+.terralize-form-group select,
+.terralize-form-group input[type="text"] {
   width: 100%;
   max-width: 100%;
   padding: 10px 15px;
-  border: 1px solid var(--zonify-border);
+  border: 1px solid var(--terralize-border);
   border-radius: 6px;
-  background-color: var(--zonify-light);
-  font-family: var(--zonify-font);
+  background-color: var(--terralize-light);
+  font-family: var(--terralize-font);
   font-size: 0.95em;
-  color: var(--zonify-text);
+  color: var(--terralize-text);
   transition: all 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
 }
 
-.zonify-select:focus,
-.zonify-form-group select:focus,
-.zonify-form-group input[type="text"]:focus {
+.terralize-select:focus,
+.terralize-form-group select:focus,
+.terralize-form-group input[type="text"]:focus {
   outline: none;
-  border-color: var(--zonify-primary);
+  border-color: var(--terralize-primary);
   box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2);
 }
 
 /* Select2 Customization */
 .select2-container--default .select2-selection--multiple,
 .select2-container--default .select2-selection--single {
-  border: 1px solid var(--zonify-border) !important;
+  border: 1px solid var(--terralize-border) !important;
   border-radius: 6px !important;
   min-height: 38px !important;
   padding: 2px !important;
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
-  background-color: var(--zonify-primary) !important;
+  background-color: var(--terralize-primary) !important;
   color: white !important;
   border: none !important;
   border-radius: 4px !important;
@@ -191,9 +191,9 @@
 
 /* Buttons */
 .button.button-primary,
-.zonify-content .button-primary,
+.terralize-content .button-primary,
 .wp-core-ui .button-primary {
-  background: var(--zonify-primary);
+  background: var(--terralize-primary);
   border: none;
   color: white;
   padding: 10px 20px;
@@ -202,36 +202,36 @@
   font-weight: 500;
   cursor: pointer;
   text-shadow: none;
-  box-shadow: 0 2px 4px var(--zonify-shadow);
+  box-shadow: 0 2px 4px var(--terralize-shadow);
   transition: all 0.2s ease;
 }
 
 .button.button-primary:hover,
-.zonify-content .button-primary:hover,
+.terralize-content .button-primary:hover,
 .wp-core-ui .button-primary:hover {
-  background: var(--zonify-dark);
+  background: var(--terralize-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px var(--zonify-shadow);
+  box-shadow: 0 4px 8px var(--terralize-shadow);
 }
 
 .button.button-secondary,
-.zonify-content .button-secondary {
+.terralize-content .button-secondary {
   background: white;
-  border: 1px solid var(--zonify-border);
-  color: var(--zonify-text);
+  border: 1px solid var(--terralize-border);
+  color: var(--terralize-text);
   padding: 9px 18px;
   border-radius: 6px;
   font-size: 1em;
   cursor: pointer;
-  box-shadow: 0 1px 3px var(--zonify-shadow);
+  box-shadow: 0 1px 3px var(--terralize-shadow);
   transition: all 0.2s ease;
 }
 
 .button.button-secondary:hover,
-.zonify-content .button-secondary:hover {
-  background: var(--zonify-light);
-  border-color: var(--zonify-primary);
-  color: var(--zonify-primary);
+.terralize-content .button-secondary:hover {
+  background: var(--terralize-light);
+  border-color: var(--terralize-primary);
+  color: var(--terralize-primary);
 }
 
 /* Map Container */
@@ -240,42 +240,42 @@
   border-radius: 8px !important;
   margin-top: 20px !important;
   height: 65vh !important;
-  box-shadow: 0 4px 15px var(--zonify-shadow);
+  box-shadow: 0 4px 15px var(--terralize-shadow);
 }
 
 /* Link Styles */
-.zonify-links {
+.terralize-links {
   list-style-type: none;
   margin-left: 5px;
   padding-left: 0;
 }
 
-.zonify-links li {
+.terralize-links li {
   margin-bottom: 10px;
   padding-left: 22px;
   position: relative;
 }
 
-.zonify-links li::before {
+.terralize-links li::before {
   content: "";
   position: absolute;
   left: 0;
   top: 8px;
   width: 12px;
   height: 12px;
-  background-color: var(--zonify-secondary);
+  background-color: var(--terralize-secondary);
   border-radius: 50%;
 }
 
-.zonify-links a {
-  color: var(--zonify-primary);
+.terralize-links a {
+  color: var(--terralize-primary);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
 }
 
-.zonify-links a:hover {
-  color: var(--zonify-secondary);
+.terralize-links a:hover {
+  color: var(--terralize-secondary);
   text-decoration: none;
 }
 
@@ -285,18 +285,18 @@
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 15px;
-  box-shadow: 0 2px 8px var(--zonify-shadow);
+  box-shadow: 0 2px 8px var(--terralize-shadow);
   transition: all 0.3s ease;
-  border-left: 3px solid var(--zonify-primary);
+  border-left: 3px solid var(--terralize-primary);
 }
 
 .result-item:hover, .panel-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--zonify-shadow);
+  box-shadow: 0 4px 12px var(--terralize-shadow);
 }
 
 .result-item h4 {
-  color: var(--zonify-primary);
+  color: var(--terralize-primary);
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.1em;
@@ -305,7 +305,7 @@
 .result-section {
   margin-bottom: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--zonify-border);
+  border-bottom: 1px solid var(--terralize-border);
 }
 
 .result-section:last-child {
@@ -323,7 +323,7 @@
 
 .pagination-controls button {
   background-color: white;
-  border: 1px solid var(--zonify-border);
+  border: 1px solid var(--terralize-border);
   padding: 8px 15px;
   border-radius: 4px;
   margin: 0 5px;
@@ -332,9 +332,9 @@
 }
 
 .pagination-controls button:hover:not(:disabled) {
-  background-color: var(--zonify-light);
-  border-color: var(--zonify-primary);
-  color: var(--zonify-primary);
+  background-color: var(--terralize-light);
+  border-color: var(--terralize-primary);
+  color: var(--terralize-primary);
 }
 
 .pagination-controls button:disabled {
@@ -344,7 +344,7 @@
 
 .pagination-info {
   margin: 0 10px;
-  color: var(--zonify-text-light);
+  color: var(--terralize-text-light);
 }
 
 /* Status Indicators */
@@ -382,27 +382,27 @@
 /* Map Controls and Popups */
 .leaflet-control-container .leaflet-bar {
   border-radius: 6px;
-  box-shadow: 0 2px 5px var(--zonify-shadow);
+  box-shadow: 0 2px 5px var(--terralize-shadow);
   overflow: hidden;
 }
 
 .leaflet-control-container .leaflet-bar a {
-  border-bottom: 1px solid var(--zonify-border);
-  color: var(--zonify-primary);
+  border-bottom: 1px solid var(--terralize-border);
+  color: var(--terralize-primary);
 }
 
 .leaflet-popup-content-wrapper {
   border-radius: 8px;
-  box-shadow: 0 3px 14px var(--zonify-shadow);
+  box-shadow: 0 3px 14px var(--terralize-shadow);
 }
 
 .leaflet-popup-content {
   margin: 15px;
-  font-family: var(--zonify-font);
+  font-family: var(--terralize-font);
 }
 
 .panel-popup h3 {
-  color: var(--zonify-primary);
+  color: var(--terralize-primary);
   margin: 0 0 10px;
   font-weight: 600;
 }
@@ -414,7 +414,7 @@
 .panel-popup .details-section {
   margin-bottom: 15px;
   padding-bottom: 15px;
-  border-bottom: 1px solid var(--zonify-border);
+  border-bottom: 1px solid var(--terralize-border);
 }
 
 .panel-popup .details-section:last-child {
@@ -423,7 +423,7 @@
 }
 
 .panel-popup .details-section h4 {
-  color: var(--zonify-primary);
+  color: var(--terralize-primary);
   margin: 0 0 10px;
   font-size: 1em;
   font-weight: 600;
@@ -435,7 +435,7 @@
 }
 
 .panel-popup .panel-contact-btn {
-  background-color: var(--zonify-secondary);
+  background-color: var(--terralize-secondary);
   color: white;
   padding: 8px 16px;
   border-radius: 6px;
@@ -452,16 +452,16 @@
 
 /* Responsive Adjustments */
 @media screen and (max-width: 782px) {
-  .zonify-section {
+  .terralize-section {
     padding: 15px;
   }
   
-  .zonify-header, .zonify-banner {
+  .terralize-header, .terralize-banner {
     flex-direction: column;
     align-items: flex-start;
   }
   
-  .zonify-header-right {
+  .terralize-header-right {
     margin-top: 10px;
   }
 }
@@ -470,19 +470,19 @@
 .map-sidebar {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 3px 15px var(--zonify-shadow);
+  box-shadow: 0 3px 15px var(--terralize-shadow);
 }
 
 .sidebar-tabs {
   display: flex;
-  border-bottom: 1px solid var(--zonify-border);
+  border-bottom: 1px solid var(--terralize-border);
 }
 
 .tab-btn {
   padding: 12px 20px;
   background: transparent;
   border: none;
-  color: var(--zonify-text-light);
+  color: var(--terralize-text-light);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -490,7 +490,7 @@
 }
 
 .tab-btn.active {
-  color: var(--zonify-primary);
+  color: var(--terralize-primary);
 }
 
 .tab-btn.active::after {
@@ -500,7 +500,7 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background-color: var(--zonify-primary);
+  background-color: var(--terralize-primary);
 }
 
 .sidebar-panel {
@@ -514,7 +514,7 @@
 
 /* Filter Accordion */
 .accordion-item {
-  border-bottom: 1px solid var(--zonify-border);
+  border-bottom: 1px solid var(--terralize-border);
 }
 
 .accordion-header {
@@ -528,13 +528,13 @@
 
 .accordion-header h4 {
   margin: 0;
-  color: var(--zonify-dark);
+  color: var(--terralize-dark);
   font-size: 1em;
   font-weight: 600;
 }
 
 .accordion-icon {
-  color: var(--zonify-primary);
+  color: var(--terralize-primary);
   font-weight: bold;
   font-size: 1.2em;
 }
@@ -560,8 +560,8 @@
   display: flex;
   align-items: center;
   background: white;
-  border: 1px solid var(--zonify-border);
-  color: var(--zonify-text);
+  border: 1px solid var(--terralize-border);
+  color: var(--terralize-text);
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 0.9em;
@@ -574,9 +574,9 @@
 }
 
 .map-control-btn:hover {
-  background: var(--zonify-light);
-  border-color: var(--zonify-primary);
-  color: var(--zonify-primary);
+  background: var(--terralize-light);
+  border-color: var(--terralize-primary);
+  color: var(--terralize-primary);
 }
 
 /* Blueprint-specific details */
@@ -588,25 +588,25 @@
 }
 
 .blueprint-detail {
-  border-left: 2px solid var(--zonify-primary);
+  border-left: 2px solid var(--terralize-primary);
   padding-left: 15px;
   margin: 15px 0;
 }
 
 .blueprint-note {
   background-color: rgba(44, 90, 160, 0.05);
-  border-left: 3px solid var(--zonify-primary);
+  border-left: 3px solid var(--terralize-primary);
   padding: 12px 15px;
   margin: 15px 0;
   border-radius: 0 6px 6px 0;
 }
 
 /* Wrap existing WordPress styles */
-#wpbody-content .wrap.zonify-map-page {
+#wpbody-content .wrap.terralize-map-page {
   margin: 15px 20px 0 2px;
   padding: 20px;
   background: white;
-  box-shadow: 0 3px 15px var(--zonify-shadow);
+  box-shadow: 0 3px 15px var(--terralize-shadow);
   border-radius: 8px;
   position: relative;
 }
@@ -617,7 +617,7 @@
 }
 
 .leaflet-draw-toolbar a:hover {
-  background-color: var(--zonify-light);
+  background-color: var(--terralize-light);
 }
 
 /* Result item styling */
@@ -648,16 +648,16 @@
 }
 
 .locate-on-map {
-  background-color: var(--zonify-primary);
+  background-color: var(--terralize-primary);
   color: white;
 }
 
 .locate-on-map:hover {
-  background-color: var(--zonify-dark);
+  background-color: var(--terralize-dark);
 }
 
 .contact-button {
-  background-color: var(--zonify-secondary);
+  background-color: var(--terralize-secondary);
   color: white;
   text-decoration: none;
   margin-top: 8px;
@@ -671,7 +671,7 @@
 
 .widefat.wp-list-table {
   border: none !important;
-  box-shadow: 0 3px 10px var(--zonify-shadow) !important;
+  box-shadow: 0 3px 10px var(--terralize-shadow) !important;
   border-radius: 8px !important;
   overflow: hidden !important;
   background-color: white !important;
@@ -680,10 +680,10 @@
 
 /* En-têtes des colonnes */
 .widefat.wp-list-table thead th {
-  background-color: var(--zonify-light) !important;
+  background-color: var(--terralize-light) !important;
   padding: 12px 15px !important;
-  border-bottom: 2px solid var(--zonify-primary) !important;
-  color: var(--zonify-dark) !important;
+  border-bottom: 2px solid var(--terralize-primary) !important;
+  color: var(--terralize-dark) !important;
   font-weight: 600 !important;
   text-transform: uppercase !important;
   font-size: 0.85em !important;
@@ -692,17 +692,17 @@
 }
 
 .widefat.wp-list-table thead th a {
-  color: var(--zonify-dark) !important;
+  color: var(--terralize-dark) !important;
 }
 
 .widefat.wp-list-table thead th a:hover {
-  color: var(--zonify-primary) !important;
+  color: var(--terralize-primary) !important;
 }
 
 /* Lignes du tableau */
 .widefat.wp-list-table tbody tr {
   transition: all 0.2s ease !important;
-  border-bottom: 1px solid var(--zonify-border) !important;
+  border-bottom: 1px solid var(--terralize-border) !important;
 }
 
 .widefat.wp-list-table tbody tr:last-child {
@@ -727,19 +727,19 @@
 .widefat.wp-list-table td {
   padding: 15px !important;
   vertical-align: middle !important;
-  color: var(--zonify-text) !important;
-  border-bottom: 1px solid var(--zonify-border) !important;
+  color: var(--terralize-text) !important;
+  border-bottom: 1px solid var(--terralize-border) !important;
 }
 
 /* Style des liens dans le tableau */
 .widefat.wp-list-table .row-title {
   font-weight: 600 !important;
-  color: var(--zonify-primary) !important;
+  color: var(--terralize-primary) !important;
 }
 
 .widefat.wp-list-table .row-actions {
   margin-top: 6px !important;
-  color: var(--zonify-text-light) !important;
+  color: var(--terralize-text-light) !important;
   font-size: 0.85em !important;
 }
 
@@ -748,12 +748,12 @@
 }
 
 .widefat.wp-list-table .row-actions a {
-  color: var(--zonify-text-light) !important;
+  color: var(--terralize-text-light) !important;
   transition: all 0.2s ease !important;
 }
 
 .widefat.wp-list-table .row-actions a:hover {
-  color: var(--zonify-primary) !important;
+  color: var(--terralize-primary) !important;
 }
 
 /* Pagination des tableaux */
@@ -770,7 +770,7 @@
   background-color: white !important;
   border-radius: 6px !important;
   padding: 5px 10px !important;
-  box-shadow: 0 1px 3px var(--zonify-shadow) !important;
+  box-shadow: 0 1px 3px var(--terralize-shadow) !important;
 }
 
 .tablenav .tablenav-pages a,
@@ -782,23 +782,23 @@
   padding: 0 5px !important;
   text-align: center !important;
   line-height: 30px !important;
-  background-color: var(--zonify-light) !important;
-  border: 1px solid var(--zonify-border) !important;
+  background-color: var(--terralize-light) !important;
+  border: 1px solid var(--terralize-border) !important;
   border-radius: 4px !important;
-  color: var(--zonify-text) !important;
+  color: var(--terralize-text) !important;
   text-decoration: none !important;
   transition: all 0.2s ease !important;
 }
 
 .tablenav .tablenav-pages span.current {
-  background-color: var(--zonify-primary) !important;
+  background-color: var(--terralize-primary) !important;
   color: white !important;
-  border-color: var(--zonify-primary) !important;
+  border-color: var(--terralize-primary) !important;
 }
 
 .tablenav .tablenav-pages a:hover {
   background-color: rgba(44, 90, 160, 0.1) !important;
-  border-color: var(--zonify-primary) !important;
+  border-color: var(--terralize-primary) !important;
 }
 
 /* Boutons de filtre et de recherche */
@@ -815,17 +815,17 @@
 .tablenav .actions select {
   height: 36px !important;
   padding: 0 25px 0 10px !important;
-  border: 1px solid var(--zonify-border) !important;
+  border: 1px solid var(--terralize-border) !important;
   border-radius: 6px !important;
   background-color: white !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  color: var(--zonify-text) !important;
+  color: var(--terralize-text) !important;
   font-size: 0.9em !important;
   transition: all 0.2s ease !important;
 }
 
 .tablenav .actions select:focus {
-  border-color: var(--zonify-primary) !important;
+  border-color: var(--terralize-primary) !important;
   box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
   outline: none !important;
 }
@@ -840,23 +840,23 @@
   height: 36px !important;
   width: 250px !important;
   padding: 0 15px !important;
-  border: 1px solid var(--zonify-border) !important;
+  border: 1px solid var(--terralize-border) !important;
   border-radius: 6px !important;
   background-color: white !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  color: var(--zonify-text) !important;
+  color: var(--terralize-text) !important;
   font-size: 0.9em !important;
   transition: all 0.2s ease !important;
 }
 
 .search-box input[type="search"]:focus {
-  border-color: var(--zonify-primary) !important;
+  border-color: var(--terralize-primary) !important;
   box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
   outline: none !important;
 }
 
 .search-box input[type="submit"] {
-  background: var(--zonify-primary) !important;
+  background: var(--terralize-primary) !important;
   border: none !important;
   color: white !important;
   height: 36px !important;
@@ -866,14 +866,14 @@
   font-weight: 500 !important;
   cursor: pointer !important;
   text-shadow: none !important;
-  box-shadow: 0 1px 3px var(--zonify-shadow) !important;
+  box-shadow: 0 1px 3px var(--terralize-shadow) !important;
   transition: all 0.2s ease !important;
 }
 
 .search-box input[type="submit"]:hover {
-  background: var(--zonify-dark) !important;
+  background: var(--terralize-dark) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 3px 6px var(--zonify-shadow) !important;
+  box-shadow: 0 3px 6px var(--terralize-shadow) !important;
 }
 
 /* Statut des posts dans le tableau */
@@ -885,7 +885,7 @@
   border-radius: 10px !important;
   background-color: #f0f0f0 !important;
   margin-left: 5px !important;
-  color: var(--zonify-text) !important;
+  color: var(--terralize-text) !important;
   font-weight: bold !important;
 }
 
@@ -912,7 +912,7 @@
 /* Style spécifique pour les lignes du CPT POI (panneaux d'affichage) */
 .post-type-poi .widefat.wp-list-table tr .column-title strong a {
   font-weight: 600 !important;
-  color: var(--zonify-primary) !important;
+  color: var(--terralize-primary) !important;
 }
 
 .post-type-poi .widefat.wp-list-table td.column-panel_type,
@@ -990,26 +990,26 @@
 .page-title-action,
 .wp-core-ui .button-secondary {
   background: white !important;
-  border: 1px solid var(--zonify-border) !important;
-  color: var(--zonify-text) !important;
+  border: 1px solid var(--terralize-border) !important;
+  color: var(--terralize-text) !important;
   padding: 7px 15px !important;
   height: auto !important;
   border-radius: 6px !important;
   font-size: 0.9em !important;
   font-weight: 500 !important;
   cursor: pointer !important;
-  box-shadow: 0 1px 3px var(--zonify-shadow) !important;
+  box-shadow: 0 1px 3px var(--terralize-shadow) !important;
   transition: all 0.2s ease !important;
   text-shadow: none !important;
 }
 
 .page-title-action:hover,
 .wp-core-ui .button-secondary:hover {
-  background: var(--zonify-light) !important;
-  border-color: var(--zonify-primary) !important;
-  color: var(--zonify-primary) !important;
+  background: var(--terralize-light) !important;
+  border-color: var(--terralize-primary) !important;
+  color: var(--terralize-primary) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 3px 6px var(--zonify-shadow) !important;
+  box-shadow: 0 3px 6px var(--terralize-shadow) !important;
 }
 
 /* Entête de page des CPTs */
@@ -1018,9 +1018,9 @@
   padding: 20px !important;
   background: white !important;
   border-radius: 8px !important;
-  box-shadow: 0 2px 10px var(--zonify-shadow) !important;
-  border-left: 4px solid var(--zonify-primary) !important;
-  color: var(--zonify-dark) !important;
+  box-shadow: 0 2px 10px var(--terralize-shadow) !important;
+  border-left: 4px solid var(--terralize-primary) !important;
+  color: var(--terralize-dark) !important;
 }
 
 /* Messages de notification dans les tableaux */
@@ -1058,17 +1058,17 @@ div.error {
 /* Métaboxes dans les écrans d'édition */
 #poststuff .postbox {
   border: none !important;
-  box-shadow: 0 2px 8px var(--zonify-shadow) !important;
+  box-shadow: 0 2px 8px var(--terralize-shadow) !important;
   border-radius: 8px !important;
   margin-bottom: 20px !important;
 }
 
 #poststuff .postbox .hndle {
-  border-bottom: 2px solid var(--zonify-primary) !important;
+  border-bottom: 2px solid var(--terralize-primary) !important;
   padding: 12px 15px !important;
   font-size: 1.1em !important;
   font-weight: 600 !important;
-  color: var(--zonify-dark) !important;
+  color: var(--terralize-dark) !important;
 }
 
 #poststuff .postbox .inside {
@@ -1077,17 +1077,17 @@ div.error {
 
 /* Style pour les boîtes latérales */
 #side-sortables .postbox {
-  background-color: var(--zonify-light) !important;
+  background-color: var(--terralize-light) !important;
 }
 
 #side-sortables .postbox .hndle {
-  border-bottom: 2px solid var(--zonify-secondary) !important;
-  color: var(--zonify-dark) !important;
+  border-bottom: 2px solid var(--terralize-secondary) !important;
+  color: var(--terralize-dark) !important;
 }
 
 /* Formulaires des métaboxes */
 .form-table th {
-  color: var(--zonify-dark) !important;
+  color: var(--terralize-dark) !important;
   font-weight: 600 !important;
   padding: 15px 10px 15px 0 !important;
 }
@@ -1107,11 +1107,11 @@ div.error {
   width: 100% !important;
   max-width: 100% !important;
   padding: 8px 12px !important;
-  border: 1px solid var(--zonify-border) !important;
+  border: 1px solid var(--terralize-border) !important;
   border-radius: 6px !important;
   background-color: white !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07) !important;
-  color: var(--zonify-text) !important;
+  color: var(--terralize-text) !important;
   transition: all 0.2s ease !important;
 }
 
@@ -1122,7 +1122,7 @@ div.error {
 .form-table input[type="url"]:focus,
 .form-table textarea:focus,
 .form-table select:focus {
-  border-color: var(--zonify-primary) !important;
+  border-color: var(--terralize-primary) !important;
   box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2) !important;
   outline: none !important;
 }
@@ -1135,7 +1135,7 @@ div.error {
   border-radius: 8px !important;
   margin: 20px 0 !important;
   font-style: italic !important;
-  color: var(--zonify-text-light) !important;
+  color: var(--terralize-text-light) !important;
 }
 
 /* Ajustement pour les écrans mobiles */

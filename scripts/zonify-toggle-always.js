@@ -4,12 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (toggleBtn) {
         toggleBtn.addEventListener('click', function() {
             // On déclenche l’appel AJAX
-            fetch(zonifyMapVars.ajax_url, {
+            fetch(terralizeMapVars.ajax_url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: new URLSearchParams({
                     action: 'toggle_always_show',
-                    // si besoin : _ajax_nonce: zonifyMapVars.nonce
+                    // si besoin : _ajax_nonce: terralizeMapVars.nonce
                 })
             })
             .then(r => r.json())

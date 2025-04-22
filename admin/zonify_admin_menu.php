@@ -1,23 +1,23 @@
 <?php
 // Ajouter une page de gestion dans le menu d'administration
 
-function zonify_admin_menu()
+function terralize_admin_menu()
 {
-    $is_zap_enabled = class_exists('ZonifyAffichagePremier');
+    $is_terralize_ap_enabled = class_exists('TerralizeAffichagePremier');
 
-    if (!$is_zap_enabled) {
+    if (!$is_terralize_ap_enabled) {
         add_menu_page(
-            'Zonify',          // Titre de la page
-            'Zonify',          // Titre du menu
+            'Terralize',          // Titre de la page
+            'Terralize',          // Titre du menu
             'manage_options',  // Capacité requise
-            'zonify',          // Slug du menu
-            'zonify_main_page', // Fonction callback pour la page principale
+            'terralize',          // Slug du menu
+            'terralize_main_page', // Fonction callback pour la page principale
             'dashicons-location-alt' // Icône du menu (ou utilisez votre propre icône via URL)
         );
 
         // Ajout d'un lien vers la gestion des commerciaux (le CPT "commercial")
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Commerciaux',
             'Commerciaux',
             'manage_options',
@@ -26,16 +26,16 @@ function zonify_admin_menu()
 
 
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Tracer des zones',
             'Tracer des zones',
             'manage_options',
-            'zonify_map',
-            'zonify_map_pages'
+            'terralize_map',
+            'terralize_map_pages'
         );
 
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Liste des zones',
             'Liste des zones',
             'manage_options',
@@ -44,34 +44,34 @@ function zonify_admin_menu()
 
 
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Réglages',
             'Réglages',
             'manage_options',
-            'zonify_settings',
-            'zonify_settings_page'
+            'terralize_settings',
+            'terralize_settings_page'
         );
 
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Import / Export Zones',
             'Import / Export',
             'manage_options',
-            'zonify_import_export',
-            'zonify_import_export_page'
+            'terralize_import_export',
+            'terralize_import_export_page'
         );
 
         // Ajout du sous-menu pour la gestion des Contacts
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Contacts',
             'Contacts',
             'manage_options',
-            'edit.php?post_type=zonify_contact'
+            'edit.php?post_type=terralize_contact'
         );
         // Ajout du sous-menu pour la liste des Points d'Intérêt (POI)
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Liste des Points d’Intérêt',
             'Liste des Points d’Intérêt',
             'manage_options',
@@ -80,55 +80,55 @@ function zonify_admin_menu()
 
         // Ajout du sous-menu pour la gestion des Points d'Intérêt (POI)
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Points d\'Intérêt',
             'Points d\'Intérêt',
             'manage_options',
-            'zonify_poi',
-            'zonify_poi_pages'
+            'terralize_poi',
+            'terralize_poi_pages'
         );
 
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Icônes POI',
             'Icônes POI',
             'edit_posts',
-            'edit.php?post_type=zonify_icon'
+            'edit.php?post_type=terralize_icon'
         );
     }
 
-    if ($is_zap_enabled) {
+    if ($is_terralize_ap_enabled) {
         add_menu_page(
-            'Zonify',          // Titre de la page
-            'Zonify',          // Titre du menu
+            'Terralize',          // Titre de la page
+            'Terralize',          // Titre du menu
             'manage_options',  // Capacité requise
-            'zonify',          // Slug du menu
-            'zonify_main_page', // Fonction callback pour la page principale
+            'terralize',          // Slug du menu
+            'terralize_main_page', // Fonction callback pour la page principale
             'dashicons-location-alt' // Icône du menu (ou utilisez votre propre icône via URL)
         );
 
 
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Réglages',
             'Réglages',
             'manage_options',
-            'zonify_settings',
-            'zonify_settings_page'
+            'terralize_settings',
+            'terralize_settings_page'
         );
 
         // Ajout du sous-menu pour la gestion des Contacts
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Contacts',
             'Contacts',
             'manage_options',
-            'edit.php?post_type=zonify_contact'
+            'edit.php?post_type=terralize_contact'
         );
 
         // Ajout du sous-menu pour la liste des Points d'Intérêt (POI)
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Liste des Points d’Intérêt',
             'Liste des Points d’Intérêt',
             'manage_options',
@@ -137,19 +137,19 @@ function zonify_admin_menu()
 
         // Ajout du sous-menu pour la gestion des Points d'Intérêt (POI)
         add_submenu_page(
-            'zonify',
+            'terralize',
             'Points d\'Intérêt',
             'Points d\'Intérêt',
             'manage_options',
-            'zonify_poi',
-            'zonify_poi_pages'
+            'terralize_poi',
+            'terralize_poi_pages'
         );
     }
 }
-add_action('admin_menu', 'zonify_admin_menu');
+add_action('admin_menu', 'terralize_admin_menu');
 
 // Gérer les écrans de sous-menu
-function zonify_fix_submenu_highlight()
+function terralize_fix_submenu_highlight()
 {
     global $submenu_file, $plugin_page, $pagenow;
 
@@ -165,8 +165,8 @@ function zonify_fix_submenu_highlight()
         } else if ($post_type === 'poi') {
             $submenu_file = 'edit.php?post_type=poi';
             $plugin_page = null;
-        } else if ($post_type === 'zonify_icon') {
-            $submenu_file = 'edit.php?post_type=zonify_icon';
+        } else if ($post_type === 'terralize_icon') {
+            $submenu_file = 'edit.php?post_type=terralize_icon';
             $plugin_page = null;
         }
     }
@@ -174,10 +174,10 @@ function zonify_fix_submenu_highlight()
     // Ajouter des conditions similaires pour vos autres CPTs
     // si vous en avez d'autres à gérer
 }
-add_action('admin_head', 'zonify_fix_submenu_highlight');
+add_action('admin_head', 'terralize_fix_submenu_highlight');
 
 // Fonction de callback pour l'affichage du tableau de bord
-function zonify_dashboard_page()
+function terralize_dashboard_page()
 {
     // Vérifiez les permissions
     if (!current_user_can('manage_options')) {

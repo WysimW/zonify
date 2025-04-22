@@ -1,5 +1,5 @@
-/* Style simple pour le formulaire de contact Zonify */
-.zonify-contact-form {
+/* Style simple pour le formulaire de contact Terralize */
+.terralize-contact-form {
     max-width: 600px;
     margin: 20px auto;
     padding: 20px;
@@ -9,20 +9,20 @@
     font-family: Arial, sans-serif;
   }
   
-  .zonify-contact-form p {
+  .terralize-contact-form p {
     margin-bottom: 15px;
   }
   
-  .zonify-contact-form label {
+  .terralize-contact-form label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
     color: #333;
   }
   
-  .zonify-contact-form input[type="text"],
-  .zonify-contact-form input[type="email"],
-  .zonify-contact-form textarea {
+  .terralize-contact-form input[type="text"],
+  .terralize-contact-form input[type="email"],
+  .terralize-contact-form textarea {
     width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
@@ -30,12 +30,12 @@
     box-sizing: border-box;
   }
   
-  .zonify-contact-form textarea {
+  .terralize-contact-form textarea {
     resize: vertical;
     min-height: 100px;
   }
   
-  .zonify-contact-form input[type="submit"] {
+  .terralize-contact-form input[type="submit"] {
     background-color: #0073aa;
     color: #fff;
     border: none;
@@ -44,7 +44,7 @@
     cursor: pointer;
   }
   
-  .zonify-contact-form input[type="submit"]:hover {
+  .terralize-contact-form input[type="submit"]:hover {
     background-color: #005177;
   }
   

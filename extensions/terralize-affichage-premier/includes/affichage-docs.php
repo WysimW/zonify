@@ -1,6 +1,6 @@
 <?php
 /**
- * Page de documentation pour l'extension Zonify Affichage Premier
+ * Page de documentation pour l'extension Terralize Affichage Premier
  * 
  * Fournit une documentation détaillée sur l'utilisation de l'extension
  * pour la gestion des panneaux d'affichage urbain.
@@ -14,39 +14,39 @@ if (!defined('ABSPATH')) {
 /**
  * Ajouter la page de documentation à l'administration
  */
-function zap_add_docs_page() {
+function terralize_ap_add_docs_page() {
     add_submenu_page(
-        'zonify',
+        'terralize',
         'Documentation Affichage Premier',
         'Documentation',
         'manage_options',
-        'zonify_affichage_docs',
-        'zap_docs_page_content'
+        'terralize_affichage_docs',
+        'terralize_ap_docs_page_content'
     );
 }
-add_action('admin_menu', 'zap_add_docs_page');
+add_action('admin_menu', 'terralize_ap_add_docs_page');
 
 /**
  * Contenu de la page de documentation
  */
-function zap_docs_page_content() {
+function terralize_ap_docs_page_content() {
     $icon_url = plugin_dir_url(dirname(__FILE__)) . 'assets/icons/icon.png';
-    $plugin_version = ZAP_VERSION;
+    $plugin_version = TERRALIZE_AP_VERSION;
     ?>
-    <div class="wrap zonify-docs">
+    <div class="wrap terralize-docs">
         <!-- En-tête -->
-        <div class="zonify-header">
-            <div class="zonify-header-left">
-                <img src="<?php echo esc_url($icon_url); ?>" alt="Zonify Icon" class="zonify-icon" />
-                <h1 class="zonify-title">Documentation Zonify Affichage Premier</h1>
+        <div class="terralize-header">
+            <div class="terralize-header-left">
+                <img src="<?php echo esc_url($icon_url); ?>" alt="Terralize Icon" class="terralize-icon" />
+                <h1 class="terralize-title">Documentation Terralize Affichage Premier</h1>
             </div>
-            <div class="zonify-header-right">
-                <span class="zonify-version">Version <?php echo esc_html($plugin_version); ?></span>
+            <div class="terralize-header-right">
+                <span class="terralize-version">Version <?php echo esc_html($plugin_version); ?></span>
             </div>
         </div>
         
         <!-- Navigation de la documentation -->
-        <div class="zonify-docs-nav">
+        <div class="terralize-docs-nav">
             <nav class="nav-tabs">
                 <a href="#introduction" class="active">Introduction</a>
                 <a href="#panneau-affichage">Gestion des panneaux</a>
@@ -60,12 +60,12 @@ function zap_docs_page_content() {
         </div>
         
         <!-- Contenu principal de la documentation -->
-        <div class="zonify-docs-content">
+        <div class="terralize-docs-content">
             <!-- Introduction -->
             <section id="introduction" class="doc-section active">
-                <h2>Introduction à Zonify Affichage Premier</h2>
+                <h2>Introduction à Terralize Affichage Premier</h2>
                 <p>
-                    L'extension Zonify Affichage Premier est spécialement conçue pour les entreprises d'affichage urbain. 
+                    L'extension Terralize Affichage Premier est spécialement conçue pour les entreprises d'affichage urbain. 
                     Elle permet de gérer votre parc de panneaux d'affichage et de les présenter sur une carte interactive.
                 </p>
                 
@@ -217,7 +217,7 @@ function zap_docs_page_content() {
                             <li><code>categories</code> : Liste de catégories séparées par des virgules</li>
                         </ul>
                     </li>
-                    <li>Accédez à <strong>Zonify → Import/Export</strong> puis sélectionnez l'onglet <strong>Import Panneaux</strong></li>
+                    <li>Accédez à <strong>Terralize → Import/Export</strong> puis sélectionnez l'onglet <strong>Import Panneaux</strong></li>
                     <li>Téléversez votre fichier CSV et configurez les options de correspondance des colonnes</li>
                     <li>Lancez l'import et vérifiez le rapport de résultats</li>
                 </ol>
@@ -233,8 +233,8 @@ function zap_docs_page_content() {
                 
                 <h4>Accès à l'export :</h4>
                 <p>
-                    Les fonctions d'export sont disponibles dans <strong>Zonify → Import/Export</strong> ou directement 
-                    depuis la page d'accueil de Zonify.
+                    Les fonctions d'export sont disponibles dans <strong>Terralize → Import/Export</strong> ou directement 
+                    depuis la page d'accueil de Terralize.
                 </p>
             </section>
             
@@ -257,7 +257,7 @@ function zap_docs_page_content() {
                     Pour gérer les catégories de panneaux :
                 </p>
                 <ol>
-                    <li>Accédez à <strong>Zonify → Catégories de panneaux</strong></li>
+                    <li>Accédez à <strong>Terralize → Catégories de panneaux</strong></li>
                     <li>Ajoutez de nouvelles catégories en précisant :
                         <ul>
                             <li>Nom et slug</li>
@@ -288,7 +288,7 @@ function zap_docs_page_content() {
                 <p>
                     Pour intégrer le formulaire de réservation de panneaux sur une page, utilisez le shortcode suivant :
                 </p>
-                <pre>[zonify_panel_contact_form]</pre>
+                <pre>[terralize_panel_contact_form]</pre>
                 
                 <p>
                     Ce shortcode crée un formulaire qui récupère automatiquement les informations du panneau 
@@ -302,7 +302,7 @@ function zap_docs_page_content() {
                         <ul>
                             <li>Créez une nouvelle page dans WordPress</li>
                             <li>Utilisez le modèle "Contact - Réservation de panneaux" dans le thème Affichage Premier</li>
-                            <li>Ou utilisez n'importe quel modèle et ajoutez le shortcode <code>[zonify_panel_contact_form]</code></li>
+                            <li>Ou utilisez n'importe quel modèle et ajoutez le shortcode <code>[terralize_panel_contact_form]</code></li>
                         </ul>
                     </li>
                     <li>
@@ -367,7 +367,7 @@ function zap_docs_page_content() {
                 
                 <h3>Paramètres généraux</h3>
                 <p>
-                    Les paramètres de l'extension sont accessibles via <strong>Zonify → Paramètres</strong> dans l'onglet 
+                    Les paramètres de l'extension sont accessibles via <strong>Terralize → Paramètres</strong> dans l'onglet 
                     <strong>Affichage Premier</strong>.
                 </p>
                 
@@ -384,7 +384,7 @@ function zap_docs_page_content() {
                     Vous pouvez personnaliser les icônes des marqueurs pour chaque type de panneau :
                 </p>
                 <ol>
-                    <li>Accédez à <strong>Zonify → Paramètres → Affichage Premier → Types de panneaux</strong></li>
+                    <li>Accédez à <strong>Terralize → Paramètres → Affichage Premier → Types de panneaux</strong></li>
                     <li>Pour chaque type de panneau, sélectionnez une icône prédéfinie ou téléversez votre propre image</li>
                     <li>Ajustez les couleurs et la taille des marqueurs</li>
                 </ol>
@@ -431,10 +431,10 @@ function zap_docs_page_content() {
                     <h4>Comment intégrer la carte des panneaux sur une autre page ?</h4>
                     <div class="faq-answer">
                         <p>
-                            Vous pouvez utiliser le shortcode <code>[zonify_map_panneaux]</code> pour intégrer la carte 
+                            Vous pouvez utiliser le shortcode <code>[terralize_map_panneaux]</code> pour intégrer la carte 
                             sur n'importe quelle page ou article. Personnalisez l'affichage avec des attributs :
                         </p>
-                        <pre>[zonify_map_panneaux height="500px" zoom="12" type="4x3" ville="Paris"]</pre>
+                        <pre>[terralize_map_panneaux height="500px" zoom="12" type="4x3" ville="Paris"]</pre>
                     </div>
                 </div>
                 
@@ -447,7 +447,7 @@ function zap_docs_page_content() {
                         <ol>
                             <li>Créez une page WordPress avec le slug <code>contact</code> (recommandé)</li>
                             <li>Utilisez le modèle "Contact - Réservation de panneaux" si vous utilisez le thème Affichage Premier</li>
-                            <li>Ou insérez le shortcode <code>[zonify_panel_contact_form]</code> dans la page</li>
+                            <li>Ou insérez le shortcode <code>[terralize_panel_contact_form]</code> dans la page</li>
                             <li>Personnalisez le formulaire via CSS ou en modifiant le fichier <code>panel-contact-shortcode.php</code></li>
                         </ol>
                         <p>
@@ -488,12 +488,12 @@ function zap_docs_page_content() {
     
     <style>
     /* Styles pour la page de documentation */
-    .zonify-docs {
+    .terralize-docs {
         max-width: 1200px;
         margin: 0 auto;
     }
     
-    .zonify-docs-nav {
+    .terralize-docs-nav {
         background: #fff;
         padding: 15px;
         border-radius: 5px;
@@ -521,11 +521,11 @@ function zap_docs_page_content() {
     
     .nav-tabs a.active,
     .nav-tabs a:hover {
-        background: var(--zap-primary, #70c141);
+        background: var(--terralize_ap-primary, #70c141);
         color: white;
     }
     
-    .zonify-docs-content {
+    .terralize-docs-content {
         background: #fff;
         padding: 30px;
         border-radius: 5px;
@@ -542,14 +542,14 @@ function zap_docs_page_content() {
     }
     
     .doc-section h2 {
-        color: var(--zap-primary, #70c141);
-        border-bottom: 2px solid var(--zap-primary, #70c141);
+        color: var(--terralize_ap-primary, #70c141);
+        border-bottom: 2px solid var(--terralize_ap-primary, #70c141);
         padding-bottom: 10px;
         margin-bottom: 20px;
     }
     
     .doc-section h3 {
-        color: var(--zap-secondary, #E04D00);
+        color: var(--terralize_ap-secondary, #E04D00);
         margin-top: 30px;
         margin-bottom: 15px;
     }
@@ -565,11 +565,11 @@ function zap_docs_page_content() {
         background: #f9f9f9;
         padding: 20px;
         border-radius: 8px;
-        border-left: 3px solid var(--zap-primary, #70c141);
+        border-left: 3px solid var(--terralize_ap-primary, #70c141);
     }
     
     .feature-item h4 {
-        color: var(--zap-primary, #70c141);
+        color: var(--terralize_ap-primary, #70c141);
         margin-top: 0;
     }
     

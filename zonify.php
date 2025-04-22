@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: MBS Zonify
+Plugin Name: MBS Terralize
 Description: Plugin pour gérer les zones des commerciaux via une carte interactive.
 Version: 1.0
 Author: THomas Dupez, Agence MBS
@@ -57,8 +57,8 @@ require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
 
 // Charger les extensions
 
-    if (file_exists(plugin_dir_path(__FILE__) . 'extensions/zonify-affichage-premier/zonify-affichage-premier.php')) {
-        require_once plugin_dir_path(__FILE__) . 'extensions/zonify-affichage-premier/zonify-affichage-premier.php';
+    if (file_exists(plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php')) {
+        require_once plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php';
     }
         
 

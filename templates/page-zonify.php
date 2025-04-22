@@ -45,7 +45,7 @@ if ($zones_query->have_posts()) {
 
             // Récupérer les catégories de cette zone
             $zone_categories = array();
-            $terms = get_the_terms(get_the_ID(), 'zonify_category');
+            $terms = get_the_terms(get_the_ID(), 'terralize_category');
             if ($terms && !is_wp_error($terms)) {
                 foreach ($terms as $term) {
                     $zone_categories[] = array(
@@ -109,7 +109,7 @@ if ($poi_query->have_posts()) {
         if ($poi_geojson) {
             // Récupérer les catégories de ce POI
             $poi_categories = array();
-            $terms = get_the_terms(get_the_ID(), 'zonify_category');
+            $terms = get_the_terms(get_the_ID(), 'terralize_category');
             if ($terms && !is_wp_error($terms)) {
                 foreach ($terms as $term) {
                     $poi_categories[] = array(
@@ -173,7 +173,7 @@ if ($poi_query->have_posts()) {
 
 // Récupérer toutes les catégories pour les filtres
 $categories = get_terms(array(
-    'taxonomy' => 'zonify_category',
+    'taxonomy' => 'terralize_category',
     'hide_empty' => true,
 ));
 
@@ -191,32 +191,32 @@ if (!empty($region_terms) && !is_wp_error($region_terms)) {
     }
 }
 
-// Récupérer les options front-end de Zonify
+// Récupérer les options front-end de Terralize
 $front_options = array(
-    'tile_provider'    => get_option('zonify_tile_provider_front', 'cartodb_light'),
-    'tile_custom_url'  => get_option('zonify_tile_custom_url_front', ''),
-    'zone_fill_color'  => get_option('zonify_zone_fill_color_front', '#3388ff'),
-    'zone_border_color' => get_option('zonify_zone_border_color_front', '#3388ff'),
-    'zone_opacity'     => floatval(get_option('zonify_zone_opacity_front', 0.5)),
-    'map_zoom'         => intval(get_option('zonify_map_zoom_front', 9)),
-    'map_center_lat'   => get_option('zonify_map_center_lat_front', '50.5'),
-    'map_center_lng'   => get_option('zonify_map_center_lng_front', '2.5'),
+    'tile_provider'    => get_option('terralize_tile_provider_front', 'cartodb_light'),
+    'tile_custom_url'  => get_option('terralize_tile_custom_url_front', ''),
+    'zone_fill_color'  => get_option('terralize_zone_fill_color_front', '#3388ff'),
+    'zone_border_color' => get_option('terralize_zone_border_color_front', '#3388ff'),
+    'zone_opacity'     => floatval(get_option('terralize_zone_opacity_front', 0.5)),
+    'map_zoom'         => intval(get_option('terralize_map_zoom_front', 9)),
+    'map_center_lat'   => get_option('terralize_map_center_lat_front', '50.5'),
+    'map_center_lng'   => get_option('terralize_map_center_lng_front', '2.5'),
     'show_category_filter' => true,
 );
 
 $popup_options = array(
-    'popup_show_address'       => get_option('zonify_popup_show_address', 0),
-    'popup_show_hours'         => get_option('zonify_popup_show_hours', 0),
-    'popup_show_social'        => get_option('zonify_popup_show_social', 0),
-    'popup_font_family'        => get_option('zonify_popup_font_family', 'Arial, sans-serif'),
-    'popup_font_size'          => get_option('zonify_popup_font_size', '14px'),
-    'popup_font_color'         => get_option('zonify_popup_font_color', '#333333'),
-    'popup_enable_email_btn'   => get_option('zonify_popup_enable_email_btn', 1),
-    'popup_enable_phone_btn'   => get_option('zonify_popup_enable_phone_btn', 1),
-    'popup_enable_contact_btn' => get_option('zonify_popup_enable_contact_btn', 0)
+    'popup_show_address'       => get_option('terralize_popup_show_address', 0),
+    'popup_show_hours'         => get_option('terralize_popup_show_hours', 0),
+    'popup_show_social'        => get_option('terralize_popup_show_social', 0),
+    'popup_font_family'        => get_option('terralize_popup_font_family', 'Arial, sans-serif'),
+    'popup_font_size'          => get_option('terralize_popup_font_size', '14px'),
+    'popup_font_color'         => get_option('terralize_popup_font_color', '#333333'),
+    'popup_enable_email_btn'   => get_option('terralize_popup_enable_email_btn', 1),
+    'popup_enable_phone_btn'   => get_option('terralize_popup_enable_phone_btn', 1),
+    'popup_enable_contact_btn' => get_option('terralize_popup_enable_contact_btn', 0)
 );
 
-$contact_page_url = get_option('zonify_contact_page_url', '/contact');
+$contact_page_url = get_option('terralize_contact_page_url', '/contact');
 $combined_options = array_merge($front_options, $popup_options, array(
     'contact_page_url' => $contact_page_url
 ));
@@ -363,7 +363,7 @@ wp_enqueue_script('select2-js', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0
                             </div>
                             <div class="accordion-content">
                                 <div class="filter-options categories-filter">
-                                    <select id="categoryFilter" class="zonify-category-filter" multiple="multiple" data-placeholder="Sélectionner des catégories">
+                                    <select id="categoryFilter" class="terralize-category-filter" multiple="multiple" data-placeholder="Sélectionner des catégories">
                                         <?php foreach ($categories as $category) : ?>
                                             <option value="<?php echo esc_attr($category->slug); ?>"><?php echo esc_html($category->name); ?></option>
                                         <?php endforeach; ?>
@@ -440,8 +440,8 @@ wp_enqueue_script('select2-js', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0
 <script>
     // Passage des données PHP au JavaScript
     var zonesData = <?php echo json_encode($zones_data); ?>;
-    var zonifyFrontendOptions = <?php echo json_encode($combined_options); ?>;
-    var zonifyCategories = <?php echo json_encode(array_map(function ($term) {
+    var terralizeFrontendOptions = <?php echo json_encode($combined_options); ?>;
+    var terralizeCategories = <?php echo json_encode(array_map(function ($term) {
                                 return array(
                                     'id' => $term->term_id,
                                     'slug' => $term->slug,
@@ -451,7 +451,7 @@ wp_enqueue_script('select2-js', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0
 
     // Initialisation de la carte quand le DOM est chargé
     document.addEventListener('DOMContentLoaded', function() {
-        var options = zonifyFrontendOptions || {};
+        var options = terralizeFrontendOptions || {};
 
         // 1) Choix du provider de tuiles
         var provider = options.tile_provider || 'cartodb_light';
@@ -489,7 +489,7 @@ wp_enqueue_script('select2-js', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0
         }).addTo(map);
 
         // Exposer la carte globalement pour les interactions
-        window.zonifyMap = map;
+        window.terralizeMap = map;
 
         // Ajouter le geocoder sur la carte
         var geocoder = L.Control.geocoder({

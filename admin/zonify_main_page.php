@@ -5,26 +5,26 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Affiche la page principale du plugin Zonify
+ * Affiche la page principale du plugin Terralize
  */
-function zonify_main_page() {
+function terralize_main_page() {
     // Informations sur le plugin
     $plugin_version = '1.0';
     $plugin_dir = plugin_dir_url(dirname(__FILE__));
     $icon_url = $plugin_dir . 'assets/icons/icon.png';
     
-    // Vérifier si l'extension Zonify Affichage Premier est activée
-    $affichage_premier_active = class_exists('ZonifyAffichagePremier') || function_exists('zonify_affichage_premier_init');
+    // Vérifier si l'extension Terralize Affichage Premier est activée
+    $affichage_premier_active = class_exists('TerralizeAffichagePremier') || function_exists('terralize_affichage_premier_init');
     ?>
-    <div class="wrap zonify-home">
+    <div class="wrap terralize-home">
         <!-- En-tête -->
-        <div class="zonify-header">
-            <div class="zonify-header-left">
-                <img src="<?php echo esc_url($icon_url); ?>" alt="Zonify Icon" class="zonify-icon" />
-                <h1 class="zonify-title">Zonify by MBS</h1>
+        <div class="terralize-header">
+            <div class="terralize-header-left">
+                <img src="<?php echo esc_url($icon_url); ?>" alt="Terralize Icon" class="terralize-icon" />
+                <h1 class="terralize-title">Terralize by MBS</h1>
             </div>
-            <div class="zonify-header-right">
-                <span class="zonify-version">Version <?php echo esc_html($plugin_version); ?></span>
+            <div class="terralize-header-right">
+                <span class="terralize-version">Version <?php echo esc_html($plugin_version); ?></span>
                 <?php if ($affichage_premier_active): ?>
                 <span class="extension-badge" style="background-color: #70c141; color: white; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-size: 12px;">Extension Affichage Premier activée</span>
                 <?php endif; ?>
@@ -32,12 +32,12 @@ function zonify_main_page() {
         </div>
         
         <!-- Contenu principal -->
-        <div class="zonify-content">
+        <div class="terralize-content">
             <!-- Message de bienvenue -->
-            <section class="zonify-section">
-                <h2>Bienvenue sur Zonify</h2>
+            <section class="terralize-section">
+                <h2>Bienvenue sur Terralize</h2>
                 <p>
-                    Zonify est un plugin puissant conçu pour faciliter la gestion de vos zones commerciales.
+                    Terralize est un plugin puissant conçu pour faciliter la gestion de vos zones commerciales.
                     <?php if ($affichage_premier_active): ?>
                     Avec l'extension Affichage Premier, vous pouvez également gérer et présenter vos panneaux d'affichage urbain sur une carte interactive.
                     <?php else: ?>
@@ -47,11 +47,11 @@ function zonify_main_page() {
             </section>
             
             <!-- Tutoriel d'utilisation -->
-            <section class="zonify-section">
+            <section class="terralize-section">
                 <h3>Tutoriel d'utilisation</h3>
                 
                 <?php if ($affichage_premier_active): ?>
-                <div class="zonify-tabs">
+                <div class="terralize-tabs">
                     <div class="tab-buttons">
                         <button class="tab-btn active" data-target="zones">Gestion des zones</button>
                         <button class="tab-btn" data-target="panneaux">Gestion des panneaux d'affichage</button>
@@ -65,7 +65,7 @@ function zonify_main_page() {
                                     Pour cela, rendez-vous dans la section <a href="<?php echo esc_url(admin_url('edit.php?post_type=commercial')); ?>">Gérer les Commerciaux</a>.
                                 </li>
                                 <li>
-                                    <strong>Tracer une zone :</strong> Accédez à la section <a href="<?php echo esc_url(admin_url('admin.php?page=zonify_map')); ?>">Tracer des zones</a>.
+                                    <strong>Tracer une zone :</strong> Accédez à la section <a href="<?php echo esc_url(admin_url('admin.php?page=terralize_map')); ?>">Tracer des zones</a>.
                                     <br />
                                     <em>Étapes :</em>
                                     <ul>
@@ -123,7 +123,7 @@ function zonify_main_page() {
                         Pour cela, rendez-vous dans la section <a href="<?php echo esc_url(admin_url('edit.php?post_type=commercial')); ?>">Gérer les Commerciaux</a>.
                     </li>
                     <li>
-                        <strong>Tracer une zone :</strong> Accédez à la section <a href="<?php echo esc_url(admin_url('admin.php?page=zonify_map')); ?>">Tracer des zones</a>.
+                        <strong>Tracer une zone :</strong> Accédez à la section <a href="<?php echo esc_url(admin_url('admin.php?page=terralize_map')); ?>">Tracer des zones</a>.
                         <br />
                         <em>Étapes :</em>
                         <ul>
@@ -145,48 +145,48 @@ function zonify_main_page() {
             </section>
             
             <!-- Premiers pas -->
-            <section class="zonify-section">
+            <section class="terralize-section">
                 <h3>Liens pratiques</h3>
                 <p>
                     Pour démarrer, nous vous recommandons de consulter les sections ci-dessous :
                 </p>
-                <ul class="zonify-links">
+                <ul class="terralize-links">
                     <?php if ($affichage_premier_active): ?>
                     <li><a href="<?php echo esc_url(admin_url('edit.php?post_type=commercial')); ?>">Gérer les Commerciaux</a></li>
-                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=zonify_map')); ?>">Visualiser la Carte des Zones</a></li>
-                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=zonify_list')); ?>">Gérer la Liste des Zones</a></li>
+                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=terralize_map')); ?>">Visualiser la Carte des Zones</a></li>
+                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=terralize_list')); ?>">Gérer la Liste des Zones</a></li>
                     <li><a href="<?php echo esc_url(admin_url('edit.php?post_type=affichage_panneau')); ?>">Gérer les Panneaux d'Affichage</a></li>
                     <li><a href="<?php echo esc_url(admin_url('edit-tags.php?taxonomy=panneau_category&post_type=affichage_panneau')); ?>">Gérer les Catégories de Panneaux</a></li>
                     <li><a href="<?php echo esc_url(home_url('/carte-des-panneaux/')); ?>">Voir la Carte des Panneaux (frontend)</a></li>
-                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=zonify_affichage_docs')); ?>">Documentation de l'Extension</a></li>
-                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=zonify_affichage_settings')); ?>">Paramètres de la Carte des Panneaux</a></li>
+                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=terralize_affichage_docs')); ?>">Documentation de l'Extension</a></li>
+                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=terralize_affichage_settings')); ?>">Paramètres de la Carte des Panneaux</a></li>
                     <?php else: ?>
                     <li><a href="<?php echo esc_url(admin_url('edit.php?post_type=commercial')); ?>">Gérer les Commerciaux</a></li>
-                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=zonify_map')); ?>">Visualiser la Carte des Zones</a></li>
-                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=zonify_list')); ?>">Gérer la Liste des Zones</a></li>
+                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=terralize_map')); ?>">Visualiser la Carte des Zones</a></li>
+                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=terralize_list')); ?>">Gérer la Liste des Zones</a></li>
                     <?php endif; ?>
                 </ul>
             </section>
             
             <!-- Ressources et support -->
-            <section class="zonify-section">
+            <section class="terralize-section">
                 <h3>Ressources &amp; Support</h3>
                 <p>
-                    Pour en savoir plus sur Zonify, consultez la documentation ou contactez notre support technique.
+                    Pour en savoir plus sur Terralize, consultez la documentation ou contactez notre support technique.
                 </p>
-                <ul class="zonify-links">
+                <ul class="terralize-links">
                     <li><a href="https://votresite.com/support" target="_blank">Support Technique</a></li>
                     <?php if ($affichage_premier_active): ?>
                     <li><a href="https://votresite.com/documentation-affichage-premier" target="_blank">Documentation de l'extension Affichage Premier</a></li>
-                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=zonify_affichage_docs')); ?>">Aide Rapide</a></li>
+                    <li><a href="<?php echo esc_url(admin_url('admin.php?page=terralize_affichage_docs')); ?>">Aide Rapide</a></li>
                     <?php endif; ?>
                 </ul>
                 
                 <div class="export-buttons" style="margin-top: 20px;">
-                    <?php echo '<a href="' . esc_url(admin_url('admin-post.php?action=zonify_export_geojson')) . '" class="button button-primary">Exporter toutes les zones (GeoJSON)</a>'; ?>
+                    <?php echo '<a href="' . esc_url(admin_url('admin-post.php?action=terralize_export_geojson')) . '" class="button button-primary">Exporter toutes les zones (GeoJSON)</a>'; ?>
                     
                     <?php if ($affichage_premier_active): ?>
-                    <?php echo '<a href="' . esc_url(admin_url('admin-post.php?action=zonify_export_panneaux_geojson')) . '" class="button button-primary" style="margin-left: 10px;">Exporter tous les panneaux (GeoJSON)</a>'; ?>
+                    <?php echo '<a href="' . esc_url(admin_url('admin-post.php?action=terralize_export_panneaux_geojson')) . '" class="button button-primary" style="margin-left: 10px;">Exporter tous les panneaux (GeoJSON)</a>'; ?>
                     <?php endif; ?>
                 </div>
             </section>
@@ -219,7 +219,7 @@ function zonify_main_page() {
     });
     </script>
     <style>
-    .zonify-tabs {
+    .terralize-tabs {
         margin-top: 20px;
     }
     

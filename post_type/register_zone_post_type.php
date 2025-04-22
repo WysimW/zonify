@@ -19,7 +19,7 @@ function register_zone_post_type() {
         'labels'             => $labels,
         'public'             => false,               // vous pouvez mettre true si vous voulez rendre le CPT accessible publiquement
         'show_ui'            => true,                // afficher dans l’admin
-        'show_in_menu'       => false,               // on masque le menu par défaut, pour l'intégrer plus tard dans votre menu Zonify
+        'show_in_menu'       => false,               // on masque le menu par défaut, pour l'intégrer plus tard dans votre menu Terralize
         'capability_type'    => 'post',
         'hierarchical'       => false,
         'supports'           => array('title', 'revisions'), 
@@ -107,19 +107,19 @@ function zone_save_geojson($post_id) {
 }
 add_action('save_post_zone', 'zone_save_geojson');
 
-function zonify_zone_row_actions($actions, $post) {
+function terralize_zone_row_actions($actions, $post) {
     if ($post->post_type === 'zone') {
-        $export_url = admin_url('admin-post.php?action=zonify_export_geojson_single&zone_id=' . $post->ID);
+        $export_url = admin_url('admin-post.php?action=terralize_export_geojson_single&zone_id=' . $post->ID);
         $actions['export_single'] = '<a href="' . esc_url($export_url) . '">Exporter (GeoJSON)</a>';
-        $export_url = admin_url('admin-post.php?action=zonify_export_csv_single&zone_id=' . $post->ID);
+        $export_url = admin_url('admin-post.php?action=terralize_export_csv_single&zone_id=' . $post->ID);
         $actions['export_single_csv'] = '<a href="' . esc_url($export_url) . '">Exporter CSV</a>';
     }
     return $actions;
 }
-add_filter('post_row_actions', 'zonify_zone_row_actions', 10, 2);
+add_filter('post_row_actions', 'terralize_zone_row_actions', 10, 2);
 
 function zone_export_meta_box_callback($post) {
-    $export_url = admin_url('admin-post.php?action=zonify_export_geojson_single&zone_id=' . $post->ID);
+    $export_url = admin_url('admin-post.php?action=terralize_export_geojson_single&zone_id=' . $post->ID);
     echo '<a href="'.esc_url($export_url).'" class="button button-primary">Exporter cette zone</a>';
 }
 

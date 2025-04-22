@@ -1,6 +1,6 @@
 <?php
-add_action('wp_ajax_get_zone', 'zonify_get_zone');
-function zonify_get_zone() {
+add_action('wp_ajax_get_zone', 'terralize_get_zone');
+function terralize_get_zone() {
     // Récupérer la valeur envoyée (ex: "0" ou "12,34,56")
     $commercial_input = isset($_POST['commercial_id']) ? sanitize_text_field($_POST['commercial_id']) : '';
     $region_input = isset($_POST['region_id']) ? sanitize_text_field($_POST['region_id']) : '';
