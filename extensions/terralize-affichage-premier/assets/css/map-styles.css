@@ -566,6 +566,10 @@
     border-left: 4px solid #17a2b8;
 }
 
+#locate-me-btn i {
+    margin-right: 5px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .map-sidebar {

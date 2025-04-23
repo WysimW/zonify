@@ -2,6 +2,8 @@
  * Script JavaScript pour la carte des panneaux d'affichage - Extension Terralize Affichage Premier
  */
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initialisation de la carte v1');
+
     var options = mapOptions || {};
     
     // Initialisation des variables globales
@@ -104,6 +106,10 @@ document.addEventListener('DOMContentLoaded', function() {
         var maxHeight = filters.maxHeight || 0;
         var radiusKm = filters.radiusKm ? parseFloat(filters.radiusKm) : 0;
         var centerCity = filters.centerCity || null;
+        
+        // Nouveaux filtres pour la géolocalisation
+        var userLocation = filters.userLocation || null;
+        var userLocationRadiusKm = filters.userLocationRadiusKm ? parseFloat(filters.userLocationRadiusKm) : 0;
 
         console.log("Filtres appliqués:", filters);
 
@@ -166,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let matchesFormat = true;
             let matchesDimensions = true;
             let matchesRadius = true;
+            let matchesUserLocationRadius = true;
             
             // Fonction pour normaliser le texte (minuscules, sans accents)
             function normalizeText(text) {
@@ -336,10 +343,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            // Filtre par rayon kilométrique autour de la position utilisateur
+            if (userLocationRadiusKm > 0 && userLocation && userLocation.latitude && userLocation.longitude && 
+                feature.geometry && feature.geometry.coordinates) {
+                
+                // Coordonnées de l'utilisateur
+                const userLat = parseFloat(userLocation.latitude);
+                const userLng = parseFloat(userLocation.longitude);
+                
+                // Coordonnées du panneau
+                const panelLat = feature.geometry.coordinates[1];
+                const panelLng = feature.geometry.coordinates[0];
+                
+                // Calculer la distance
+                const distance = calculateDistance(userLat, userLng, panelLat, panelLng);
+                
+                // Log pour débogage
+                if (feature.properties.id && feature.properties.title) {
+                    console.log("Panneau: " + feature.properties.title + 
+                                ", Distance: " + distance.toFixed(2) + " km, " +
+                                "Rayon max: " + userLocationRadiusKm + " km, " +
+                                "Inclus: " + (distance <= userLocationRadiusKm));
+                }
+                
+                // Vérifier si le panneau est dans le rayon spécifié
+                if (distance > userLocationRadiusKm) {
+                    matchesUserLocationRadius = false;
+                }
+            }
+            
             // Un panneau doit correspondre à tous les filtres pour être affiché
             const matches = matchesSearch && matchesCategories && matchesCities && 
                         matchesDepartment && matchesRegion && matchesType && 
-                        matchesSupport && matchesStatus && matchesFormat && matchesDimensions && matchesRadius;
+                        matchesSupport && matchesStatus && matchesFormat && matchesDimensions && matchesRadius && matchesUserLocationRadius;
                         
             // Si le panneau correspond aux filtres, l'ajouter aux résultats à afficher
             if (matches) {
@@ -906,6 +942,22 @@ document.addEventListener('DOMContentLoaded', function() {
             placeholder: "Sélectionner un rayon",
             allowClear: true
         });
+        
+        // Initialiser Select2 pour tous les autres sélecteurs avec la classe select2-filter
+        jQuery('.select2-filter').not('#category-filter, #city-filter, #department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter, #radius-filter, #center-city-filter, #radius-km-filter').select2({
+            width: '100%',
+            placeholder: function() {
+                return jQuery(this).attr('data-placeholder') || '';
+            },
+            allowClear: true
+        });
+        
+        // Initialiser Select2 pour le rayon de géolocalisation
+        jQuery('#geo-radius-filter').select2({
+            width: '100%',
+            minimumResultsForSearch: Infinity, // Désactiver la recherche pour ce sélecteur
+            dropdownCssClass: 'geo-radius-dropdown'
+        });
     }
 
     // 14) Gestionnaires d'événements pour les filtres
@@ -1007,6 +1059,37 @@ document.addEventListener('DOMContentLoaded', function() {
             var radiusKmFilter = document.getElementById('radius-km-filter');
             if (radiusKmFilter) radiusKmFilter.value = '';
             
+            // Réinitialiser les contrôles de géolocalisation
+            var geoRadiusContainer = document.getElementById('geo-radius-container');
+            if (geoRadiusContainer) geoRadiusContainer.style.display = 'none';
+            
+            var locateMeBtn = document.getElementById('locate-me-btn');
+            if (locateMeBtn) {
+                locateMeBtn.innerHTML = '<i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> Me localiser';
+                locateMeBtn.style.backgroundColor = '#70c141';
+                locateMeBtn.disabled = false;
+            }
+            
+            var geoStatus = document.getElementById('geo-status');
+            if (geoStatus) {
+                geoStatus.textContent = '';
+            }
+            
+            // Supprimer le cercle et le marqueur de géolocalisation
+            if (radiusCircle) {
+                map.removeLayer(radiusCircle);
+                radiusCircle = null;
+            }
+            
+            if (window.userMarker) {
+                map.removeLayer(window.userMarker);
+                window.userMarker = null;
+            }
+            
+            // Supprimer la notification du filtre géographique
+            var geoFilterInfo = document.getElementById('geo-filter-info');
+            if (geoFilterInfo) geoFilterInfo.remove();
+            
             if (typeof jQuery !== 'undefined') {
                 if (jQuery('#category-filter').length) jQuery('#category-filter').val(null).trigger('change');
                 if (jQuery('#city-filter').length) jQuery('#city-filter').val(null).trigger('change');
@@ -1019,6 +1102,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (jQuery('#radius-filter').length) jQuery('#radius-filter').val(null).trigger('change');
                 if (jQuery('#center-city-filter').length) jQuery('#center-city-filter').val(null).trigger('change');
                 if (jQuery('#radius-km-filter').length) jQuery('#radius-km-filter').val(null).trigger('change');
+                if (jQuery('#geo-radius-filter').length) jQuery('#geo-radius-filter').val('5').trigger('change');
             } else {
                 var cityFilter = document.getElementById('city-filter');
                 if (cityFilter) cityFilter.value = '';
@@ -1181,4 +1265,232 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 17) Initialiser la carte avec toutes les données
     filterAndRenderData();
+
+    // Variable pour stocker la position actuelle de l'utilisateur
+    var userLocation = null;
+    // Variable pour stocker le cercle de rayon
+    var radiusCircle = null;
+
+    // Gestionnaire d'événement pour le bouton "Me localiser"
+    var locateMeBtn = document.getElementById('locate-me-btn');
+    if (locateMeBtn) {
+        locateMeBtn.addEventListener('click', function() {
+            // Vérifier si la géolocalisation est disponible
+            if (!navigator.geolocation) {
+                alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
+                return;
+            }
+
+            // Mise à jour visuelle du bouton pendant la géolocalisation
+            locateMeBtn.disabled = true;
+            locateMeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Localisation en cours...';
+            
+            // Afficher un message de statut
+            var geoStatus = document.getElementById('geo-status');
+            if (geoStatus) {
+                geoStatus.textContent = "Recherche de votre position...";
+            }
+
+            // Demander la géolocalisation
+            navigator.geolocation.getCurrentPosition(
+                // Succès
+                function(position) {
+                    userLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    
+                    console.log("Position trouvée :", userLocation);
+
+                    // Afficher le panneau de rayon
+                    var geoRadiusContainer = document.getElementById('geo-radius-container');
+                    if (geoRadiusContainer) {
+                        geoRadiusContainer.style.display = 'block';
+                    }
+                    
+                    // Mise à jour du bouton
+                    locateMeBtn.disabled = false;
+                    locateMeBtn.innerHTML = '<i class="fas fa-check"></i> Position trouvée';
+                    locateMeBtn.style.backgroundColor = '#28a745';
+                    
+                    // Mise à jour du message de statut
+                    if (geoStatus) {
+                        geoStatus.textContent = "Position trouvée ! Utilisez le rayon pour filtrer les panneaux autour de vous.";
+                        geoStatus.style.color = '#28a745';
+                    }
+                    
+                    // Centrer la carte sur la position trouvée
+                    map.setView([userLocation.latitude, userLocation.longitude], 13);
+                    
+                    // Ajouter un marqueur pour indiquer la position de l'utilisateur
+                    if (window.userMarker) {
+                        map.removeLayer(window.userMarker);
+                    }
+                    window.userMarker = L.marker([userLocation.latitude, userLocation.longitude], {
+                        icon: L.icon({
+                            iconUrl: '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/location-pin-svgrepo-com.svg',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 32],
+                            popupAnchor: [0, -30]
+                        })
+                    }).addTo(map);
+                },
+                // Erreur
+                function(error) {
+                    console.error("Erreur de géolocalisation:", error);
+                    locateMeBtn.disabled = false;
+                    locateMeBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Me localiser';
+                    
+                    // Message d'erreur spécifique pour HTTP vs HTTPS
+                    var errorMsg = "";
+                    if (window.location.protocol === 'http:' && !window.location.hostname.match(/localhost|127.0.0.1/)) {
+                        errorMsg = "La géolocalisation nécessite une connexion sécurisée (HTTPS). Sur un serveur local, utilisez localhost ou 127.0.0.1.";
+                    } else {
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = "Vous avez refusé l'accès à votre position.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = "Votre position n'a pas pu être déterminée.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = "La demande de géolocalisation a expiré.";
+                                break;
+                            default:
+                                errorMsg = "Une erreur inconnue s'est produite.";
+                        }
+                    }
+                    
+                    // Afficher le message d'erreur
+                    if (geoStatus) {
+                        geoStatus.textContent = errorMsg;
+                        geoStatus.style.color = '#dc3545';
+                    } else {
+                        alert(errorMsg);
+                    }
+                },
+                // Options
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        });
+    }
+
+    // Gestionnaire d'événement pour le bouton "Filtrer" par géolocalisation
+    var applyGeoFilterBtn = document.getElementById('apply-geo-filter');
+    if (applyGeoFilterBtn) {
+        applyGeoFilterBtn.addEventListener('click', function() {
+            var geoRadiusSelect = document.getElementById('geo-radius-filter');
+            var geoRadiusKm = geoRadiusSelect ? geoRadiusSelect.value : '';
+            console.log("Rayon sélectionné:", geoRadiusKm);
+            filterByUserLocation(geoRadiusKm);
+        });
+    }
+
+    // Fonction pour filtrer les panneaux autour de la position de l'utilisateur
+    function filterByUserLocation(radiusKm) {
+        if (!userLocation) {
+            alert("Veuillez d'abord activer la géolocalisation.");
+            return;
+        }
+        
+        // Convertir en nombre
+        radiusKm = parseFloat(radiusKm);
+        
+        // Retirer le cercle existant s'il y en a un
+        if (radiusCircle) {
+            map.removeLayer(radiusCircle);
+            radiusCircle = null;
+        }
+        
+        if (!radiusKm || isNaN(radiusKm)) {
+            // Si pas de rayon spécifié, réinitialiser les filtres pour voir tous les panneaux
+            filterAndRenderData();
+            // Supprimer la notification si elle existe
+            var existingInfo = document.getElementById('geo-filter-info');
+            if (existingInfo) existingInfo.remove();
+            return;
+        }
+        
+        console.log("Filtrage avec rayon de " + radiusKm + " km autour de la position : ", userLocation);
+        
+        // Création d'un objet de filtres avec la position de l'utilisateur
+        var filters = {
+            userLocation: userLocation,
+            userLocationRadiusKm: radiusKm
+        };
+        
+        // Ajouter un cercle visuel sur la carte pour montrer le rayon
+        radiusCircle = L.circle([userLocation.latitude, userLocation.longitude], {
+            radius: radiusKm * 1000, // en mètres
+            color: '#70c141',
+            fillColor: '#70c141',
+            fillOpacity: 0.1,
+            weight: 2
+        }).addTo(map);
+        
+        // Ajuster la vue de la carte pour voir tout le cercle
+        map.fitBounds(radiusCircle.getBounds());
+        
+        // Mettre à jour un élément UI pour montrer que le filtre est actif
+        var filterInfoElement = document.getElementById('geo-filter-info');
+        if (!filterInfoElement) {
+            filterInfoElement = document.createElement('div');
+            filterInfoElement.id = 'geo-filter-info';
+            filterInfoElement.className = 'geo-filter-notification';
+            filterInfoElement.style.cssText = 'position: absolute; z-index: 1000; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
+            
+            // S'assurer que l'élément parent existe
+            var mapContainer = document.querySelector('.map-container');
+            if (mapContainer) {
+                mapContainer.appendChild(filterInfoElement);
+            } else {
+                // Fallback si .map-container n'est pas trouvé
+                document.querySelector('#map').parentNode.appendChild(filterInfoElement);
+            }
+        }
+        
+        filterInfoElement.innerHTML = 'Filtre actif : Panneaux dans un rayon de ' + radiusKm + ' km autour de ma position <button id="clear-geo-filter" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Effacer</button>';
+        
+        // S'assurer que l'écouteur d'événement est correctement attaché
+        setTimeout(function() {
+            var clearButton = document.getElementById('clear-geo-filter');
+            if (clearButton) {
+                // Supprimer les écouteurs précédents pour éviter les doublons
+                clearButton.replaceWith(clearButton.cloneNode(true));
+                // Réattacher l'écouteur
+                document.getElementById('clear-geo-filter').addEventListener('click', function() {
+                    // Supprimer le cercle de rayon si présent
+                    if (radiusCircle) {
+                        map.removeLayer(radiusCircle);
+                        radiusCircle = null;
+                    }
+                    // Réinitialiser les filtres
+                    filterAndRenderData();
+                    // Supprimer la notification
+                    filterInfoElement.remove();
+                    
+                    // Réinitialiser le statut de géolocalisation
+                    var geoStatus = document.getElementById('geo-status');
+                    if (geoStatus) {
+                        geoStatus.textContent = "Position trouvée ! Utilisez le rayon pour filtrer les panneaux autour de vous.";
+                        geoStatus.style.color = '#4CAF50';
+                    }
+                });
+            }
+        }, 50);
+        
+        // Mettre à jour le message de statut
+        var geoStatus = document.getElementById('geo-status');
+        if (geoStatus) {
+            geoStatus.textContent = "Filtrage actif : affichage des panneaux dans un rayon de " + radiusKm + " km.";
+            geoStatus.style.color = '#70c141';
+        }
+        
+        // Appliquer le filtre
+        filterAndRenderData(filters);
+    }
 });
