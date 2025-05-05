@@ -41,6 +41,21 @@ document.addEventListener('DOMContentLoaded', function() {
     var map = L.map('map').setView([centerLat, centerLng], zoom);
     L.tileLayer(tileLayerUrl, { attribution: attribution }).addTo(map);
 
+    // Ajout du contrôle de géolocalisation
+    L.control.locate({
+        position: 'topleft',
+        strings: {
+            title: "Me localiser",
+            popup: "Vous êtes ici",
+            outsideMapBoundsMsg: "Vous semblez être en dehors des limites de la carte"
+        },
+        locateOptions: {
+            maxZoom: 16,
+            enableHighAccuracy: true
+        },
+        icon: 'fa fa-location-arrow'
+    }).addTo(map);
+
     // 3) Mode de placement du geocoder
     if (options.geocoder_mode === 'on_map') {
         // Contrôle par défaut (en haut à gauche)
@@ -404,6 +419,46 @@ document.addEventListener('DOMContentLoaded', function() {
     var resetFilterBtn = document.getElementById('resetFilter');
     var categoryFilter = document.getElementById('categoryFilter');
     var regionFilter = document.getElementById('region-filter'); // Corrigé : ID correct du filtre région
+    var locateMeBtn = document.getElementById('locateMe'); // Nouveau bouton de localisation
+    
+    // Gestionnaire pour le bouton de localisation personnalisé
+    if (locateMeBtn) {
+        locateMeBtn.addEventListener('click', function() {
+            map.locate({
+                setView: true,
+                maxZoom: 16,
+                enableHighAccuracy: true
+            });
+            
+            // Afficher un message lors de la localisation
+            map.on('locationfound', function(e) {
+                var radius = e.accuracy / 2;
+                
+                // Créer un marqueur à la position de l'utilisateur
+                var userMarker = L.marker(e.latlng).addTo(map)
+                    .bindPopup("Vous êtes ici (précision de " + Math.round(radius) + " mètres)").openPopup();
+                
+                // Afficher un cercle indiquant la précision
+                var accuracyCircle = L.circle(e.latlng, {
+                    radius: radius,
+                    color: '#4285F4',
+                    fillColor: '#4285F4',
+                    fillOpacity: 0.15
+                }).addTo(map);
+                
+                // Supprimer les marqueurs après 10 secondes
+                setTimeout(function() {
+                    map.removeLayer(userMarker);
+                    map.removeLayer(accuracyCircle);
+                }, 10000);
+            });
+            
+            // Gestion des erreurs de localisation
+            map.on('locationerror', function(e) {
+                alert("Impossible de vous localiser : " + e.message);
+            });
+        });
+    }
     
     // Utiliser jQuery pour récupérer les valeurs de Select2
     if (applyFilterBtn) {

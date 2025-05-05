@@ -679,7 +679,6 @@ function terralize_ap_enqueue_poi_admin_scripts() {
         wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
         
         // Styles personnalisés
-        wp_enqueue_style('terralize_ap-admin-styles', plugin_dir_url(dirname(__FILE__)) . 'assets/css/admin.css', array(), '1.0.0');
         
         // Script personnalisé pour la gestion des dates
         wp_enqueue_script('jquery-ui-datepicker');

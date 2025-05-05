@@ -1,0 +1,1689 @@
+/**
+ * Tracteur Zone - Styles combinés pour la carte interactive
+ * Ce fichier contient les styles pour:
+ * - La carte et ses composants (filtres, résultats, popups)
+ * - Le sélecteur multiple pour les filtres
+ */
+
+/* Définition des layers dans l'ordre de priorité */
+@layer terralize-dynamic, terralize-default, terralize-base, terralize-controls, terralize-sidebar, terralize-popups, terralize-responsive, terralize-utilities, terralize-tabs;
+
+/* Layer: terralize-default - Valeurs par défaut */
+@layer terralize-default {
+    :root {
+        /* Couleurs principales */
+        --terralize-primary-color: #3388ff;
+        --terralize-secondary-color: #2c3e50;
+        --terralize-accent-color: #e74c3c;
+        --terralize-background-color: #ffffff;
+        --terralize-text-color: #333333;
+        --terralize-border-color: #e0e0e0;
+        --terralize-shadow-color: rgba(0, 0, 0, 0.1);
+
+        /* Valeurs par défaut pour les variables dynamiques */
+        --terralize-button-background-color: #3388ff;
+        --terralize-button-text-color: #ffffff;
+        --terralize-button-hover-background: #2c3e50;
+        --terralize-button-hover-text: #ffffff;
+        --terralize-button-border-color: #3388ff;
+        --terralize-button-border-width: 1px;
+        --terralize-button-border-style: solid;
+        --terralize-button-border-radius: 4px;
+
+        --terralize-sidebar-background: #ffffff;
+        --terralize-sidebar-border-color: #e0e0e0;
+        --terralize-sidebar-text-color: #333333;
+
+        --terralize-popup-background: #ffffff;
+        --terralize-popup-border-color: #e0e0e0;
+        --terralize-popup-border-width: 1px;
+        --terralize-popup-border-style: solid;
+        --terralize-popup-border-radius: 4px;
+        --terralize-popup-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Layer: terralize-dynamic - Variables dynamiques (sera chargé par terralize-dynamic-styles.php) */
+@layer terralize-dynamic {
+    /* Ce layer sera rempli dynamiquement par terralize-dynamic-styles.php */
+}
+
+/* Layer: terralize-base */
+@layer terralize-base {
+    .tracteur-zone-map-container {
+        display: flex;
+        flex-direction: column;
+        font-family: 'Montserrat', 'Inter', sans-serif;
+        color: var(--terralize-text-color);
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-color: var(--terralize-background-color);
+    }
+
+    .map-container-wrapper {
+        display: flex;
+        position: relative;
+        flex-grow: 1;
+        height: 70vh;
+        overflow: hidden;
+    }
+    
+    /* Styles pour le mode plein écran */
+    .tracteur-zone-map-container.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+        background: var(--terralize-background-color);
+    }
+
+    .tracteur-zone-map-container.fullscreen .map-container-wrapper {
+        height: 100vh;
+    }
+
+    /* Assurer que la carte remplit tout son conteneur */
+    .tracteur-zone-map {
+        width: 100%;
+        height: 100% !important;
+    }
+    
+    /* Styles des zones */
+    .zone-polygon {
+        fill: var(--terralize-primary-color);
+        stroke: var(--terralize-secondary-color);
+        stroke-width: 2;
+        fill-opacity: 0.5;
+    }
+
+    /* Styles des points d'intérêt */
+    .poi-marker {
+        background-color: var(--terralize-accent-color);
+        border: 2px solid var(--terralize-background-color);
+        border-radius: 50%;
+    }
+    
+    /* Styles pour le survol des marqueurs */
+    .leaflet-marker-icon:hover {
+        filter: brightness(1.2) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+    
+    /* Styles pour le cercle de précision de localisation */
+    .leaflet-interactive {
+        transition: opacity 0.3s ease;
+    }
+    
+    /* Styles pour les marqueurs de localisation */
+    .user-location-marker {
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+        animation: marker-pulse 2s infinite;
+    }
+
+    .nearest-poi-marker {
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+        animation: marker-bounce 1.5s infinite;
+    }
+
+    /* Animation de pulsation pour le marqueur utilisateur */
+    @keyframes marker-pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Animation de rebond pour le marqueur POI le plus proche */
+    @keyframes marker-bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+}
+
+/* Layer: terralize-controls */
+@layer terralize-controls {
+    .map-controls {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 5px;
+        box-shadow: 0 2px 8px rgba(42, 42, 42, 0.2);
+    }
+
+    .control-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 16px;
+        background-color: var(--terralize-button-background-color);
+        border-radius: var(--terralize-button-border-radius);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: var(--terralize-button-text-color);
+    }
+
+    .control-btn.active,
+    .control-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+    
+    .control-btn svg {
+        vertical-align: middle;
+    }
+    
+    /* Styles des boutons d'action */
+    .apply-filters-btn,
+    .reset-filters-btn,
+    .find-nearest-poi-btn,
+    .locate-me-btn {
+        padding: 8px 16px;
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    /* Bouton appliquer les filtres */
+    .apply-filters-btn {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+    }
+    
+    /* Bouton réinitialiser les filtres */
+    .reset-filters-btn {
+        background-color: transparent;
+        color: var(--terralize-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-border-color);
+    }
+    
+    .apply-filters-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+    
+    /* Bouton de localisation personnalisé */
+    .location-action {
+        padding: 0 15px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .locate-me-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px 15px;
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .locate-me-btn svg {
+        stroke: var(--terralize-button-text-color);
+        width: 16px;
+        height: 16px;
+    }
+
+    .locate-me-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    .locate-me-btn:hover svg {
+        stroke: var(--terralize-button-hover-text);
+    }
+    
+    /* Bouton pour trouver le POI le plus proche */
+    .find-nearest-poi-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+        gap: 8px;
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+
+    .find-nearest-poi-btn svg {
+        stroke: white;
+        width: 16px;
+        height: 16px;
+    }
+
+    .find-nearest-poi-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    .find-nearest-poi-btn:hover svg {
+        stroke: white;
+    }
+    
+    /* Styles des boutons de pagination */
+    .pagination-btn {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .pagination-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    /* Styles pour les options de localisation */
+    .location-options {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px 0;
+        overflow-y: auto;
+        max-height: calc(100% - 50px);
+    }
+    
+    .location-option-card {
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .location-option-card:hover {
+        box-shadow: 0 3px 8px var(--terralize-shadow-color);
+        border-color: var(--terralize-accent-color);
+    }
+    
+    .location-option-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: var(--terralize-accent-color);
+        border-bottom: 1px solid var(--terralize-border-color);
+        padding-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .location-option-card h3 svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--terralize-accent-color);
+    }
+    
+    .location-option-card p {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: var(--terralize-text-color);
+    }
+    
+    @media (max-height: 600px) {
+        .location-options {
+            gap: 10px;
+            padding: 5px 0;
+        }
+        
+        .location-option-card {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .location-option-card h3 {
+            font-size: 14px;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .location-option-card p {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+    }
+}
+
+/* Layer: terralize-sidebar */
+@layer terralize-sidebar {
+    .map-sidebar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 350px;
+        height: 100%;
+        background-color: var(--terralize-sidebar-background);
+        box-shadow: 2px 0 10px var(--terralize-shadow-color);
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+        border-radius: 0 var(--terralize-button-border-radius) var(--terralize-button-border-radius) 0;
+        border-color: var(--terralize-sidebar-border-color);
+        color: var(--terralize-sidebar-text-color);
+    }
+    
+    /* Panneau de contenu */
+    .sidebar-panel {
+        display: none;
+        flex-direction: column;
+        flex-grow: 1;
+        overflow: hidden;
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 15px;
+        margin-top: 10px;
+        max-height: calc(100% - 70px); /* Hauteur maximale pour laisser de la place aux onglets */
+        overflow-y: auto;
+    }
+
+    .sidebar-panel.active {
+        display: flex;
+    }
+    
+    /* Panel spécifique pour les options de localisation */
+    .sidebar-panel.location-panel {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 15px;
+    }
+    
+    .location-option {
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .location-option h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: var(--terralize-primary-color);
+        border-bottom: 1px solid var(--terralize-border-color);
+        padding-bottom: 8px;
+    }
+    
+    .location-option p {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: var(--terralize-text-color);
+    }
+    
+    .panel-header {
+        padding: 15px;
+        border-bottom: 1px solid var(--terralize-border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--terralize-background-color);
+    }
+
+    .panel-header h2 {
+        margin: 0;
+        font-size: 18px;
+        font-family: 'Montserrat', sans-serif;
+        color: var(--terralize-text-color);
+    }
+
+    .panel-close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--terralize-text-color);
+    }
+    
+    /* Accordéon des filtres */
+    .accordion-filters {
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .accordion-item {
+        border: 1px solid var(--terralize-border-color);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+
+    .accordion-header {
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--terralize-background-color);
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .accordion-header:hover {
+        background-color: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+    }
+
+    .accordion-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .accordion-icon {
+        font-size: 18px;
+        color: var(--terralize-text-color);
+    }
+
+    .accordion-content {
+        padding: 15px;
+        display: none;
+        border-top: 1px solid var(--terralize-border-color);
+        background-color: var(--terralize-background-color);
+    }
+
+    .accordion-item.active .accordion-content {
+        display: block;
+    }
+    
+    /* Actions des filtres */
+    .filter-actions {
+        padding: 15px;
+        border-top: 1px solid var(--terralize-border-color);
+        display: flex;
+        gap: 10px;
+        background-color: var(--terralize-background-color);
+        margin-top: 15px;
+        justify-content: space-between;
+    }
+    
+    /* Styles pour la recherche */
+    .search-field {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .search-field input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        font-size: 14px;
+        color: var(--terralize-text-color);
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-field input:focus {
+        outline: none;
+        border-color: var(--terralize-primary-color);
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-field .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--terralize-text-color);
+    }
+    
+    /* Styles pour le champ de recherche */
+    .filter-options.search-filter {
+        width: 100%;
+    }
+
+    .search-filter-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        color: var(--terralize-text-color);
+        transition: all 0.3s ease;
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-filter-input:focus {
+        outline: none;
+        border-color: var(--terralize-primary-color);
+        box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.2);
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-filter-input::placeholder {
+        color: var(--terralize-text-color);
+        opacity: 0.8;
+    }
+    
+    /* Styles des filtres */
+    .filter-options {
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    /* Styles pour le type et la région */
+    .type-filter-select,
+    .region-filter-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        color: var(--terralize-text-color);
+        background-color: var(--terralize-background-color);
+        transition: all 0.3s ease;
+    }
+
+    .type-filter-select:focus,
+    .region-filter-select:focus {
+        outline: none;
+        border-color: var(--terralize-primary-color);
+        box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.2);
+        background-color: var(--terralize-background-color);
+    }
+    
+    /* Styles Select2 personnalisés */
+    .terralize-category-filter {
+        width: 100% !important;
+    }
+
+    .select2-container--classic .select2-selection--multiple {
+        border: 1px solid var(--terralize-border-color) !important;
+        border-radius: var(--terralize-button-border-radius) !important;
+        padding: 5px !important;
+    }
+
+    .select2-container--classic .select2-selection--multiple:focus {
+        border-color: var(--terralize-primary-color) !important;
+        outline: none !important;
+    }
+
+    .select2-container--classic .select2-selection--multiple .select2-selection__choice {
+        background-color: var(--terralize-background-color) !important;
+        border: 1px solid var(--terralize-border-color) !important;
+        color: var(--terralize-primary-color) !important;
+        border-radius: 3px !important;
+        padding: 2px 8px !important;
+        font-size: 12px !important;
+    }
+
+    .select2-container--classic .select2-selection__choice__remove {
+        color: var(--terralize-primary-color) !important;
+        margin-right: 5px !important;
+    }
+
+    .select2-container--classic .select2-search--inline .select2-search__field {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .select2-container--classic .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--terralize-primary-color) !important;
+    }
+    
+    /* Styles des résultats */
+    .results-list {
+        margin-top: 15px;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 10px;
+    }
+
+    .result-item {
+        padding: 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        margin-bottom: 10px;
+        background: var(--terralize-background-color);
+        transition: all 0.2s;
+    }
+
+    .result-item:hover {
+        box-shadow: 0 3px 8px var(--terralize-shadow-color);
+        border-color: var(--terralize-primary-color);
+    }
+
+    .result-item h3 {
+        margin: 0 0 10px;
+        color: var(--terralize-text-color);
+    }
+
+    .result-item .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 0 var(--terralize-button-border-radius) 0 var(--terralize-button-border-radius);
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .result-item .badge-primary {
+        background: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+    }
+
+    .result-item .badge-secondary {
+        background: var(--terralize-secondary-color);
+        color: var(--terralize-text-color);
+    }
+
+    .result-item p {
+        margin: 10px 0;
+        color: var(--terralize-text-color);
+    }
+    
+    /* Contrôles de pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 20px;
+    }
+
+    .pagination button {
+        padding: 8px 12px;
+        border: 1px solid var(--terralize-border-color);
+        background: var(--terralize-background-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        color: var(--terralize-text-color);
+    }
+
+    .pagination button.active {
+        background: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+    }
+    
+    .pagination-controls {
+        background-color: var(--terralize-background-color);
+        border-top: 1px solid var(--terralize-border-color);
+        padding: 10px;
+        margin-top: 10px;
+    }
+}
+
+/* Layer: Popups */
+@layer popups {
+    .leaflet-popup-content-wrapper {
+        background-color: var(--terralize-popup-background);
+        border: var(--terralize-popup-border-width) var(--terralize-popup-border-style) var(--terralize-popup-border-color);
+        border-radius: var(--terralize-popup-border-radius);
+        box-shadow: var(--terralize-popup-shadow);
+        padding: 0;
+        max-width: 300px;
+    }
+
+    .leaflet-popup-content {
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .popup-container {
+        padding: 20px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .popup-container h2 {
+        margin: 0 0 15px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--terralize-primary-color);
+        color: var(--terralize-primary-color);
+        font-family: 'Montserrat', sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .popup-container p {
+        margin: 0 0 12px;
+        font-size: 14px;
+        color: var(--terralize-text-color);
+        line-height: 1.5;
+    }
+
+    .popup-container strong {
+        color: var(--terralize-secondary-color);
+        font-weight: 600;
+    }
+
+    .popup-container a {
+        color: var(--terralize-primary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .popup-container a:hover {
+        color: var(--terralize-button-hover-background);
+        text-decoration: underline;
+    }
+
+    .popup-container .btn-contact,
+    .popup-container .get-directions-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: var(--terralize-primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .popup-container .btn-contact:hover,
+    .popup-container .get-directions-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .popup-contact-info {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid var(--terralize-border-color);
+    }
+
+    .popup-contact-info p {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .popup-contact-info svg {
+        width: 16px;
+        height: 16px;
+        color: var(--terralize-primary-color);
+    }
+
+    .popup-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0;
+    }
+
+    .popup-tag {
+        display: inline-block;
+        padding: 4px 8px;
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: 12px;
+        font-size: 12px;
+        color: var(--terralize-text-color);
+    }
+
+    .popup-hours {
+        margin: 12px 0;
+        padding: 10px;
+        background-color: var(--terralize-background-color);
+        border-radius: var(--terralize-button-border-radius);
+        border: 1px solid var(--terralize-border-color);
+    }
+
+    .popup-hours p {
+        margin: 0;
+        font-size: 13px;
+    }
+
+    .popup-social {
+        margin-top: 12px;
+    }
+
+    .popup-social a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 10px;
+        font-size: 13px;
+    }
+
+    .nearest-poi-popup {
+        padding: 15px;
+        font-family: 'Inter', sans-serif;
+        max-width: 250px;
+    }
+
+    .nearest-poi-popup h3 {
+        margin: 0 0 12px 0;
+        color: #FF5722;
+        font-size: 16px;
+        font-weight: 600;
+        border-bottom: 2px solid #FF5722;
+        padding-bottom: 8px;
+    }
+
+    .nearest-poi-popup p {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nearest-poi-popup p svg {
+        width: 16px;
+        height: 16px;
+        color: #FF5722;
+    }
+
+    .get-directions-btn {
+        display: inline-block;
+        width: 100%;
+        padding: 10px 15px;
+        background-color: #FF5722;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .get-directions-btn:hover {
+        background-color: #E64A19;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .nearest-poi-pulse {
+        background-color: #FF5722;
+    }
+}
+
+/* Layer: terralize-utilities */
+@layer terralize-utilities {
+    .map-main-container {
+        flex-grow: 1;
+        margin-left: 0;
+        transition: all 0.3s ease;
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* États par défaut - pas de sidebar */
+    .map-sidebar {
+        transform: translateX(-110%); /* Sidebar cachée par défaut */
+    }
+    
+    .map-main-container.with-sidebar {
+        width: 100%; /* Pleine largeur par défaut quand sidebar cachée */
+    }
+    
+    /* État avec sidebar visible */
+    .map-sidebar.sidebar-visible {
+        transform: translateX(0); /* Sidebar visible */
+    }
+    
+    /* Important : Push la carte vers la droite uniquement quand la sidebar est visible */
+    .map-sidebar.sidebar-visible + .map-main-container.with-sidebar {
+        margin-left: 350px;
+        width: calc(100% - 350px);
+    }
+
+    /* Style explicite pour l'état sans sidebar */
+    .map-main-container.without-sidebar {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Layer: terralize-responsive */
+@layer terralize-responsive {
+    @media (max-width: 768px) {
+        .map-container-wrapper {
+            height: 80vh;
+        }
+
+        .map-sidebar {
+            width: 100%;
+            max-width: none;
+        }
+
+        .map-controls {
+            left: 15px;
+            right: 15px;
+            justify-content: space-between;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row;
+            border-bottom: 1px solid var(--terralize-border-color);
+        }
+
+        .tab-btn {
+            padding: 10px 5px;
+            font-size: 13px;
+            flex: 1;
+        }
+        
+        /* Ajuster l'espacement des icônes dans les onglets */
+        .tab-btn svg {
+            margin-right: 2px;
+        }
+        
+        /* Cacher certains textes sur très petit écran */
+        @media (max-width: 360px) {
+            .tab-btn {
+                font-size: 11px;
+                padding: 8px 4px;
+            }
+        }
+    }
+    
+    /* Media queries pour les écrans de petite hauteur */
+    @media (max-height: 600px) {
+        .map-container-wrapper {
+            height: 65vh;
+        }
+        
+        .map-sidebar {
+            height: 100%;
+            max-height: 100%;
+        }
+        
+        .sidebar-panel {
+            padding: 10px;
+            max-height: calc(100% - 50px);
+        }
+        
+        .tab-btn {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+        
+        .accordion-header {
+            padding: 8px 10px;
+        }
+        
+        .accordion-content {
+            padding: 10px;
+        }
+        
+        /* Optimisation du panneau de localisation */
+        .location-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        
+        /* Réduire l'espacement dans les options de localisation */
+        .location-option-card {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .location-option-card h3 {
+            font-size: 14px;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .location-option-card p {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        /* Ajuster les boutons de localisation */
+        .locate-me-btn, .find-nearest-poi-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+    }
+    
+    /* Media queries pour les très petits écrans (smartphones en mode portrait) */
+    @media (max-width: 480px) {
+        .map-sidebar {
+            overflow-y: auto;
+        }
+        
+        .sidebar-panel {
+            margin-top: 5px;
+            padding: 8px;
+        }
+        
+        .tab-btn {
+            padding: 8px 6px;
+            font-size: 12px;
+        }
+        
+        .tab-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Au-dessous de 360px, n'afficher que les icônes dans les onglets */
+        @media (max-width: 360px) {
+            .tab-btn span:not(.tab-counter) {
+                display: none;
+            }
+            
+            .tab-btn {
+                justify-content: center;
+                padding: 8px 4px;
+            }
+            
+            .tab-btn svg {
+                margin-right: 0;
+                width: 18px;
+                height: 18px;
+            }
+        }
+    }
+}
+
+/* Layer: Terralize */
+@layer terralize {
+    .search-field {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .search-field input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        font-size: 14px;
+        color: var(--terralize-text-color);
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-field input:focus {
+        outline: none;
+        border-color: var(--terralize-primary-color);
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-field .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--terralize-text-color);
+    }
+
+    .results-list {
+        margin-top: 15px;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 10px;
+    }
+
+    .result-item {
+        padding: 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        margin-bottom: 10px;
+        background: var(--terralize-background-color);
+        transition: all 0.2s;
+    }
+
+    .result-item:hover {
+        box-shadow: 0 3px 8px var(--terralize-shadow-color);
+        border-color: var(--terralize-primary-color);
+    }
+
+    .result-item h3 {
+        margin: 0 0 10px;
+        color: var(--terralize-text-color);
+    }
+
+    .result-item .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 0 var(--terralize-button-border-radius) 0 var(--terralize-button-border-radius);
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .result-item .badge-primary {
+        background: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+    }
+
+    .result-item .badge-secondary {
+        background: var(--terralize-secondary-color);
+        color: var(--terralize-text-color);
+    }
+
+    .result-item p {
+        margin: 10px 0;
+        color: var(--terralize-text-color);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 20px;
+    }
+
+    .pagination button {
+        padding: 8px 12px;
+        border: 1px solid var(--terralize-border-color);
+        background: var(--terralize-background-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        color: var(--terralize-text-color);
+    }
+
+    .pagination button.active {
+        background: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+    }
+
+    /* Styles pour le champ de recherche */
+    .filter-options.search-filter {
+        width: 100%;
+    }
+
+    .search-filter-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        color: var(--terralize-text-color);
+        transition: all 0.3s ease;
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-filter-input:focus {
+        outline: none;
+        border-color: var(--terralize-primary-color);
+        box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.2);
+        background-color: var(--terralize-background-color);
+    }
+
+    .search-filter-input::placeholder {
+        color: var(--terralize-text-color);
+        opacity: 0.8;
+    }
+
+    /* Styles des zones */
+    .zone-polygon {
+        fill: var(--terralize-primary-color);
+        stroke: var(--terralize-secondary-color);
+        stroke-width: 2;
+        fill-opacity: 0.5;
+    }
+
+    /* Styles des points d'intérêt */
+    .poi-marker {
+        background-color: var(--terralize-accent-color);
+        border: 2px solid var(--terralize-background-color);
+        border-radius: 50%;
+    }
+
+    /* Styles des filtres */
+    .filter-options {
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* Styles des résultats */
+    .results-list {
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+    /* Styles des contrôles de pagination */
+    .pagination-controls {
+        background-color: var(--terralize-background-color);
+        border-top: 1px solid var(--terralize-border-color);
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+    /* Styles des boutons de pagination */
+    .pagination-btn {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .pagination-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    /* Styles des onglets */
+    .tab-btn {
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+    }
+
+    /* Styles des panneaux */
+    .sidebar-panel {
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 15px;
+        margin-top: 10px;
+    }
+
+    /* Styles des en-têtes de panneau */
+    .panel-header {
+        background-color: var(--terralize-background-color);
+        border-bottom: 1px solid var(--terralize-border-color);
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* Styles des boutons de fermeture */
+    .panel-close-btn {
+        background-color: transparent;
+        border: none;
+        color: var(--terralize-text-color);
+        cursor: pointer;
+        font-size: 20px;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Styles des champs de recherche */
+    .search-filter-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-text-color);
+    }
+
+    /* Styles des sélecteurs */
+    .type-filter-select,
+    .region-filter-select,
+    .terralize-category-filter {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-text-color);
+    }
+
+    /* Styles des boutons d'action */
+    .location-action {
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .locate-me-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    /* Styles des boutons de filtre */
+    .filter-actions {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .apply-filters-btn,
+    .reset-filters-btn {
+        padding: 8px 16px;
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .apply-filters-btn {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+    }
+
+    .reset-filters-btn {
+        background-color: transparent;
+        color: var(--terralize-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-border-color);
+    }
+
+    .apply-filters-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    /* Styles pour les marqueurs de localisation */
+    .user-location-marker {
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+        animation: marker-pulse 2s infinite;
+    }
+
+    .nearest-poi-marker {
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+        animation: marker-bounce 1.5s infinite;
+    }
+
+    /* Animation de pulsation pour le marqueur utilisateur */
+    @keyframes marker-pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Animation de rebond pour le marqueur POI le plus proche */
+    @keyframes marker-bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    /* Styles pour la popup du POI le plus proche */
+    .nearest-poi-popup {
+        padding: 15px;
+        font-family: 'Inter', sans-serif;
+        max-width: 250px;
+    }
+
+    .nearest-poi-popup h3 {
+        margin: 0 0 12px 0;
+        color: #FF5722;
+        font-size: 16px;
+        font-weight: 600;
+        border-bottom: 2px solid #FF5722;
+        padding-bottom: 8px;
+    }
+
+    .nearest-poi-popup p {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nearest-poi-popup p svg {
+        width: 16px;
+        height: 16px;
+        color: #FF5722;
+    }
+
+    .get-directions-btn {
+        display: inline-block;
+        width: 100%;
+        padding: 10px 15px;
+        background-color: #FF5722;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .get-directions-btn:hover {
+        background-color: #E64A19;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Styles pour le cercle de précision de localisation */
+    .leaflet-interactive {
+        transition: opacity 0.3s ease;
+    }
+}
+
+/* Layer: Tabs */
+@layer terralize-tabs {
+    /* Conteneur des onglets */
+    .sidebar-tabs {
+        display: flex;
+        background-color: var(--terralize-background-color);
+        border-bottom: 1px solid var(--terralize-border-color);
+        padding: 0;
+        margin: 0;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Bouton d'onglet */
+    .tab-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 15px;
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Onglet de localisation */
+    .tab-btn.location-tab {
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-accent-color);
+    }
+    
+    .tab-btn.location-tab.active {
+        background-color: var(--terralize-accent-color);
+        color: var(--terralize-background-color);
+    }
+    
+    .tab-btn.location-tab svg {
+        stroke: var(--terralize-accent-color);
+    }
+    
+    .tab-btn.location-tab.active svg {
+        stroke: var(--terralize-background-color);
+    }
+    
+    .tab-btn.location-tab::after {
+        background-color: var(--terralize-accent-color);
+    }
+
+    /* Icône dans le bouton */
+    .tab-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        transition: all 0.3s ease;
+    }
+
+    /* État hover du bouton */
+    .tab-btn:hover {
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-primary-color);
+    }
+
+    /* État actif du bouton */
+    .tab-btn.active {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        font-weight: 600;
+    }
+
+    /* Compteur dans le bouton */
+    .tab-btn .tab-counter {
+        background-color: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+        border-radius: 12px;
+        padding: 2px 6px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 4px;
+    }
+
+    /* Animation du soulignement */
+    .tab-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--terralize-primary-color);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .tab-btn:hover::after,
+    .tab-btn.active::after {
+        transform: scaleX(1);
+    }
+
+    /* Styles spécifiques pour le premier et dernier bouton */
+    .tab-btn:first-child {
+        border-top-left-radius: var(--terralize-button-border-radius);
+    }
+
+    .tab-btn:last-child {
+        border-top-right-radius: var(--terralize-button-border-radius);
+        border-right: none;
+    }
+
+    /* Styles pour les petits écrans */
+    @media (max-width: 768px) {
+        .sidebar-tabs {
+            flex-direction: column;
+            border-bottom: none;
+        }
+
+        .tab-btn {
+            padding: 10px 12px;
+            border-bottom: none;
+            border-right: 2px solid transparent;
+            justify-content: flex-start;
+        }
+
+        .tab-btn.active {
+            border-right-color: var(--terralize-primary-color);
+            border-bottom: none;
+        }
+
+        .tab-btn::after {
+            width: 2px;
+            height: 100%;
+            transform: scaleY(0);
+            transform-origin: top;
+        }
+
+        .tab-btn:hover::after,
+        .tab-btn.active::after {
+            transform: scaleY(1);
+        }
+
+        .tab-btn:first-child {
+            border-top-left-radius: var(--terralize-button-border-radius);
+            border-top-right-radius: var(--terralize-button-border-radius);
+        }
+
+        .tab-btn:last-child {
+            border-bottom-left-radius: var(--terralize-button-border-radius);
+            border-bottom-right-radius: var(--terralize-button-border-radius);
+        }
+    }
+} 

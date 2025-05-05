@@ -1,5 +1,6 @@
 <?php
 function terralize_enqueue_scripts($hook) {
+    // Liste des hooks autorisés pour le plugin
     $allowed_hooks = array(
         'toplevel_page_terralize',
         'terralize_page_terralize_map',
@@ -8,14 +9,15 @@ function terralize_enqueue_scripts($hook) {
         'terralize_page_terralize_import_export',
         'terralize_page_terralize_settings'
     );
-    if (! in_array($hook, $allowed_hooks)) {
+
+    // Vérifier si nous sommes sur une page autorisée
+    if (!in_array($hook, $allowed_hooks)) {
         return;
     }
 
-          // Enqueue Select2 (pour moderniser le multi-select)
-          wp_enqueue_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
-          wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js', array('jquery'), '4.0.13', true);
-      
+    // Enqueue Select2 (pour moderniser le multi-select)
+    wp_enqueue_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
+    wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js', array('jquery'), '4.0.13', true);
 
     wp_enqueue_style('leaflet-css', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css');
     wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true);
@@ -27,8 +29,6 @@ function terralize_enqueue_scripts($hook) {
     // Optionnel : enqueue du style admin commun
     wp_enqueue_style('terralize-admin-style', plugin_dir_url(__FILE__) . '../assets/css/admin-style.css', array(), '1.0');
 
-
-  
     $back_options = array(
         'tile_provider'   => get_option('terralize_tile_provider', 'cartodb_light'),
         'tile_custom_url' => get_option('terralize_tile_custom_url', ''),
@@ -40,7 +40,7 @@ function terralize_enqueue_scripts($hook) {
         'map_center_lng'  => get_option('terralize_map_center_lng', '2.5'),
         'ajax_url'        => admin_url('admin-ajax.php'),
         'nonce'           => wp_create_nonce('save_zone_nonce'),
-        'edit_zone_base'  => admin_url('post.php'), // ex: https://example.com/wp-admin/post.php
+        'edit_zone_base'  => admin_url('post.php'),
         'alwaysShow'      => get_option('terralize_always_show_all_zones', '0')
     );
 

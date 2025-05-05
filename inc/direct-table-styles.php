@@ -17,6 +17,48 @@ function terralize_inject_table_button_styles() {
     if (!is_admin()) {
         return;
     }
+
+    // Récupérer le hook actuel
+    $current_screen = get_current_screen();
+    if (!$current_screen) {
+        return;
+    }
+
+    $hook = $current_screen->id;
+    
+    // Liste des hooks autorisés pour le plugin
+    $allowed_hooks = array(
+        'toplevel_page_terralize',
+        'terralize_page_terralize_map',
+        'terralize_page_terralize_list',
+        'terralize_page_terralize_settings',
+        'terralize_page_terralize_import_export',
+        'terralize_page_terralize_settings'
+    );
+
+    // Vérifier si nous sommes sur une page autorisée
+    if (!in_array($hook, $allowed_hooks)) {
+        // Pour les pages de CPT, vérifier le type de post
+        if (strpos($hook, 'edit.php') !== false || strpos($hook, 'post.php') !== false || strpos($hook, 'post-new.php') !== false) {
+            $post_type = isset($_GET['post_type']) ? $_GET['post_type'] : '';
+            if (empty($post_type) && isset($_GET['post'])) {
+                $post_type = get_post_type($_GET['post']);
+            }
+            
+            // Liste des types de post spécifiques au plugin
+            $allowed_post_types = array(
+                'terralize_zone',
+                'terralize_commercial',
+                'terralize_region'
+            );
+            
+            if (!in_array($post_type, $allowed_post_types)) {
+                return;
+            }
+        } else {
+            return;
+        }
+    }
     
     // CSS inline pour les boutons et éléments de formulaire
     $styles = "

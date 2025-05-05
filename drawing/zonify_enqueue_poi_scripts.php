@@ -14,8 +14,6 @@ function terralize_enqueue_poi_scripts($hook) {
     wp_enqueue_style('leaflet-draw-css', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css');
     wp_enqueue_script('leaflet-draw-js', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js', array('leaflet-js'), '1.0.4', true);
 
-    // Optionnel : Enqueue du style admin commun si besoin
-    wp_enqueue_style('terralize-admin-style', plugin_dir_url(__FILE__) . '../assets/css/admin-style.css', array(), '1.0');
 
     // Enqueue du script personnalisé pour la gestion des POI
     wp_enqueue_script('terralize-poi-script', plugin_dir_url(__FILE__) . '../scripts/terralize-poi.js', array('leaflet-js', 'leaflet-draw-js'), '1.0', true);
