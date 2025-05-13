@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var map = L.map(mapId).setView([centerLat, centerLng], zoom);
     L.tileLayer(tileLayerUrl, { attribution: attribution }).addTo(map);
+    
+    // Correction du problème de carte grise en forçant un invalidateSize après chargement
+    setTimeout(function() {
+        map.invalidateSize(true);
+    }, 300);
 
     // Ajout du contrôle de géolocalisation Leaflet
     L.control.locate({
@@ -546,7 +551,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         content += '</div>';
                     } else {
                         // Popup pour les zones
-                        content += '<h2>' + (feature.properties.nom_commercial || 'Commercial') + '</h2>';
+                        content += '<h2>' + (feature.properties.title || 'Zone') + '</h2>';
+                        
+                        // Afficher le nom commercial / commercial associé en sous-titre si disponible
+                        if (feature.properties.nom_commercial) {
+                            content += '<h3 style="margin-top: 5px; color: #555;">Commercial : ' + feature.properties.nom_commercial + '</h3>';
+                        }
                         
                         // Info / présentation
                         if (feature.properties.infos) {
@@ -1031,7 +1041,8 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
             map.invalidateSize({
                 animate: true,
-                pan: true
+                pan: true,
+                debounceMoveend: true // paramètre supplémentaire pour améliorer la performance
             });
         }, 350); // Un peu plus que la durée de transition CSS (0.3s)
     }
@@ -1140,4 +1151,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Afficher initialement toutes les données
     filterAndRenderData();
+    
+    // Forcer un redimensionnement après le chargement initial des données
+    setTimeout(function() {
+        map.invalidateSize(true);
+    }, 500);
+    
+    // Ajouter un écouteur pour le redimensionnement de la fenêtre
+    window.addEventListener('resize', function() {
+        // Redimensionner la carte lors du redimensionnement de la fenêtre
+        setTimeout(function() {
+            map.invalidateSize(true);
+        }, 200);
+    });
 }); 

@@ -36,6 +36,12 @@ function terralize_import_export_page() {
             echo '<div class="updated notice"><p>Import CSV des panneaux réussi : ' . $created . ' panneaux créés, ' . $updated . ' panneaux mis à jour, ' . $errors . ' erreurs.</p></div>';
         }
         
+        // Vérifier si des zones ont été supprimées
+        if ( isset($_GET['zones_cleared']) ) {
+            $count = isset($_GET['count']) ? intval($_GET['count']) : 0;
+            echo '<div class="updated notice"><p><strong>Suppression réussie :</strong> ' . $count . ' zones ont été définitivement supprimées.</p></div>';
+        }
+        
         // Vérifier s'il y a eu une erreur lors de l'importation
         if ( isset($_GET['import_error']) ) {
             $error_msg = sanitize_text_field(urldecode($_GET['import_error']));
@@ -81,6 +87,19 @@ function terralize_import_export_page() {
             </p>
             <input type="submit" value="Importer CSV" class="button button-primary" />
         </form>
+        
+        <hr/>
+        
+        <h2>Supprimer toutes les zones</h2>
+        <div class="card" style="max-width: 800px; padding: 15px; background-color: #f8f8f8; border-left: 4px solid #dc3545;">
+            <h3 style="color: #dc3545;">Zone de danger</h3>
+            <p><strong>Attention :</strong> Cette action supprimera définitivement toutes les zones commerciales de la base de données. Cette opération est irréversible.</p>
+            
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_clear_zones')); ?>" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer TOUTES les zones commerciales ? Cette action est irréversible.');">
+                <?php wp_nonce_field('terralize_clear_zones_nonce'); ?>
+                <input type="submit" name="clear_zones" class="button button-secondary" value="Supprimer toutes les zones" style="background-color: #dc3545; color: white; border-color: #c82333;" />
+            </form>
+        </div>
         
         <br/>
         

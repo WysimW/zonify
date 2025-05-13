@@ -37,11 +37,23 @@ function terralize_import_geojson() {
 
         $props = isset($feat['properties']) ? $feat['properties'] : array();
 
-        // Utiliser le titre défini dans le fichier, sinon utiliser le titre par défaut,
-        // et si ce dernier est vide, auto-générer un titre basé sur la date
-        $zone_title = !empty($props['zone_title']) ? sanitize_text_field($props['zone_title']) : $default_title;
-        if ( empty($zone_title) ) {
-            $zone_title = 'Zone - ' . date('Y-m-d H:i:s');
+        // Générer le titre à partir du code et du nom si disponibles
+        $zone_title = '';
+        if (!empty($props['code']) && !empty($props['nom'])) {
+            $zone_title = sanitize_text_field($props['code'] . ' - ' . $props['nom']);
+        } elseif (!empty($props['code'])) {
+            $zone_title = sanitize_text_field($props['code']);
+        } elseif (!empty($props['nom'])) {
+            $zone_title = sanitize_text_field($props['nom']);
+        } elseif (!empty($props['zone_title'])) {
+            // Fallback sur zone_title s'il existe
+            $zone_title = sanitize_text_field($props['zone_title']);
+        } else {
+            // Utiliser le titre par défaut, sinon auto-générer
+            $zone_title = $default_title;
+            if (empty($zone_title)) {
+                $zone_title = 'Zone - ' . date('Y-m-d H:i:s');
+            }
         }
 
         // Forcer la création d'une nouvelle zone
@@ -58,6 +70,15 @@ function terralize_import_geojson() {
         if ( $new_id ) {
             update_post_meta($new_id, 'zone_geojson', $geometry);
             update_post_meta($new_id, 'zone_commercial_id', $com_id);
+            
+            // Enregistrer également le code et le nom comme meta-données séparées si disponibles
+            if (!empty($props['code'])) {
+                update_post_meta($new_id, 'zone_code', sanitize_text_field($props['code']));
+            }
+            if (!empty($props['nom'])) {
+                update_post_meta($new_id, 'zone_nom', sanitize_text_field($props['nom']));
+            }
+            
             $count_created++;
             error_log("Nouvelle zone créée avec ID: " . $new_id);
         } else {

@@ -494,6 +494,15 @@ function terralize_ap_import_csv_page() {
     } else {
         $communes_status_message = '<p style="color: orange;">Aucune commune n\'a encore été importée. Utilisez le bouton ci-dessous pour importer les communes du Nord, Pas-de-Calais et Somme.</p>';
     }
+    
+    // Nouvelle section pour l'association des photos
+    $photos_status_message = '';
+    
+    if (isset($_GET['photo_import_status'])) {
+        $status_class = $_GET['photo_import_status'] === 'success' ? 'updated' : ($_GET['photo_import_status'] === 'error' ? 'error' : 'notice');
+        $message = isset($_GET['photo_import_message']) ? urldecode($_GET['photo_import_message']) : '';
+        $photos_status_message = '<div class="' . $status_class . ' notice"><p>' . $message . '</p></div>';
+    }
     ?>
     <div class="wrap">
         <h1>Importer des Panneaux d'Affichage (CSV)</h1>
@@ -517,6 +526,85 @@ function terralize_ap_import_csv_page() {
             </form>
         </div>
 
+        <!-- Nouvelle section pour l'association des photos -->
+        <div class="card" style="margin-bottom: 20px;">
+            <h2>Associer automatiquement les photos aux panneaux</h2>
+            <?php 
+            // Vérifier le statut actuel de l'importation des photos
+            $photos_status = get_option('terralize_ap_photos_imported');
+            $photos_status_message = '';
+            
+            if ($photos_status) {
+                $photos_status_message = '<p style="color: green;"><strong>' . $photos_status['count'] . '</strong> photos ont été associées aux panneaux le ' . date_i18n(get_option('date_format') . ' à ' . get_option('time_format'), strtotime($photos_status['date'])) . '.</p>';
+            } else {
+                $photos_status_message = '<p style="color: orange;">Aucune photo n\'a encore été associée automatiquement. Utilisez le bouton ci-dessous pour associer les photos du dossier assets/photos/poi/ aux panneaux.</p>';
+            }
+            
+            echo $photos_status_message;
+            
+            // Notification pour l'importation des photos
+            if (isset($_GET['photo_import_status'])) {
+                $status_class = $_GET['photo_import_status'] === 'success' ? 'updated' : ($_GET['photo_import_status'] === 'error' ? 'error' : 'notice');
+                $message = isset($_GET['photo_import_message']) ? urldecode($_GET['photo_import_message']) : '';
+                echo '<div class="' . $status_class . ' notice"><p>' . $message . '</p></div>';
+            }
+            ?>
+            
+            <p>Cette fonction recherche dans le dossier <code>assets/photos/poi/</code> les photos dont le nom de fichier contient la référence d'un panneau, et les associe automatiquement.</p>
+            
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_associate_photos')); ?>">
+                <?php wp_nonce_field('terralize_ap_associate_photos_nonce'); ?>
+                
+                <p class="submit">
+                    <input type="submit" name="submit" id="submit_photos" class="button button-primary" value="Associer automatiquement les photos" />
+                </p>
+            </form>
+        </div>
+        
+        <!-- Nouvelle section pour l'import ZIP de photos -->
+        <div class="card" style="margin-bottom: 20px;">
+            <h2>Importer des photos depuis un fichier ZIP</h2>
+            
+            <?php
+            // Notification pour l'importation ZIP des photos
+            if (isset($_GET['zip_import_status'])) {
+                $status_class = $_GET['zip_import_status'] === 'success' ? 'updated' : ($_GET['zip_import_status'] === 'error' ? 'error' : 'notice');
+                $message = isset($_GET['zip_import_message']) ? urldecode($_GET['zip_import_message']) : '';
+                echo '<div class="' . $status_class . ' notice"><p>' . $message . '</p></div>';
+            }
+            ?>
+            
+            <p>Cette fonction vous permet d'importer plusieurs photos à la fois via un fichier ZIP. Les photos seront associées aux panneaux en fonction de leur nom de fichier.</p>
+            <p><strong>Important :</strong> Le nom de chaque photo doit contenir la référence du panneau correspondant.</p>
+            
+            <form method="post" enctype="multipart/form-data" action="<?php echo esc_url(admin_url('admin-post.php?action=terralize_ap_import_photos_zip')); ?>">
+                <?php wp_nonce_field('terralize_ap_import_photos_zip_nonce'); ?>
+                
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row"><label for="photos_zip">Fichier ZIP :</label></th>
+                        <td>
+                            <input type="file" name="photos_zip" id="photos_zip" accept=".zip" required />
+                            <p class="description">Taille maximale : <?php echo esc_html(size_format(wp_max_upload_size())); ?></p>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">Options :</th>
+                        <td>
+                            <label for="overwrite_existing">
+                                <input type="checkbox" name="overwrite_existing" id="overwrite_existing" value="1" />
+                                Remplacer les photos existantes
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+                
+                <p class="submit">
+                    <input type="submit" name="submit" id="submit_zip" class="button button-primary" value="Importer le ZIP de photos" />
+                </p>
+            </form>
+        </div>
+        
         <div class="card">
             <h2>Importer les panneaux</h2>
             <p>Sélectionnez un fichier CSV contenant la liste des panneaux à importer.</p>
@@ -590,6 +678,313 @@ function terralize_ap_import_csv_page() {
         </div>
     </div>
     <?php
+}
+
+/**
+ * Fonction pour associer automatiquement les photos aux panneaux
+ */
+function terralize_ap_associate_photos_to_panels() {
+    // Vérifier le nonce
+    check_admin_referer('terralize_ap_associate_photos_nonce');
+    
+    // Chemin du dossier photos
+    $photos_dir = plugin_dir_path(dirname(__FILE__)) . 'assets/photos/poi/';
+    
+    // Récupérer tous les fichiers du dossier
+    $photos = array();
+    if (is_dir($photos_dir)) {
+        $files = scandir($photos_dir);
+        foreach ($files as $file) {
+            // Ignorer . et ..
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+            
+            // Ne garder que les images
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if (in_array(strtolower($ext), array('jpg', 'jpeg', 'png', 'gif'))) {
+                $photos[] = $file;
+            }
+        }
+    }
+    
+    if (empty($photos)) {
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&photo_import_status=error&photo_import_message=' . urlencode('Aucune photo trouvée dans le dossier assets/photos/poi/')));
+        exit;
+    }
+    
+    // Récupérer tous les panneaux
+    $panels = get_posts(array(
+        'post_type' => 'poi',
+        'posts_per_page' => -1,
+        'post_status' => 'publish'
+    ));
+    
+    if (empty($panels)) {
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&photo_import_status=error&photo_import_message=' . urlencode('Aucun panneau trouvé dans la base de données.')));
+        exit;
+    }
+    
+    $success_count = 0;
+    $upload_dir = wp_upload_dir();
+    
+    foreach ($panels as $panel) {
+        // Récupérer la référence du panneau
+        $reference = get_post_meta($panel->ID, 'panel_reference', true);
+        
+        if (empty($reference)) {
+            continue;
+        }
+        
+        // Vérifier si une photo avec cette référence existe
+        $found_photo = null;
+        foreach ($photos as $photo) {
+            // Vérifier si le nom du fichier contient la référence (sans tenir compte de l'extension)
+            $filename_without_ext = pathinfo($photo, PATHINFO_FILENAME);
+            if (strpos($filename_without_ext, $reference) !== false) {
+                $found_photo = $photo;
+                break;
+            }
+        }
+        
+        if ($found_photo) {
+            // Photo trouvée, l'ajouter à la médiathèque WordPress et l'associer au panneau
+            $file_path = $photos_dir . $found_photo;
+            
+            // Vérifier si le panneau a déjà une photo
+            $existing_photo_id = get_post_meta($panel->ID, 'panel_photo_id', true);
+            if ($existing_photo_id) {
+                continue; // Passer au suivant si déjà une photo
+            }
+            
+            // Préparer le fichier pour l'import
+            $file = array(
+                'name'     => sanitize_file_name($found_photo),
+                'type'     => mime_content_type($file_path),
+                'tmp_name' => $file_path,
+                'error'    => 0,
+                'size'     => filesize($file_path),
+            );
+            
+            // Importer le fichier dans la médiathèque WordPress
+            $attachment_id = media_handle_sideload($file, $panel->ID);
+            
+            if (is_wp_error($attachment_id)) {
+                // Gérer l'erreur
+                continue;
+            }
+            
+            // Associer la photo au panneau
+            update_post_meta($panel->ID, 'panel_photo_id', $attachment_id);
+            
+            // Mettre à jour le titre de l'attachment
+            wp_update_post(array(
+                'ID' => $attachment_id,
+                'post_title' => 'Photo du panneau ' . $reference,
+            ));
+            
+            $success_count++;
+        }
+    }
+    
+    // Stocker les statistiques
+    update_option('terralize_ap_photos_imported', array(
+        'count' => $success_count,
+        'date' => current_time('mysql')
+    ));
+    
+    // Rediriger avec un message de succès
+    wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&photo_import_status=success&photo_import_message=' . urlencode($success_count . ' photos ont été associées aux panneaux.')));
+    exit;
+}
+add_action('admin_post_terralize_ap_associate_photos', 'terralize_ap_associate_photos_to_panels');
+
+/**
+ * Traite l'importation de photos à partir d'un fichier ZIP
+ */
+function terralize_ap_import_photos_from_zip() {
+    // Vérifier les permissions
+    if (!current_user_can('manage_options')) {
+        wp_die('Permission refusée');
+    }
+    
+    // Vérifier le nonce
+    check_admin_referer('terralize_ap_import_photos_zip_nonce');
+    
+    // Vérifier si un fichier a été téléchargé
+    if (!isset($_FILES['photos_zip']) || $_FILES['photos_zip']['error'] !== UPLOAD_ERR_OK) {
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&zip_import_status=error&zip_import_message=' . urlencode('Aucun fichier ZIP valide n\'a été téléchargé.')));
+        exit;
+    }
+    
+    // Vérifier l'extension du fichier
+    $file_info = pathinfo($_FILES['photos_zip']['name']);
+    if (strtolower($file_info['extension']) !== 'zip') {
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&zip_import_status=error&zip_import_message=' . urlencode('Le fichier doit être au format ZIP.')));
+        exit;
+    }
+    
+    // Créer un répertoire temporaire pour extraire le ZIP
+    $temp_dir = wp_upload_dir()['basedir'] . '/temp_photos_' . uniqid();
+    if (!file_exists($temp_dir)) {
+        mkdir($temp_dir, 0755, true);
+    }
+    
+    // Extraire le fichier ZIP
+    $zip = new ZipArchive();
+    if ($zip->open($_FILES['photos_zip']['tmp_name']) !== true) {
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&zip_import_status=error&zip_import_message=' . urlencode('Impossible d\'ouvrir le fichier ZIP.')));
+        exit;
+    }
+    
+    $zip->extractTo($temp_dir);
+    $zip->close();
+    
+    // Récupérer les extensions d'images valides
+    $valid_extensions = array('jpg', 'jpeg', 'png', 'gif');
+    
+    // Parcourir le répertoire de manière récursive pour trouver toutes les images
+    $photos = [];
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($temp_dir));
+    foreach ($iterator as $file) {
+        if ($file->isFile()) {
+            $ext = strtolower(pathinfo($file->getPathname(), PATHINFO_EXTENSION));
+            if (in_array($ext, $valid_extensions)) {
+                $photos[] = $file->getPathname();
+            }
+        }
+    }
+    
+    if (empty($photos)) {
+        // Supprimer le répertoire temporaire
+        terralize_ap_remove_directory($temp_dir);
+        
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&zip_import_status=error&zip_import_message=' . urlencode('Aucune image n\'a été trouvée dans le fichier ZIP.')));
+        exit;
+    }
+    
+    // Récupérer tous les panneaux
+    $panels = get_posts(array(
+        'post_type' => 'poi',
+        'posts_per_page' => -1,
+        'post_status' => 'publish'
+    ));
+    
+    if (empty($panels)) {
+        // Supprimer le répertoire temporaire
+        terralize_ap_remove_directory($temp_dir);
+        
+        wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&zip_import_status=error&zip_import_message=' . urlencode('Aucun panneau trouvé dans la base de données.')));
+        exit;
+    }
+    
+    // Option de remplacement des photos existantes
+    $overwrite_existing = isset($_POST['overwrite_existing']) && $_POST['overwrite_existing'] == '1';
+    
+    $success_count = 0;
+    $skipped_count = 0;
+    
+    foreach ($panels as $panel) {
+        // Récupérer la référence du panneau
+        $reference = get_post_meta($panel->ID, 'panel_reference', true);
+        
+        if (empty($reference)) {
+            continue;
+        }
+        
+        // Vérifier si le panneau a déjà une photo et si on ne veut pas remplacer
+        $existing_photo_id = get_post_meta($panel->ID, 'panel_photo_id', true);
+        if ($existing_photo_id && !$overwrite_existing) {
+            $skipped_count++;
+            continue;
+        }
+        
+        // Vérifier si une photo avec cette référence existe dans notre collection extraite
+        $found_photo = null;
+        foreach ($photos as $photo_path) {
+            $filename = basename($photo_path);
+            // Vérifier si le nom du fichier contient la référence
+            if (stripos($filename, $reference) !== false) {
+                $found_photo = $photo_path;
+                break;
+            }
+        }
+        
+        if ($found_photo) {
+            // Préparer le fichier pour l'import
+            $file = [
+                'name'     => basename($found_photo),
+                'type'     => mime_content_type($found_photo),
+                'tmp_name' => $found_photo,
+                'error'    => 0,
+                'size'     => filesize($found_photo),
+            ];
+            
+            // Si on remplace une photo existante, supprimer l'ancienne
+            if ($existing_photo_id && $overwrite_existing) {
+                wp_delete_attachment($existing_photo_id, true);
+            }
+            
+            // Importer le fichier dans la médiathèque WordPress
+            $attachment_id = media_handle_sideload($file, $panel->ID);
+            
+            if (is_wp_error($attachment_id)) {
+                // Gérer l'erreur silencieusement et continuer
+                continue;
+            }
+            
+            // Associer la photo au panneau
+            update_post_meta($panel->ID, 'panel_photo_id', $attachment_id);
+            
+            // Mettre à jour le titre de l'attachment
+            wp_update_post(array(
+                'ID' => $attachment_id,
+                'post_title' => 'Photo du panneau ' . $reference,
+            ));
+            
+            $success_count++;
+        }
+    }
+    
+    // Supprimer le répertoire temporaire
+    terralize_ap_remove_directory($temp_dir);
+    
+    // Stocker les statistiques
+    update_option('terralize_ap_photos_imported', array(
+        'count' => $success_count + (get_option('terralize_ap_photos_imported')['count'] ?? 0),
+        'date' => current_time('mysql')
+    ));
+    
+    // Rediriger avec un message de succès
+    $message = $success_count . ' photos ont été importées et associées aux panneaux.';
+    if ($skipped_count > 0) {
+        $message .= ' ' . $skipped_count . ' panneaux ont été ignorés car ils avaient déjà une photo.';
+    }
+    
+    wp_redirect(admin_url('admin.php?page=terralize_ap_import_csv&zip_import_status=success&zip_import_message=' . urlencode($message)));
+    exit;
+}
+add_action('admin_post_terralize_ap_import_photos_zip', 'terralize_ap_import_photos_from_zip');
+
+/**
+ * Fonction utilitaire pour supprimer un répertoire et son contenu de manière récursive
+ */
+function terralize_ap_remove_directory($dir) {
+    if (!is_dir($dir)) {
+        return;
+    }
+    
+    $objects = scandir($dir);
+    foreach ($objects as $object) {
+        if ($object != "." && $object != "..") {
+            if (is_dir($dir . DIRECTORY_SEPARATOR . $object)) {
+                terralize_ap_remove_directory($dir . DIRECTORY_SEPARATOR . $object);
+            } else {
+                unlink($dir . DIRECTORY_SEPARATOR . $object);
+            }
+        }
+    }
+    rmdir($dir);
 }
 
 /**

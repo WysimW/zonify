@@ -42,6 +42,16 @@ function terralize_ap_add_poi_meta_boxes() {
         'normal',
         'high'
     );
+    
+    // Nouvelle metabox pour la photo du panneau
+    add_meta_box(
+        'panel_photo_meta_box',
+        'Photo du panneau',
+        'terralize_ap_panel_photo_callback',
+        'poi',
+        'side',
+        'default'
+    );
 }
 add_action('add_meta_boxes', 'terralize_ap_add_poi_meta_boxes');
 
@@ -408,6 +418,81 @@ function terralize_ap_panel_visibility_callback($post) {
 }
 
 /**
+ * Callback pour la metabox de la photo du panneau
+ */
+function terralize_ap_panel_photo_callback($post) {
+    // Récupérer la valeur existante
+    $photo_id = get_post_meta($post->ID, 'panel_photo_id', true);
+    
+    ?>
+    <div class="terralize_ap-meta-field">
+        <div id="panel_photo_container">
+            <?php if ($photo_id) : 
+                $img_url = wp_get_attachment_image_url($photo_id, 'medium');
+            ?>
+                <div class="panel-photo-preview">
+                    <img src="<?php echo esc_url($img_url); ?>" style="max-width:100%; height:auto; margin-bottom:10px;" />
+                    <a href="#" class="remove-panel-photo button"><?php _e('Supprimer la photo', 'terralize-ap'); ?></a>
+                </div>
+            <?php else : ?>
+                <p><?php _e('Aucune photo associée à ce panneau.', 'terralize-ap'); ?></p>
+            <?php endif; ?>
+        </div>
+        <input type="hidden" id="panel_photo_id" name="panel_photo_id" value="<?php echo esc_attr($photo_id); ?>" />
+        <p>
+            <button type="button" class="button" id="upload_panel_photo_button">
+                <?php echo $photo_id ? __('Changer la photo', 'terralize-ap') : __('Ajouter une photo', 'terralize-ap'); ?>
+            </button>
+        </p>
+        <p class="description">Photo du panneau d'affichage</p>
+    </div>
+
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        var file_frame;
+        
+        $('#upload_panel_photo_button').on('click', function(e) {
+            e.preventDefault();
+            
+            if (file_frame) {
+                file_frame.open();
+                return;
+            }
+            
+            file_frame = wp.media.frames.file_frame = wp.media({
+                title: '<?php _e('Sélectionner ou téléverser une photo', 'terralize-ap'); ?>',
+                button: {
+                    text: '<?php _e('Utiliser cette photo', 'terralize-ap'); ?>'
+                },
+                multiple: false
+            });
+            
+            file_frame.on('select', function() {
+                var attachment = file_frame.state().get('selection').first().toJSON();
+                $('#panel_photo_id').val(attachment.id);
+                
+                var preview = '<div class="panel-photo-preview">' +
+                              '<img src="' + attachment.url + '" style="max-width:100%; height:auto; margin-bottom:10px;" />' +
+                              '<a href="#" class="remove-panel-photo button"><?php _e('Supprimer la photo', 'terralize-ap'); ?></a>' +
+                              '</div>';
+                              
+                $('#panel_photo_container').html(preview);
+            });
+            
+            file_frame.open();
+        });
+        
+        $(document).on('click', '.remove-panel-photo', function(e) {
+            e.preventDefault();
+            $('#panel_photo_id').val('');
+            $('#panel_photo_container').html('<p><?php _e('Aucune photo associée à ce panneau.', 'terralize-ap'); ?></p>');
+        });
+    });
+    </script>
+    <?php
+}
+
+/**
  * Sauvegarder les données des meta boxes
  */
 function terralize_ap_save_panel_meta_boxes($post_id) {
@@ -461,7 +546,10 @@ function terralize_ap_save_panel_meta_boxes($post_id) {
         'visibility_angle',
         'visibility_distance',
         'visibility_note',
-        'panel_traffic'
+        'panel_traffic',
+        
+        // Photo
+        'panel_photo_id'
     );
     
     // Sauvegarder chaque champ s'il est présent
@@ -525,6 +613,11 @@ function terralize_ap_save_panel_meta_boxes($post_id) {
         
         update_post_meta($post_id, 'poi_geojson', wp_json_encode($point));
     }
+    
+    // Sauvegarder l'ID de la photo
+    if (isset($_POST['panel_photo_id'])) {
+        update_post_meta($post_id, 'panel_photo_id', absint($_POST['panel_photo_id']));
+    }
 }
 add_action('save_post', 'terralize_ap_save_panel_meta_boxes');
 
@@ -533,17 +626,23 @@ add_action('save_post', 'terralize_ap_save_panel_meta_boxes');
  */
 function terralize_ap_add_panel_admin_columns($columns) {
     $new_columns = array();
+    
+    // Insérer la colonne photo après la case à cocher
     foreach ($columns as $key => $value) {
         $new_columns[$key] = $value;
         
-        // Ajouter nos colonnes personnalisées après le titre
-        if ($key === 'title') {
-            $new_columns['panel_reference'] = 'Référence';
-            $new_columns['panel_type'] = 'Type';
-            $new_columns['panel_location'] = 'Localisation';
-            $new_columns['panel_dimensions'] = 'Dimensions';
+        if ($key === 'cb') {
+            $new_columns['panel_photo'] = __('Photo', 'terralize-ap');
         }
     }
+    
+    // Les autres colonnes personnalisées
+    $new_columns['panel_reference'] = __('Référence', 'terralize-ap');
+    $new_columns['panel_type'] = __('Type', 'terralize-ap');
+    $new_columns['panel_format'] = __('Format', 'terralize-ap');
+    $new_columns['panel_city'] = __('Ville', 'terralize-ap');
+    $new_columns['panel_dept'] = __('Département', 'terralize-ap');
+    $new_columns['panel_disponibilite'] = __('Disponibilité', 'terralize-ap');
     
     return $new_columns;
 }
@@ -554,6 +653,16 @@ add_filter('manage_poi_posts_columns', 'terralize_ap_add_panel_admin_columns');
  */
 function terralize_ap_fill_panel_admin_columns($column, $post_id) {
     switch ($column) {
+        case 'panel_photo':
+            $photo_id = get_post_meta($post_id, 'panel_photo_id', true);
+            if ($photo_id) {
+                $img_url = wp_get_attachment_image_url($photo_id, 'thumbnail');
+                echo '<a href="' . esc_url(get_edit_post_link($post_id)) . '"><img src="' . esc_url($img_url) . '" style="max-width:50px; height:auto;" /></a>';
+            } else {
+                echo '<span class="dashicons dashicons-camera" style="color:#ddd; font-size:24px; width:24px; height:24px;"></span>';
+            }
+            break;
+        
         case 'panel_reference':
             echo esc_html(get_post_meta($post_id, 'panel_reference', true));
             break;
@@ -571,20 +680,24 @@ function terralize_ap_fill_panel_admin_columns($column, $post_id) {
             echo isset($types[$panel_type]) ? esc_html($types[$panel_type]) : '';
             break;
             
-        case 'panel_location':
-            $postal_code = get_post_meta($post_id, 'panel_postal_code', true);
+        case 'panel_format':
+            $format = get_post_meta($post_id, 'panel_format', true);
+            echo esc_html($format);
+            break;
+            
+        case 'panel_city':
             $city = get_post_meta($post_id, 'panel_city_name', true);
-            echo $postal_code ? esc_html($postal_code) . ' ' : '';
             echo esc_html($city);
             break;
             
-        case 'panel_dimensions':
-            $width = get_post_meta($post_id, 'panel_width', true);
-            $height = get_post_meta($post_id, 'panel_height', true);
+        case 'panel_dept':
+            $departement = get_post_meta($post_id, 'panel_departement', true);
+            echo esc_html($departement);
+            break;
             
-            if ($width && $height) {
-                echo esc_html($width) . ' × ' . esc_html($height) . ' cm';
-            }
+        case 'panel_disponibilite':
+            $disponibilite = get_post_meta($post_id, 'panel_disponibilite', true);
+            echo esc_html($disponibilite);
             break;
     }
 }
@@ -596,7 +709,7 @@ add_action('manage_poi_posts_custom_column', 'terralize_ap_fill_panel_admin_colu
 function terralize_ap_sortable_panel_columns($columns) {
     $columns['panel_reference'] = 'panel_reference';
     $columns['panel_type'] = 'panel_type';
-    $columns['panel_location'] = 'panel_city_name';
+    $columns['panel_city_name'] = 'panel_city_name';
     
     return $columns;
 }
@@ -640,6 +753,8 @@ function terralize_ap_panel_admin_scripts() {
     if ($post_type === 'poi') {
         wp_enqueue_script('terralize_ap-panel-admin-js', plugin_dir_url(__FILE__) . '../../assets/js/panel-admin.js', array('jquery'), '1.0', true);
     }
+    
+    wp_enqueue_media();
 }
 add_action('admin_enqueue_scripts', 'terralize_ap_panel_admin_scripts');
 

@@ -4,15 +4,153 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initialisation de la carte v1');
 
-    var options = mapOptions || {};
+    var options = window.mapOptions || {};
+    console.log('Options de la carte:', options);
     
     // Initialisation des variables globales
-    var map;
-    var geoJSONLayer;
     var allResults = [];
     var currentPage = 1;
     var resultsPerPage = 5;
+    var geoJSONLayer;
+    window.maps = window.maps || {};
     
+    // Fonction pour afficher une image en lightbox
+    window.openImageLightbox = function(imgUrl) {
+        // Créer l'overlay pour la lightbox s'il n'existe pas déjà
+        var lightboxOverlay = document.getElementById('image-lightbox-overlay');
+        if (!lightboxOverlay) {
+            lightboxOverlay = document.createElement('div');
+            lightboxOverlay.id = 'image-lightbox-overlay';
+            lightboxOverlay.className = 'lightbox-overlay';
+            lightboxOverlay.innerHTML = `
+                <div class="lightbox-container">
+                    <div class="lightbox-content">
+                        <img id="lightbox-image" src="" alt="Image agrandie" />
+                    </div>
+                    <button class="lightbox-close">×</button>
+                </div>
+            `;
+            document.body.appendChild(lightboxOverlay);
+            
+            // Ajouter les écouteurs d'événements pour fermer la lightbox
+            lightboxOverlay.addEventListener('click', function(event) {
+                if (event.target === lightboxOverlay || event.target.className === 'lightbox-close') {
+                    lightboxOverlay.style.display = 'none';
+                }
+            });
+            
+            // Ajouter les styles CSS pour la lightbox s'ils n'existent pas déjà
+            if (!document.getElementById('lightbox-styles')) {
+                var style = document.createElement('style');
+                style.id = 'lightbox-styles';
+                style.textContent = `
+                    .lightbox-overlay {
+                        display: none;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0, 0, 0, 0.8);
+                        z-index: 10000;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .lightbox-container {
+                        position: relative;
+                        max-width: 90%;
+                        max-height: 90%;
+                    }
+                    .lightbox-content {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .lightbox-content img {
+                        max-width: 100%;
+                        max-height: 80vh;
+                        object-fit: contain;
+                        border: 2px solid white;
+                        border-radius: 4px;
+                    }
+                    .lightbox-close {
+                        position: absolute;
+                        top: -30px;
+                        right: -30px;
+                        background: transparent;
+                        border: none;
+                        color: white;
+                        font-size: 30px;
+                        cursor: pointer;
+                    }
+                    .image-zoom-icon {
+                        position: absolute;
+                        bottom: 10px;
+                        right: 10px;
+                        background-color: rgba(255, 255, 255, 0.8);
+                        border-radius: 50%;
+                        width: 30px;
+                        height: 30px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        cursor: pointer;
+                        color: #333;
+                        font-size: 16px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                        transition: transform 0.2s ease;
+                        z-index: 1;
+                    }
+                    .image-zoom-icon:hover {
+                        transform: scale(1.1);
+                        background-color: rgba(255, 255, 255, 1);
+                    }
+                    .panel-image {
+                        position: relative;
+                    }
+                    .result-image {
+                        position: relative;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // Mettre à jour l'image dans la lightbox
+        var lightboxImage = document.getElementById('lightbox-image');
+        if (lightboxImage) {
+            lightboxImage.src = imgUrl;
+            
+            // Afficher la lightbox
+            lightboxOverlay.style.display = 'flex';
+        }
+    };
+
+    // Définir la fonction switchTab dans le scope global pour les onglets des popups
+    window.switchTab = function(btn, tabId) {
+        var btns = document.querySelectorAll('.panel-popup .tab-btn');
+        for(var i=0; i<btns.length; i++) {
+            btns[i].classList.remove('active');
+            btns[i].style.fontWeight = 'normal';
+            btns[i].style.borderBottomColor = 'transparent';
+            btns[i].style.color = '#333';
+        }
+        btn.classList.add('active');
+        btn.style.fontWeight = 'bold';
+        btn.style.borderBottomColor = '#70c141';
+        btn.style.color = '#70c141';
+        
+        var contents = document.querySelectorAll('.panel-popup .tab-content');
+        for(var j=0; j<contents.length; j++) {
+            contents[j].style.display = 'none';
+        }
+        document.getElementById(tabId).style.display = 'block';
+    };
+
+    // Récupérer l'ID de la carte depuis les options
+    var mapId = options.map_id || '';
+    console.log("ID de la carte:", mapId);
+
     // 1) Choix du provider de tuiles
     var provider = options.tile_provider || 'cartodb_light';
     var tileLayerUrl, attribution;
@@ -49,44 +187,24 @@ document.addEventListener('DOMContentLoaded', function() {
     var centerLat = parseFloat(options.map_center_lat || 46.2276);
     var centerLng = parseFloat(options.map_center_lng || 2.2137);
 
-    map = L.map('map').setView([centerLat, centerLng], zoom);
-    L.tileLayer(tileLayerUrl, {
-        attribution: attribution,
-        maxZoom: 19
-    }).addTo(map);
-
-    // 3) Ajouter le geocoder pour la recherche d'adresses
-    var geocoder = L.Control.geocoder({
-        defaultMarkGeocode: false,
-        position: 'topleft',
-        placeholder: 'Rechercher une adresse...',
-        errorMessage: 'Adresse introuvable'
-    }).on('markgeocode', function(e) {
-        var bbox = e.geocode.bbox;
-        var poly = L.polygon([
-            bbox.getSouthEast(),
-            bbox.getNorthEast(),
-            bbox.getNorthWest(),
-            bbox.getSouthWest()
-        ]);
-        map.fitBounds(poly.getBounds());
-    }).addTo(map);
-
-    // 4) Styles pour les marqueurs de panneaux
-    var markerStyle = {
-        radius: 8,
-        fillColor: "#70c141",
-        color: "#70c141",
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.6
-    };
-
-    // 5) Filtrer et afficher les données sur la carte
-    function filterAndRenderData(filters) {
+    // Trouver tous les conteneurs de carte sur la page
+    var mapContainers = document.querySelectorAll('.affichage-premier-map');
+    
+    // Définir filterAndRenderData en dehors de la boucle pour qu'elle soit accessible globalement
+    function filterAndRenderData(filters, currentMap, mapId) {
+        // S'assurer que currentMap est défini
+        if (!currentMap && mapId) {
+            currentMap = window.maps[mapId];
+        }
+        
+        if (!currentMap) {
+            console.error("Carte non définie pour le filtrage des données");
+            return;
+        }
+        
         // Supprimer la couche existante si elle existe
         if (geoJSONLayer) {
-            map.removeLayer(geoJSONLayer);
+            currentMap.removeLayer(geoJSONLayer);
         }
 
         // Initialiser ou utiliser les filtres par défaut
@@ -414,6 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     region: feature.properties.region || '',
                     status: status,
                     image: feature.properties.image || '',
+                    photo_url: feature.properties.photo_url || '',
                     visibility_from: feature.properties.visibility_from || '',
                     visibility_to: feature.properties.visibility_to || '',
                     visibility_angle: feature.properties.visibility_angle || '',
@@ -427,13 +546,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Mettre à jour le nombre de résultats et la liste des résultats
-        updateResultsCount(displayedResults.length);
-        updateResultsList(displayedResults);
+        updateResultsCount(displayedResults.length, mapId);
+        updateResultsList(displayedResults, mapId);
 
         // Créer et ajouter la nouvelle couche GeoJSON
         geoJSONLayer = L.geoJSON(filteredData, {
             pointToLayer: function(feature, latlng) {
-                // Utiliser l'icône SVG personnalisée pour tous les panneaux
                 var icon = L.icon({
                     iconUrl: '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin.svg',
                     iconSize: [30, 40],
@@ -443,25 +561,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 return L.marker(latlng, { icon: icon });
             },
             onEachFeature: function(feature, layer) {
-                // Au clic sur le panneau
                 layer.on('click', function() {
-                    // Construire le contenu de la popup
                     var content = createPopupContent(feature.properties);
-                    
-                    // Ouvrir la popup
                     L.popup()
                         .setLatLng(layer.getLatLng())
                         .setContent(content)
-                        .openOn(map);
+                        .openOn(currentMap);
                 });
             }
-        }).addTo(map);
+        }).addTo(currentMap);
 
         // Ajuster la vue si nécessaire
         if (filteredData.length > 0) {
             try {
                 if (geoJSONLayer && typeof geoJSONLayer.getBounds === 'function') {
-                    map.fitBounds(geoJSONLayer.getBounds());
+                    currentMap.fitBounds(geoJSONLayer.getBounds());
                 }
             } catch (e) {
                 console.error("Impossible d'ajuster la vue:", e);
@@ -469,19 +583,188 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    /**
-     * Fonction pour calculer la distance entre deux points GPS en kilomètres (formule de Haversine)
-     */
-    function calculateDistance(lat1, lng1, lat2, lng2) {
-        const R = 6371; // Rayon de la Terre en kilomètres
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                  Math.sin(dLng/2) * Math.sin(dLng/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const distance = R * c;
-        return distance; // Distance en kilomètres
+    // Fonction pour mettre à jour le compteur de résultats
+    function updateResultsCount(count, mapId) {
+        var resultsCountEl = document.getElementById('results-count-' + mapId);
+        var tabResultsCount = document.getElementById('tab-results-count-' + mapId);
+        var resultsCounter = document.getElementById('results-counter-' + mapId);
+
+        if (resultsCountEl) {
+            resultsCountEl.textContent = `(${count})`;
+        }
+
+        if (tabResultsCount) {
+            tabResultsCount.textContent = count;
+        }
+
+        if (resultsCounter) {
+            resultsCounter.textContent = `(${count})`;
+        }
+    }
+
+    // Fonction pour mettre à jour la liste des résultats
+    function updateResultsList(results, mapId) {
+        allResults = results;
+        var resultsListEl = document.getElementById('results-list-' + mapId);
+        if (!resultsListEl) return;
+
+        if (results.length === 0) {
+            resultsListEl.innerHTML = '<p class="no-results">Aucun panneau ne correspond à vos critères.</p>';
+            currentPage = 1;
+            updatePagination(results, mapId);
+            return;
+        }
+
+        currentPage = 1;
+        displayResultsPage(1, mapId);
+        updatePagination(results, mapId);
+    }
+
+    mapContainers.forEach(function(container) {
+        var mapId = container.id;
+        if (!mapId) {
+            console.error('Conteneur de carte sans ID trouvé');
+            return;
+        }
+
+        // Initialiser la carte pour ce conteneur
+        var currentMap = L.map(mapId).setView([centerLat, centerLng], zoom);
+        
+        // Stocker la référence de la carte dans un objet global
+        window.maps = window.maps || {};
+        window.maps[mapId] = currentMap;
+        
+        console.log("Carte créée avec ID:", mapId);
+        
+        // Corriger le problème de carte grise en forçant un invalidateSize après chargement
+        setTimeout(function() {
+            currentMap.invalidateSize(true);
+        }, 300);
+
+        // Fonction pour mettre à jour la taille de la carte
+        function updateMapSize(mapId) {
+            var map = window.maps[mapId];
+            if (map && typeof map.invalidateSize === 'function') {
+                setTimeout(function() {
+                    map.invalidateSize(true);
+                }, 300);
+            }
+        }
+
+        // Fonction pour ouvrir la sidebar
+        function openSidebar(tabName, mapId) {
+            var sidebar = document.querySelector('.map-sidebar[data-map-id="' + mapId + '"]');
+            var mapContainer = document.querySelector('.map-container-wrapper[data-map-id="' + mapId + '"]');
+            
+            if (!sidebar || !mapContainer) {
+                console.error('Éléments de sidebar non trouvés pour mapId:', mapId);
+                return;
+            }
+
+            mapContainer.classList.add('sidebar-open');
+            sidebar.classList.add('sidebar-visible');
+            
+            if (tabName) {
+                var tabBtn = document.querySelector('.tab-btn[data-tab="' + tabName + '"][data-map-id="' + mapId + '"]');
+                if (tabBtn) {
+                    tabBtn.click();
+                }
+            }
+            
+            var expandMapBtn = document.getElementById('expand-map-' + mapId);
+            if (expandMapBtn) {
+                expandMapBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                Réduire
+                `;
+            }
+            
+            updateMapSize(mapId);
+        }
+
+        L.tileLayer(tileLayerUrl, {
+            attribution: attribution,
+            maxZoom: 19
+        }).addTo(currentMap);
+
+        // Ajouter le geocoder pour la recherche d'adresses
+        var geocoder = L.Control.geocoder({
+            defaultMarkGeocode: false,
+            position: 'topleft',
+            placeholder: 'Rechercher une adresse...',
+            errorMessage: 'Adresse introuvable'
+        }).on('markgeocode', function(e) {
+            var bbox = e.geocode.bbox;
+            var poly = L.polygon([
+                bbox.getSouthEast(),
+                bbox.getNorthEast(),
+                bbox.getNorthWest(),
+                bbox.getSouthWest()
+            ]);
+            currentMap.fitBounds(poly.getBounds());
+        }).addTo(currentMap);
+
+        // Initialiser la carte avec toutes les données
+        filterAndRenderData({}, currentMap, mapId);
+
+        // Gestion des boutons de contrôle pour cette instance
+        var toggleFiltersBtn = document.getElementById('toggle-filters-' + mapId);
+        var toggleResultsBtn = document.getElementById('toggle-results-' + mapId);
+        var expandMapBtn = document.getElementById('expand-map-' + mapId);
+        var sidebar = document.querySelector('.map-sidebar[data-map-id="' + mapId + '"]');
+        var mapContainer = document.querySelector('.map-container-wrapper[data-map-id="' + mapId + '"]');
+
+        if (toggleFiltersBtn) {
+            toggleFiltersBtn.addEventListener('click', function() {
+                openSidebar('filters', mapId);
+                // Forcer un redimensionnement de la carte après que la sidebar soit ouverte
+                updateMapSize(mapId);
+            });
+        }
+
+        if (toggleResultsBtn) {
+            toggleResultsBtn.addEventListener('click', function() {
+                openSidebar('results', mapId);
+                // Forcer un redimensionnement de la carte après que la sidebar soit ouverte
+                updateMapSize(mapId);
+            });
+        }
+
+        if (expandMapBtn) {
+            expandMapBtn.addEventListener('click', function() {
+                if (this.textContent.trim() === 'Réduire') {
+                    closeSidebar(mapId);
+                } else {
+                    openSidebar(null, mapId);
+                }
+                // Forcer un redimensionnement de la carte après changement d'état
+                updateMapSize(mapId);
+            });
+        }
+    });
+
+    // Fonction pour fermer la sidebar
+    function closeSidebar(mapId) {
+        var sidebar = document.querySelector('.map-sidebar[data-map-id="' + mapId + '"]');
+        var mapContainer = document.querySelector('.map-container-wrapper[data-map-id="' + mapId + '"]');
+        
+        if (!sidebar || !mapContainer) {
+            console.error('Éléments de sidebar non trouvés pour mapId:', mapId);
+            return;
+        }
+
+        mapContainer.classList.remove('sidebar-open');
+        sidebar.classList.remove('sidebar-visible');
+        
+        var expandMapBtn = document.getElementById('expand-map-' + mapId);
+        if (expandMapBtn) {
+            expandMapBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+            Plein écran
+            `;
+        }
+        
+        updateMapSize(mapId);
     }
 
     // 6) Générer le contenu de la popup pour un panneau
@@ -489,7 +772,8 @@ document.addEventListener('DOMContentLoaded', function() {
         var content = '<div class="panel-popup" style="' +
             'font-family:' + (options.popup_font_family || 'Arial,sans-serif') + ';' +
             ' font-size:' + (options.popup_font_size || '14px') + ';' +
-            ' color:' + (options.popup_font_color || '#333') + ';">';
+            ' color:' + (options.popup_font_color || '#333') + ';' +
+            ' width: 320px;">';
         
         // Titre avec référence
         content += '<h3 style="margin: 0 0 10px; color: #70c141;">' + panel.title;
@@ -498,17 +782,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         content += '</h3>';
         
-        // Image si disponible
+        // Image en haut de la popup, avant les onglets
         if (panel.image) {
-            content += '<div class="panel-image" style="text-align: center; margin-bottom: 10px;">' +
-                       '<img src="' + panel.image + '" alt="' + panel.title + '" style="max-width: 100%; max-height: 150px; border-radius: 4px;">' +
+            content += '<div class="panel-image" style="text-align: center; margin-bottom: 15px; position: relative;">' +
+                       '<img src="' + panel.image + '" alt="' + panel.title + '" style="max-width: 100%; max-height: 180px; border-radius: 4px; object-fit: cover;">' +
+                       '<div class="image-zoom-icon" onclick="openImageLightbox(\'' + panel.image + '\')" title="Agrandir l\'image">' +
+                       '<i class="fas fa-search-plus"></i>' +
+                       '</div>' +
+                       '</div>';
+        } else if (panel.photo_url) {
+            // Utiliser la propriété photo_url si disponible comme alternative
+            content += '<div class="panel-image" style="text-align: center; margin-bottom: 15px; position: relative;">' +
+                       '<img src="' + panel.photo_url + '" alt="' + panel.title + '" style="max-width: 100%; max-height: 180px; border-radius: 4px; object-fit: cover;">' +
+                       '<div class="image-zoom-icon" onclick="openImageLightbox(\'' + panel.photo_url + '\')" title="Agrandir l\'image">' +
+                       '<i class="fas fa-search-plus"></i>' +
+                       '</div>' +
+                       '</div>';
+        } else {
+            // Placeholder pour l'image si aucune image n'est disponible
+            content += '<div class="panel-image" style="text-align: center; margin-bottom: 15px; background-color: #f5f5f5; border-radius: 4px; padding: 30px; height: 100px; display: flex; align-items: center; justify-content: center;">' +
+                       '<span style="color: #999;">Aucune image disponible</span>' +
                        '</div>';
         }
         
-        content += '<div class="panel-details" style="margin-top: 10px;">';
+        // Système d'onglets avec onclick directement sur les boutons
+        content += '<div class="panel-tabs" style="margin-bottom: 15px;">';
+        content += '<div class="tab-headers" style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 10px;">';
         
-        // Section 1: Détails techniques
-        content += '<div class="details-section" style="margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px;">';
+        // Boutons des onglets avec onclick
+        content += '<div class="tab-btn active" onclick="switchTab(this, \'tech-content\')" ' +
+                  'style="flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: bold; border-bottom: 3px solid #70c141; color: #70c141;">Technique</div>';
+        
+        content += '<div class="tab-btn" onclick="switchTab(this, \'location-content\')" ' +
+                  'style="flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: normal; border-bottom: 3px solid transparent;">Localisation</div>';
+        
+        content += '<div class="tab-btn" onclick="switchTab(this, \'visibility-content\')" ' +
+                  'style="flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: normal; border-bottom: 3px solid transparent;">Visibilité</div>';
+        
+        content += '</div>'; // Fin tab-headers
+        
+        // Contenu des onglets
+        content += '<div class="tab-contents">';
+        
+        // Onglet 1: Infos techniques
+        content += '<div class="tab-content active" id="tech-content" style="display: block;">';
         content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Informations techniques</h4>';
         
         // Type et support
@@ -544,10 +861,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (panel.panel_date_fin) {
             content += '<p style="margin: 3px 0;"><strong>Fin d\'engagement:</strong> ' + panel.panel_date_fin + '</p>';
         }
-        content += '</div>';
         
-        // Section 2: Localisation
-        content += '<div class="details-section" style="margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px;">';
+        content += '</div>'; // Fin tech-content
+        
+        // Onglet 2: Localisation
+        content += '<div class="tab-content" id="location-content" style="display: none;">';
         content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Localisation</h4>';
         
         // Adresse complète
@@ -570,10 +888,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (panel.panel_latitude && panel.panel_longitude) {
             content += '<p style="margin: 3px 0;"><strong>Coordonnées GPS:</strong> ' + panel.panel_latitude + ', ' + panel.panel_longitude + '</p>';
         }
-        content += '</div>';
         
-        // Section 3: Visibilité
-        content += '<div class="details-section">';
+        content += '</div>'; // Fin location-content
+        
+        // Onglet 3: Visibilité
+        content += '<div class="tab-content" id="visibility-content" style="display: none;">';
         content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Visibilité</h4>';
         
         // Informations de visibilité
@@ -601,11 +920,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (panel.visibility_note) {
             content += '<p style="margin: 3px 0;"><strong>Notes:</strong> ' + panel.visibility_note + '</p>';
         }
-        content += '</div>';
         
-
+        content += '</div>'; // Fin visibility-content
         
-        content += '</div>'; // Fin panel-details
+        content += '</div>'; // Fin tab-contents
+        content += '</div>'; // Fin panel-tabs
         
         // Bouton pour contacter / en savoir plus
         content += '<div class="panel-actions" style="margin-top: 15px; text-align: center;">' +
@@ -644,53 +963,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return addressParts.join(', ');
     }
 
-    // 8) Mettre à jour le compteur de résultats
-    function updateResultsCount(count) {
-        var resultsCountEl = document.getElementById('results-count');
-        var tabResultsCount = document.getElementById('tab-results-count');
-        var resultsCounter = document.getElementById('results-counter');
-
-        if (resultsCountEl) {
-            resultsCountEl.textContent = `(${count})`;
-        }
-
-        if (tabResultsCount) {
-            tabResultsCount.textContent = count;
-        }
-
-        if (resultsCounter) {
-            resultsCounter.textContent = `(${count})`;
-        }
-    }
-
-    // 9) Mettre à jour la liste des résultats
-    function updateResultsList(results) {
-        // Stocker tous les résultats pour la pagination
-        allResults = results;
-
-        var resultsListEl = document.getElementById('results-list');
-        if (!resultsListEl) return;
-
-        if (results.length === 0) {
-            resultsListEl.innerHTML = '<p class="no-results">Aucun panneau ne correspond à vos critères.</p>';
-            // Réinitialiser la pagination
-            currentPage = 1;
-            updatePagination(results);
-            return;
-        }
-
-        // Reset à la première page lors d'une nouvelle recherche
-        currentPage = 1;
-
-        // Afficher la première page des résultats
-        displayResultsPage(1);
-
-        // Mettre à jour les contrôles de pagination
-        updatePagination(results);
-    }
-
-    // 10) Afficher une page spécifique de résultats
-    function displayResultsPage(page) {
+    // 8) Afficher une page spécifique de résultats
+    function displayResultsPage(page, mapId) {
         // Vérifier si la page est valide
         var totalPages = Math.max(1, Math.ceil(allResults.length / resultsPerPage));
         if (page < 1) page = 1;
@@ -706,15 +980,15 @@ document.addEventListener('DOMContentLoaded', function() {
         var pageResults = allResults.slice(startIndex, endIndex);
 
         // Mettre à jour le DOM avec cette page de résultats
-        renderResultsList(pageResults);
+        renderResultsList(pageResults, mapId);
 
         // Mettre à jour les contrôles de pagination
-        updatePagination(allResults);
+        updatePagination(allResults, mapId);
     }
 
-    // 11) Afficher la liste des résultats dans le panneau latéral
-    function renderResultsList(pageResults) {
-        var resultsListEl = document.getElementById('results-list');
+    // 9) Afficher la liste des résultats dans le panneau latéral
+    function renderResultsList(pageResults, mapId) {
+        var resultsListEl = document.getElementById('results-list-' + mapId);
         if (!resultsListEl) return;
 
         var html = '';
@@ -733,6 +1007,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.image) {
                 html += `<div class="result-image">
                     <img src="${result.image}" alt="${result.title}" />
+                    <div class="image-zoom-icon" onclick="openImageLightbox('${result.image}')" title="Agrandir l'image">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>`;
+            } else if (result.photo_url) {
+                html += `<div class="result-image">
+                    <img src="${result.photo_url}" alt="${result.title}" />
+                    <div class="image-zoom-icon" onclick="openImageLightbox('${result.photo_url}')" title="Agrandir l'image">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
                 </div>`;
             }
                 
@@ -845,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             html += `</div>
-                <button class="locate-on-map" data-id="${result.id}">
+                <button class="locate-on-map" data-id="${result.id}" data-map-id="${mapId}">
                     Localiser sur la carte
                 </button>
                 <a href="/contact/?panel_id=${result.id}' + 
@@ -866,6 +1150,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.locate-on-map').forEach(function(button) {
             button.addEventListener('click', function() {
                 var id = parseInt(this.getAttribute('data-id'));
+                var mapId = this.getAttribute('data-map-id');
+                
+                if (!mapId) {
+                    console.error("ID de carte non défini pour la localisation");
+                    return;
+                }
+                
+                var currentMap = window.maps[mapId];
+                if (!currentMap) {
+                    console.error("Carte non trouvée pour l'ID:", mapId);
+                    return;
+                }
 
                 // Trouver l'élément correspondant dans les données
                 var feature = panneauxData.find(f => f.properties.id === id);
@@ -875,7 +1171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (layer.feature && layer.feature.properties.id === id) {
                             // Centrer la carte sur cette couche
                             if (layer.getLatLng) {
-                                map.setView(layer.getLatLng(), 15);
+                                currentMap.setView(layer.getLatLng(), 15);
                             }
 
                             // Simuler un clic sur la couche pour ouvrir la popup
@@ -887,17 +1183,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 12) Mettre à jour les contrôles de pagination
-    function updatePagination(totalResults) {
+    // 10) Mettre à jour les contrôles de pagination
+    function updatePagination(totalResults, mapId) {
         var totalPages = Math.max(1, Math.ceil(totalResults.length / resultsPerPage));
 
         // Mettre à jour les compteurs
-        document.getElementById('current-page').textContent = currentPage;
-        document.getElementById('total-pages').textContent = totalPages;
+        document.getElementById('current-page-' + mapId).textContent = currentPage;
+        document.getElementById('total-pages-' + mapId).textContent = totalPages;
 
         // Activer/désactiver les boutons de pagination
-        var prevButton = document.getElementById('prev-page');
-        var nextButton = document.getElementById('next-page');
+        var prevButton = document.getElementById('prev-page-' + mapId);
+        var nextButton = document.getElementById('next-page-' + mapId);
 
         if (prevButton) {
             prevButton.disabled = currentPage <= 1;
@@ -908,43 +1204,107 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 13) Initialiser Select2 pour les filtres
+    // 11) Initialiser Select2 pour les filtres
     if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
-        jQuery('#category-filter').select2({
+        // Utiliser le mapId correct pour les sélecteurs
+        jQuery('#category-filter-' + mapId).select2({
             placeholder: "Sélectionnez une ou plusieurs catégories",
             allowClear: true,
             width: '100%',
             closeOnSelect: false
         });
 
-        jQuery('#city-filter').select2({
+        jQuery('#city-filter-' + mapId).select2({
             placeholder: "Sélectionnez une ou plusieurs villes",
             allowClear: true,
             width: '100%',
             closeOnSelect: false
         });
 
-        jQuery('#department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter, #radius-filter').select2({
+        jQuery('#department-filter-' + mapId + ', #region-filter-' + mapId + ', #type-filter-' + mapId + ', #support-filter-' + mapId + ', #format-filter-' + mapId + ', #status-filter-' + mapId + ', #radius-filter-' + mapId).select2({
             width: '100%',
             placeholder: "Sélectionner...",
             allowClear: true
         });
 
         // Nouveaux sélecteurs pour le filtre de rayon
-        jQuery('#center-city-filter').select2({
+        jQuery('#center-city-filter-' + mapId).select2({
             width: '100%',
             placeholder: "Sélectionner une ville centrale",
             allowClear: true
+        }).on('change', function() {
+            // Réagir au changement de ville centrale
+            var centerCityValue = jQuery(this).val();
+            var mapId = this.id.replace('center-city-filter-', '');
+            var currentMap = window.maps[mapId];
+            
+            // Supprimer les marqueurs de ville et cercles de rayon précédents
+            if (window.cityMarker) {
+                currentMap.removeLayer(window.cityMarker);
+                window.cityMarker = null;
+            }
+            
+            if (window.cityRadiusCircle) {
+                currentMap.removeLayer(window.cityRadiusCircle);
+                window.cityRadiusCircle = null;
+            }
+            
+            if (!centerCityValue) return;
+            
+            // Parser les informations de la ville
+            var centerCity = parseCenterCity(centerCityValue);
+            if (!centerCity) return;
+            
+            console.log("Ville sélectionnée:", centerCity);
+            
+            // Centrer la carte sur la ville sélectionnée
+            currentMap.setView([centerCity.latitude, centerCity.longitude], 13);
+            
+            // Ajouter un marqueur pour la ville sélectionnée
+            window.cityMarker = L.marker([centerCity.latitude, centerCity.longitude], {
+                icon: L.icon({
+                    iconUrl: '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/city-building-svgrepo-com.svg',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -30]
+                })
+            }).addTo(currentMap);
+            
+            // Vérifier si un rayon est déjà sélectionné et l'afficher
+            var radiusKm = jQuery('#radius-km-filter-' + mapId).val();
+            if (radiusKm) {
+                displayCityRadius(centerCity, radiusKm, currentMap);
+            }
         });
 
-        jQuery('#radius-km-filter').select2({
+        jQuery('#radius-km-filter-' + mapId).select2({
             width: '100%',
             placeholder: "Sélectionner un rayon",
             allowClear: true
+        }).on('change', function() {
+            var radiusKm = jQuery(this).val();
+            var mapId = this.id.replace('radius-km-filter-', '');
+            var currentMap = window.maps[mapId];
+            
+            // Supprimer le cercle existant s'il y en a un
+            if (window.cityRadiusCircle) {
+                currentMap.removeLayer(window.cityRadiusCircle);
+                window.cityRadiusCircle = null;
+            }
+            
+            // Vérifier si une ville est sélectionnée
+            var centerCityValue = jQuery('#center-city-filter-' + mapId).val();
+            if (!centerCityValue || !radiusKm) return;
+            
+            var centerCity = parseCenterCity(centerCityValue);
+            if (!centerCity) return;
+            
+            // Afficher le cercle de rayon
+            displayCityRadius(centerCity, radiusKm, currentMap);
         });
         
         // Initialiser Select2 pour tous les autres sélecteurs avec la classe select2-filter
-        jQuery('.select2-filter').not('#category-filter, #city-filter, #department-filter, #region-filter, #type-filter, #support-filter, #format-filter, #status-filter, #radius-filter, #center-city-filter, #radius-km-filter').select2({
+        jQuery('.select2-filter').not('#category-filter-' + mapId + ', #city-filter-' + mapId + ', #department-filter-' + mapId + ', #region-filter-' + mapId + ', #type-filter-' + mapId + ', #support-filter-' + mapId + ', #format-filter-' + mapId + ', #status-filter-' + mapId + ', #radius-filter-' + mapId + ', #center-city-filter-' + mapId + ', #radius-km-filter-' + mapId).select2({
             width: '100%',
             placeholder: function() {
                 return jQuery(this).attr('data-placeholder') || '';
@@ -953,236 +1313,274 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Initialiser Select2 pour le rayon de géolocalisation
-        jQuery('#geo-radius-filter').select2({
+        jQuery('#geo-radius-filter-' + mapId).select2({
             width: '100%',
             minimumResultsForSearch: Infinity, // Désactiver la recherche pour ce sélecteur
             dropdownCssClass: 'geo-radius-dropdown'
         });
     }
-
-    // 14) Gestionnaires d'événements pour les filtres
-    var applyFilterBtn = document.getElementById('apply-filter');
-    var resetFilterBtn = document.getElementById('reset-filter');
     
-    // Fonction pour obtenir la valeur d'un élément DOM de manière sécurisée
-    function getElementValue(id) {
-        var element = document.getElementById(id);
-        return element ? element.value : '';
-    }
-    
-    // Fonction pour obtenir une valeur numérique d'un élément DOM de manière sécurisée
-    function getElementNumericValue(id) {
-        var element = document.getElementById(id);
-        return element && element.value ? parseInt(element.value) : 0;
-    }
-    
-    // Fonction pour parser les informations de la ville centrale
-    function parseCenterCity(centerCityValue) {
-        if (!centerCityValue) return null;
+    // Fonction pour afficher un cercle de rayon autour d'une ville
+    function displayCityRadius(centerCity, radiusKm, map) {
+        radiusKm = parseFloat(radiusKm);
+        if (isNaN(radiusKm) || radiusKm <= 0) return;
         
-        var parts = centerCityValue.split('|');
-        if (parts.length >= 3) {
-            return {
-                id: parts[0],
-                latitude: parts[1],
-                longitude: parts[2]
-            };
-        }
-        return null;
+        // Créer un cercle pour visualiser le rayon
+        window.cityRadiusCircle = L.circle([centerCity.latitude, centerCity.longitude], {
+            radius: radiusKm * 1000, // Convertir en mètres
+            color: '#70c141',
+            fillColor: '#70c141',
+            fillOpacity: 0.1,
+            weight: 2
+        }).addTo(map);
+        
+        // Ajuster la vue pour voir tout le cercle
+        map.fitBounds(window.cityRadiusCircle.getBounds());
     }
-    
-    // Appliquer les filtres
-    if (applyFilterBtn) {
-        applyFilterBtn.addEventListener('click', function() {
+
+    // 12) Gestionnaires d'événements pour les filtres
+    // Fonction pour appliquer les filtres
+    document.querySelectorAll('[id^="apply-filter-"]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Extraire l'ID de la carte à partir de l'ID du bouton
+            var buttonId = this.id;
+            var mapId = buttonId.replace('apply-filter-', '');
+            
+            var currentMap = window.maps[mapId];
+            if (!currentMap) {
+                console.error("Carte non trouvée pour l'ID:", mapId);
+                return;
+            }
+            
+            console.log("Application des filtres pour la carte:", mapId);
+            
             // Récupérer les valeurs de filtres
             var selectedCategories = [];
-            if (typeof jQuery !== 'undefined' && jQuery('#category-filter').length) {
-                selectedCategories = jQuery('#category-filter').val() || [];
+            if (typeof jQuery !== 'undefined' && jQuery('#category-filter-' + mapId).length) {
+                selectedCategories = jQuery('#category-filter-' + mapId).val() || [];
             }
             
             var selectedCities = [];
-            if (typeof jQuery !== 'undefined' && jQuery('#city-filter').length) {
-                selectedCities = jQuery('#city-filter').val() || [];
+            if (typeof jQuery !== 'undefined' && jQuery('#city-filter-' + mapId).length) {
+                selectedCities = jQuery('#city-filter-' + mapId).val() || [];
             }
             
             // Récupérer la ville centrale et le rayon
-            var centerCityValue = getElementValue('center-city-filter');
+            var centerCityValue = getElementValue('center-city-filter-' + mapId);
             var centerCity = parseCenterCity(centerCityValue);
-            var radiusKm = getElementValue('radius-km-filter');
+            var radiusKm = getElementValue('radius-km-filter-' + mapId);
+            
+            // Si une ville est sélectionnée et un rayon spécifié, afficher le cercle de rayon
+            if (centerCity && radiusKm) {
+                // Si un cercle existe déjà, le supprimer
+                if (window.cityRadiusCircle) {
+                    currentMap.removeLayer(window.cityRadiusCircle);
+                    window.cityRadiusCircle = null;
+                }
+                
+                // Afficher le cercle de rayon
+                displayCityRadius(centerCity, radiusKm, currentMap);
+            }
             
             var filters = {
-                search: getElementValue('search-filter'),
+                search: getElementValue('search-filter-' + mapId),
                 categories: selectedCategories,
                 cities: selectedCities,
-                department: getElementValue('department-filter'),
-                region: getElementValue('region-filter'),
-                type: getElementValue('type-filter'),
-                support: getElementValue('support-filter'),
-                format: getElementValue('format-filter'),
-                status: getElementValue('status-filter'),
-                minWidth: getElementNumericValue('min-width'),
-                maxWidth: getElementNumericValue('max-width'),
-                minHeight: getElementNumericValue('min-height'),
-                maxHeight: getElementNumericValue('max-height'),
+                department: getElementValue('department-filter-' + mapId),
+                region: getElementValue('region-filter-' + mapId),
+                type: getElementValue('type-filter-' + mapId),
+                support: getElementValue('support-filter-' + mapId),
+                format: getElementValue('format-filter-' + mapId),
+                status: getElementValue('status-filter-' + mapId),
+                minWidth: getElementNumericValue('min-width-' + mapId),
+                maxWidth: getElementNumericValue('max-width-' + mapId),
+                minHeight: getElementNumericValue('min-height-' + mapId),
+                maxHeight: getElementNumericValue('max-height-' + mapId),
                 centerCity: centerCity,
                 radiusKm: radiusKm
             };
 
             console.log("Application des filtres:", filters);
             // Appliquer les filtres
-            filterAndRenderData(filters);
+            filterAndRenderData(filters, currentMap, mapId);
         });
-    }
+    });
 
-    // Réinitialiser les filtres
-    if (resetFilterBtn) {
-        resetFilterBtn.addEventListener('click', function() {
+    // Fonction pour réinitialiser les filtres
+    document.querySelectorAll('[id^="reset-filter-"]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Extraire l'ID de la carte à partir de l'ID du bouton
+            var buttonId = this.id;
+            var mapId = buttonId.replace('reset-filter-', '');
+            
+            var currentMap = window.maps[mapId];
+            if (!currentMap) {
+                console.error("Carte non trouvée pour l'ID:", mapId);
+                return;
+            }
+            
             // Réinitialiser les valeurs de filtres de manière sécurisée
-            var searchFilter = document.getElementById('search-filter');
+            var searchFilter = document.getElementById('search-filter-' + mapId);
             if (searchFilter) searchFilter.value = '';
             
-            var minWidth = document.getElementById('min-width');
+            var minWidth = document.getElementById('min-width-' + mapId);
             if (minWidth) minWidth.value = '';
             
-            var maxWidth = document.getElementById('max-width');
+            var maxWidth = document.getElementById('max-width-' + mapId);
             if (maxWidth) maxWidth.value = '';
             
-            var minHeight = document.getElementById('min-height');
+            var minHeight = document.getElementById('min-height-' + mapId);
             if (minHeight) minHeight.value = '';
             
-            var maxHeight = document.getElementById('max-height');
+            var maxHeight = document.getElementById('max-height-' + mapId);
             if (maxHeight) maxHeight.value = '';
             
-            var centerCityFilter = document.getElementById('center-city-filter');
+            var centerCityFilter = document.getElementById('center-city-filter-' + mapId);
             if (centerCityFilter) centerCityFilter.value = '';
             
-            var radiusKmFilter = document.getElementById('radius-km-filter');
+            var radiusKmFilter = document.getElementById('radius-km-filter-' + mapId);
             if (radiusKmFilter) radiusKmFilter.value = '';
             
             // Réinitialiser les contrôles de géolocalisation
-            var geoRadiusContainer = document.getElementById('geo-radius-container');
+            var geoRadiusContainer = document.getElementById('geo-radius-container-' + mapId);
             if (geoRadiusContainer) geoRadiusContainer.style.display = 'none';
             
-            var locateMeBtn = document.getElementById('locate-me-btn');
+            var locateMeBtn = document.getElementById('locate-me-btn-' + mapId);
             if (locateMeBtn) {
                 locateMeBtn.innerHTML = '<i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> Me localiser';
                 locateMeBtn.style.backgroundColor = '#70c141';
                 locateMeBtn.disabled = false;
             }
             
-            var geoStatus = document.getElementById('geo-status');
+            var geoStatus = document.getElementById('geo-status-' + mapId);
             if (geoStatus) {
                 geoStatus.textContent = '';
             }
             
             // Supprimer le cercle et le marqueur de géolocalisation
             if (radiusCircle) {
-                map.removeLayer(radiusCircle);
+                currentMap.removeLayer(radiusCircle);
                 radiusCircle = null;
             }
             
             if (window.userMarker) {
-                map.removeLayer(window.userMarker);
+                currentMap.removeLayer(window.userMarker);
                 window.userMarker = null;
             }
             
+            // Supprimer le cercle et le marqueur de ville
+            if (window.cityRadiusCircle) {
+                currentMap.removeLayer(window.cityRadiusCircle);
+                window.cityRadiusCircle = null;
+            }
+            
+            if (window.cityMarker) {
+                currentMap.removeLayer(window.cityMarker);
+                window.cityMarker = null;
+            }
+            
             // Supprimer la notification du filtre géographique
-            var geoFilterInfo = document.getElementById('geo-filter-info');
+            var geoFilterInfo = document.getElementById('geo-filter-info-' + mapId);
             if (geoFilterInfo) geoFilterInfo.remove();
             
             if (typeof jQuery !== 'undefined') {
-                if (jQuery('#category-filter').length) jQuery('#category-filter').val(null).trigger('change');
-                if (jQuery('#city-filter').length) jQuery('#city-filter').val(null).trigger('change');
-                if (jQuery('#department-filter').length) jQuery('#department-filter').val(null).trigger('change');
-                if (jQuery('#region-filter').length) jQuery('#region-filter').val(null).trigger('change');
-                if (jQuery('#type-filter').length) jQuery('#type-filter').val(null).trigger('change');
-                if (jQuery('#support-filter').length) jQuery('#support-filter').val(null).trigger('change');
-                if (jQuery('#format-filter').length) jQuery('#format-filter').val(null).trigger('change');
-                if (jQuery('#status-filter').length) jQuery('#status-filter').val(null).trigger('change');
-                if (jQuery('#radius-filter').length) jQuery('#radius-filter').val(null).trigger('change');
-                if (jQuery('#center-city-filter').length) jQuery('#center-city-filter').val(null).trigger('change');
-                if (jQuery('#radius-km-filter').length) jQuery('#radius-km-filter').val(null).trigger('change');
-                if (jQuery('#geo-radius-filter').length) jQuery('#geo-radius-filter').val('5').trigger('change');
+                if (jQuery('#category-filter-' + mapId).length) jQuery('#category-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#city-filter-' + mapId).length) jQuery('#city-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#department-filter-' + mapId).length) jQuery('#department-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#region-filter-' + mapId).length) jQuery('#region-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#type-filter-' + mapId).length) jQuery('#type-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#support-filter-' + mapId).length) jQuery('#support-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#format-filter-' + mapId).length) jQuery('#format-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#status-filter-' + mapId).length) jQuery('#status-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#radius-filter-' + mapId).length) jQuery('#radius-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#center-city-filter-' + mapId).length) jQuery('#center-city-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#radius-km-filter-' + mapId).length) jQuery('#radius-km-filter-' + mapId).val(null).trigger('change');
+                if (jQuery('#geo-radius-filter-' + mapId).length) jQuery('#geo-radius-filter-' + mapId).val('5').trigger('change');
             } else {
-                var cityFilter = document.getElementById('city-filter');
+                var cityFilter = document.getElementById('city-filter-' + mapId);
                 if (cityFilter) cityFilter.value = '';
                 
-                var departmentFilter = document.getElementById('department-filter');
+                var departmentFilter = document.getElementById('department-filter-' + mapId);
                 if (departmentFilter) departmentFilter.value = '';
                 
-                var regionFilter = document.getElementById('region-filter');
+                var regionFilter = document.getElementById('region-filter-' + mapId);
                 if (regionFilter) regionFilter.value = '';
                 
-                var typeFilter = document.getElementById('type-filter');
+                var typeFilter = document.getElementById('type-filter-' + mapId);
                 if (typeFilter) typeFilter.value = '';
                 
-                var supportFilter = document.getElementById('support-filter');
+                var supportFilter = document.getElementById('support-filter-' + mapId);
                 if (supportFilter) supportFilter.value = '';
                 
-                var formatFilter = document.getElementById('format-filter');
+                var formatFilter = document.getElementById('format-filter-' + mapId);
                 if (formatFilter) formatFilter.value = '';
                 
-                var statusFilter = document.getElementById('status-filter');
+                var statusFilter = document.getElementById('status-filter-' + mapId);
                 if (statusFilter) statusFilter.value = '';
                 
-                var radiusFilter = document.getElementById('radius-filter');
+                var radiusFilter = document.getElementById('radius-filter-' + mapId);
                 if (radiusFilter) radiusFilter.value = '';
             }
 
             // Afficher toutes les données
-            filterAndRenderData();
+            filterAndRenderData({}, currentMap, mapId);
         });
-    }
+    });
 
-    // 15) Gestion des boutons de pagination
-    var prevPageBtn = document.getElementById('prev-page');
-    var nextPageBtn = document.getElementById('next-page');
-
-    if (prevPageBtn) {
-        prevPageBtn.addEventListener('click', function() {
+    // 13) Gestion des boutons de pagination
+    document.querySelectorAll('[id^="prev-page-"]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Extraire l'ID de la carte à partir de l'ID du bouton
+            var buttonId = this.id;
+            var mapId = buttonId.replace('prev-page-', '');
+            
             if (currentPage > 1) {
-                displayResultsPage(currentPage - 1);
+                displayResultsPage(currentPage - 1, mapId);
             }
         });
-    }
+    });
 
-    if (nextPageBtn) {
-        nextPageBtn.addEventListener('click', function() {
+    document.querySelectorAll('[id^="next-page-"]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Extraire l'ID de la carte à partir de l'ID du bouton
+            var buttonId = this.id;
+            var mapId = buttonId.replace('next-page-', '');
+            
             var totalPages = Math.ceil(allResults.length / resultsPerPage);
             if (currentPage < totalPages) {
-                displayResultsPage(currentPage + 1);
+                displayResultsPage(currentPage + 1, mapId);
             }
         });
-    }
+    });
 
-    // 16) Gestion des onglets et contrôles de l'interface
+    // 14) Gestion des onglets et contrôles de l'interface
     // Gestion des onglets
-    document.querySelectorAll('.tab-btn').forEach(function(tab) {
+    document.querySelectorAll('.tab-btn-' + mapId).forEach(function(tab) {
         tab.addEventListener('click', function() {
             // Désactiver tous les onglets et panels
-            document.querySelectorAll('.tab-btn').forEach(function(t) {
+            document.querySelectorAll('.tab-btn-' + mapId).forEach(function(t) {
                 t.classList.remove('active');
             });
-            document.querySelectorAll('.sidebar-panel').forEach(function(p) {
+            document.querySelectorAll('.sidebar-panel-' + mapId).forEach(function(p) {
                 p.classList.remove('active');
             });
 
             // Activer l'onglet cliqué et le panneau correspondant
             this.classList.add('active');
             var tabId = this.getAttribute('data-tab');
-            document.getElementById(tabId + '-panel').classList.add('active');
+            document.getElementById(tabId + '-panel-' + mapId).classList.add('active');
         });
     });
 
     // Gestion de l'accordéon des filtres
-    document.querySelectorAll('.accordion-header').forEach(function(header) {
+    document.querySelectorAll('.accordion-header-' + mapId).forEach(function(header) {
         header.addEventListener('click', function() {
             // Toggle de la classe active pour l'élément parent
             var accordionItem = this.parentNode;
             accordionItem.classList.toggle('active');
 
             // Changer l'icône
-            var icon = this.querySelector('.accordion-icon');
+            var icon = this.querySelector('.accordion-icon-' + mapId);
             if (accordionItem.classList.contains('active')) {
                 icon.textContent = '-';
             } else {
@@ -1192,16 +1590,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Boutons de contrôle
-    var toggleFiltersBtn = document.getElementById('toggle-filters');
-    var toggleResultsBtn = document.getElementById('toggle-results');
-    var expandMapBtn = document.getElementById('expand-map');
-    var sidebar = document.querySelector('.map-sidebar');
-    var mapContainer = document.querySelector('.map-container-wrapper');
+    var toggleFiltersBtn = document.getElementById('toggle-filters-' + mapId);
+    var toggleResultsBtn = document.getElementById('toggle-results-' + mapId);
+    var expandMapBtn = document.getElementById('expand-map-' + mapId);
+    var sidebar = document.querySelector('.map-sidebar[data-map-id="' + mapId + '"]');
+    var mapContainer = document.querySelector('.map-container-wrapper[data-map-id="' + mapId + '"]');
 
     if (toggleFiltersBtn) {
         toggleFiltersBtn.addEventListener('click', function() {
             // Activer l'onglet filtres
-            document.querySelector('.tab-btn[data-tab="filters"]').click();
+            document.querySelector('.tab-btn-' + mapId + '[data-tab="filters"]').click();
 
             // Ajouter la classe 'sidebar-visible' si pas déjà présente
             if (!sidebar.classList.contains('sidebar-visible')) {
@@ -1214,7 +1612,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (toggleResultsBtn) {
         toggleResultsBtn.addEventListener('click', function() {
             // Activer l'onglet résultats
-            document.querySelector('.tab-btn[data-tab="results"]').click();
+            document.querySelector('.tab-btn-' + mapId + '[data-tab="results"]').click();
 
             // Ajouter la classe 'sidebar-visible' si pas déjà présente
             if (!sidebar.classList.contains('sidebar-visible')) {
@@ -1245,26 +1643,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Redimensionner la carte après changement d'affichage
             setTimeout(function() {
-                map.invalidateSize();
+                currentMap.invalidateSize();
             }, 300);
         });
     }
 
     // Fermeture des panneaux
-    document.querySelectorAll('.panel-close-btn').forEach(function(btn) {
+    document.querySelectorAll('.panel-close-btn-' + mapId).forEach(function(btn) {
         btn.addEventListener('click', function() {
             sidebar.classList.remove('sidebar-visible');
             mapContainer.classList.remove('sidebar-open');
 
             // Redimensionner la carte après changement d'affichage
             setTimeout(function() {
-                map.invalidateSize();
+                currentMap.invalidateSize();
             }, 300);
         });
     });
 
-    // 17) Initialiser la carte avec toutes les données
-    filterAndRenderData();
+    // 15) Initialiser la carte avec toutes les données
+    // Vérifier si mapId est défini avant d'appeler filterAndRenderData
+    if (mapId && window.maps && window.maps[mapId]) {
+        filterAndRenderData({}, window.maps[mapId], mapId);
+        
+        // Forcer un redimensionnement après le chargement initial des données
+        setTimeout(function() {
+            if (window.maps[mapId]) {
+                window.maps[mapId].invalidateSize(true);
+            }
+        }, 500);
+    } else {
+        console.error("Impossible d'initialiser les données - mapId ou window.maps non définis", {mapId, maps: window.maps});
+    }
 
     // Variable pour stocker la position actuelle de l'utilisateur
     var userLocation = null;
@@ -1272,9 +1682,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var radiusCircle = null;
 
     // Gestionnaire d'événement pour le bouton "Me localiser"
-    var locateMeBtn = document.getElementById('locate-me-btn');
-    if (locateMeBtn) {
-        locateMeBtn.addEventListener('click', function() {
+    document.querySelectorAll('[id^="locate-me-btn-"]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Extraire l'ID de la carte à partir de l'ID du bouton
+            var buttonId = this.id;
+            var mapId = buttonId.replace('locate-me-btn-', '');
+            
+            var currentMap = window.maps[mapId];
+            if (!currentMap) {
+                console.error("Carte non trouvée pour l'ID:", mapId);
+                return;
+            }
+            
+            console.log("Géolocalisation activée pour la carte:", mapId);
+            
             // Vérifier si la géolocalisation est disponible
             if (!navigator.geolocation) {
                 alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
@@ -1282,11 +1703,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Mise à jour visuelle du bouton pendant la géolocalisation
-            locateMeBtn.disabled = true;
-            locateMeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Localisation en cours...';
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Localisation en cours...';
             
             // Afficher un message de statut
-            var geoStatus = document.getElementById('geo-status');
+            var geoStatus = document.getElementById('geo-status-' + mapId);
             if (geoStatus) {
                 geoStatus.textContent = "Recherche de votre position...";
             }
@@ -1303,15 +1724,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log("Position trouvée :", userLocation);
 
                     // Afficher le panneau de rayon
-                    var geoRadiusContainer = document.getElementById('geo-radius-container');
+                    var geoRadiusContainer = document.getElementById('geo-radius-container-' + mapId);
                     if (geoRadiusContainer) {
                         geoRadiusContainer.style.display = 'block';
                     }
                     
                     // Mise à jour du bouton
-                    locateMeBtn.disabled = false;
-                    locateMeBtn.innerHTML = '<i class="fas fa-check"></i> Position trouvée';
-                    locateMeBtn.style.backgroundColor = '#28a745';
+                    var locateMeBtn = document.getElementById('locate-me-btn-' + mapId);
+                    if (locateMeBtn) {
+                        locateMeBtn.disabled = false;
+                        locateMeBtn.innerHTML = '<i class="fas fa-check"></i> Position trouvée';
+                        locateMeBtn.style.backgroundColor = '#28a745';
+                    }
                     
                     // Mise à jour du message de statut
                     if (geoStatus) {
@@ -1320,11 +1744,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     // Centrer la carte sur la position trouvée
-                    map.setView([userLocation.latitude, userLocation.longitude], 13);
+                    currentMap.setView([userLocation.latitude, userLocation.longitude], 13);
                     
                     // Ajouter un marqueur pour indiquer la position de l'utilisateur
                     if (window.userMarker) {
-                        map.removeLayer(window.userMarker);
+                        currentMap.removeLayer(window.userMarker);
                     }
                     window.userMarker = L.marker([userLocation.latitude, userLocation.longitude], {
                         icon: L.icon({
@@ -1333,13 +1757,16 @@ document.addEventListener('DOMContentLoaded', function() {
                             iconAnchor: [16, 32],
                             popupAnchor: [0, -30]
                         })
-                    }).addTo(map);
+                    }).addTo(currentMap);
                 },
                 // Erreur
                 function(error) {
                     console.error("Erreur de géolocalisation:", error);
-                    locateMeBtn.disabled = false;
-                    locateMeBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Me localiser';
+                    var locateMeBtn = document.getElementById('locate-me-btn-' + mapId);
+                    if (locateMeBtn) {
+                        locateMeBtn.disabled = false;
+                        locateMeBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Me localiser';
+                    }
                     
                     // Message d'erreur spécifique pour HTTP vs HTTPS
                     var errorMsg = "";
@@ -1377,21 +1804,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             );
         });
-    }
+    });
 
     // Gestionnaire d'événement pour le bouton "Filtrer" par géolocalisation
-    var applyGeoFilterBtn = document.getElementById('apply-geo-filter');
-    if (applyGeoFilterBtn) {
-        applyGeoFilterBtn.addEventListener('click', function() {
-            var geoRadiusSelect = document.getElementById('geo-radius-filter');
+    document.querySelectorAll('[id^="apply-geo-filter-"]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Extraire l'ID de la carte à partir de l'ID du bouton
+            var buttonId = this.id;
+            var mapId = buttonId.replace('apply-geo-filter-', '');
+            
+            var currentMap = window.maps[mapId];
+            if (!currentMap) {
+                console.error("Carte non trouvée pour l'ID:", mapId);
+                return;
+            }
+            
+            var geoRadiusSelect = document.getElementById('geo-radius-filter-' + mapId);
             var geoRadiusKm = geoRadiusSelect ? geoRadiusSelect.value : '';
             console.log("Rayon sélectionné:", geoRadiusKm);
-            filterByUserLocation(geoRadiusKm);
+            filterByUserLocation(geoRadiusKm, mapId, currentMap);
         });
-    }
+    });
 
     // Fonction pour filtrer les panneaux autour de la position de l'utilisateur
-    function filterByUserLocation(radiusKm) {
+    function filterByUserLocation(radiusKm, mapId, currentMap) {
         if (!userLocation) {
             alert("Veuillez d'abord activer la géolocalisation.");
             return;
@@ -1402,15 +1838,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Retirer le cercle existant s'il y en a un
         if (radiusCircle) {
-            map.removeLayer(radiusCircle);
+            currentMap.removeLayer(radiusCircle);
             radiusCircle = null;
         }
         
         if (!radiusKm || isNaN(radiusKm)) {
             // Si pas de rayon spécifié, réinitialiser les filtres pour voir tous les panneaux
-            filterAndRenderData();
+            filterAndRenderData({}, currentMap, mapId);
             // Supprimer la notification si elle existe
-            var existingInfo = document.getElementById('geo-filter-info');
+            var existingInfo = document.getElementById('geo-filter-info-' + mapId);
             if (existingInfo) existingInfo.remove();
             return;
         }
@@ -1430,16 +1866,16 @@ document.addEventListener('DOMContentLoaded', function() {
             fillColor: '#70c141',
             fillOpacity: 0.1,
             weight: 2
-        }).addTo(map);
+        }).addTo(currentMap);
         
         // Ajuster la vue de la carte pour voir tout le cercle
-        map.fitBounds(radiusCircle.getBounds());
+        currentMap.fitBounds(radiusCircle.getBounds());
         
         // Mettre à jour un élément UI pour montrer que le filtre est actif
-        var filterInfoElement = document.getElementById('geo-filter-info');
+        var filterInfoElement = document.getElementById('geo-filter-info-' + mapId);
         if (!filterInfoElement) {
             filterInfoElement = document.createElement('div');
-            filterInfoElement.id = 'geo-filter-info';
+            filterInfoElement.id = 'geo-filter-info-' + mapId;
             filterInfoElement.className = 'geo-filter-notification';
             filterInfoElement.style.cssText = 'position: absolute; z-index: 1000; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
             
@@ -1449,48 +1885,108 @@ document.addEventListener('DOMContentLoaded', function() {
                 mapContainer.appendChild(filterInfoElement);
             } else {
                 // Fallback si .map-container n'est pas trouvé
-                document.querySelector('#map').parentNode.appendChild(filterInfoElement);
+                document.querySelector('#' + mapId).parentNode.appendChild(filterInfoElement);
             }
         }
         
-        filterInfoElement.innerHTML = 'Filtre actif : Panneaux dans un rayon de ' + radiusKm + ' km autour de ma position <button id="clear-geo-filter" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Effacer</button>';
+        filterInfoElement.innerHTML = 'Filtre actif : Panneaux dans un rayon de ' + radiusKm + ' km autour de ma position <button id="clear-geo-filter-' + mapId + '" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Effacer</button>';
         
         // S'assurer que l'écouteur d'événement est correctement attaché
         setTimeout(function() {
-            var clearButton = document.getElementById('clear-geo-filter');
+            var clearButton = document.getElementById('clear-geo-filter-' + mapId);
             if (clearButton) {
                 // Supprimer les écouteurs précédents pour éviter les doublons
                 clearButton.replaceWith(clearButton.cloneNode(true));
                 // Réattacher l'écouteur
-                document.getElementById('clear-geo-filter').addEventListener('click', function() {
+                document.getElementById('clear-geo-filter-' + mapId).addEventListener('click', function() {
                     // Supprimer le cercle de rayon si présent
                     if (radiusCircle) {
-                        map.removeLayer(radiusCircle);
+                        currentMap.removeLayer(radiusCircle);
                         radiusCircle = null;
                     }
                     // Réinitialiser les filtres
-                    filterAndRenderData();
+                    filterAndRenderData({}, currentMap, mapId);
                     // Supprimer la notification
                     filterInfoElement.remove();
                     
                     // Réinitialiser le statut de géolocalisation
-                    var geoStatus = document.getElementById('geo-status');
+                    var geoStatus = document.getElementById('geo-status-' + mapId);
                     if (geoStatus) {
                         geoStatus.textContent = "Position trouvée ! Utilisez le rayon pour filtrer les panneaux autour de vous.";
-                        geoStatus.style.color = '#4CAF50';
+                        geoStatus.style.color = '#28a745';
                     }
                 });
             }
         }, 50);
         
         // Mettre à jour le message de statut
-        var geoStatus = document.getElementById('geo-status');
+        var geoStatus = document.getElementById('geo-status-' + mapId);
         if (geoStatus) {
             geoStatus.textContent = "Filtrage actif : affichage des panneaux dans un rayon de " + radiusKm + " km.";
             geoStatus.style.color = '#70c141';
         }
         
         // Appliquer le filtre
-        filterAndRenderData(filters);
+        filterAndRenderData(filters, currentMap, mapId);
     }
+
+    // Fonction pour obtenir la valeur d'un élément DOM de manière sécurisée
+    function getElementValue(id) {
+        var element = document.getElementById(id);
+        return element ? element.value : '';
+    }
+    
+    // Fonction pour obtenir une valeur numérique d'un élément DOM de manière sécurisée
+    function getElementNumericValue(id) {
+        var element = document.getElementById(id);
+        return element && element.value ? parseInt(element.value) : 0;
+    }
+    
+    // Fonction pour parser les informations de la ville centrale
+    function parseCenterCity(centerCityValue) {
+        if (!centerCityValue) return null;
+        
+        var parts = centerCityValue.split('|');
+        if (parts.length >= 3) {
+            return {
+                id: parts[0],
+                latitude: parts[1],
+                longitude: parts[2]
+            };
+        }
+        return null;
+    }
+
+    // Fonction pour calculer la distance entre deux points (en km)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        if (!lat1 || !lon1 || !lat2 || !lon2) {
+            console.error("Coordonnées invalides pour le calcul de distance", {lat1, lon1, lat2, lon2});
+            return Number.MAX_VALUE; // Retourner une grande distance en cas d'erreur
+        }
+        
+        var R = 6371; // Rayon de la terre en km
+        var dLat = deg2rad(lat2 - lat1);
+        var dLon = deg2rad(lon2 - lon1);
+        var a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        var d = R * c; // Distance en km
+        return d;
+    }
+    
+    function deg2rad(deg) {
+        return deg * (Math.PI/180);
+    }
+
+    // Ajouter un écouteur pour le redimensionnement de la fenêtre
+    window.addEventListener('resize', function() {
+        // Redimensionner toutes les cartes lors du redimensionnement de la fenêtre
+        if (window.maps) {
+            Object.keys(window.maps).forEach(function(mapId) {
+                updateMapSize(mapId);
+            });
+        }
+    });
 });

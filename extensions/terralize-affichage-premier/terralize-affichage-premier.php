@@ -161,6 +161,9 @@ class TerralizeAffichagePremier {
         
         // Formulaire de contact pour réservation de panneaux
         require_once $this->extension_path . 'includes/panel-contact-shortcode.php';
+
+        // Shortcode pour la carte des panneaux d'affichage
+        require_once $this->extension_path . 'templates/affichage-premier-shortcode.php';
     }
     
     /**

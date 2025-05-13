@@ -161,9 +161,9 @@ add_action('wp_ajax_nopriv_terralize_dynamic_styles', 'terralize_ajax_dynamic_st
 require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
 
 // Charger les extensions
-/*
+
     if (file_exists(plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php')) {
         require_once plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php';
     }
-*/
+
 
