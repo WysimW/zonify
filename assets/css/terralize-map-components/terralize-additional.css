@@ -1,0 +1,75 @@
+/**
+ * Terralize Map - Styles complémentaires
+ * Ce fichier contient les styles additionnels qui ne correspondent pas aux autres catégories
+ */
+
+/* Styles complémentaires pour les accordéons */
+.accordion-item .accordion-content {
+    max-height: 0;
+    transition: max-height 0.3s ease;
+}
+
+.accordion-item.active .accordion-content {
+    max-height: 500px; /* Valeur de secours */
+}
+
+.accordion-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.panel-close-btn {
+    display: none;
+}
+
+/* Panel actions */
+.panel-actions {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Style pour le bouton Localiser sur la carte */
+.locate-on-map {
+    display: inline-block;
+    width: 100%;
+    padding: 10px 15px;
+    background-color: var(--terralize-primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.locate-on-map:hover {
+    background-color: var(--terralize-button-hover-background);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation pour la mise en évidence des marqueurs */
+.highlight-marker {
+    animation: bounce-highlight 1s ease;
+    filter: drop-shadow(0 0 8px rgba(255, 69, 0, 0.8)) brightness(1.2);
+    z-index: 1000 !important;
+}
+
+@keyframes bounce-highlight {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+/* Style pour mettre en évidence les résultats dans la liste */
+.result-item.highlighted {
+    border-color: var(--terralize-accent-color);
+    background-color: rgba(var(--terralize-accent-color-rgb, 231, 76, 60), 0.1);
+    box-shadow: 0 0 10px rgba(var(--terralize-accent-color-rgb, 231, 76, 60), 0.3);
+} 

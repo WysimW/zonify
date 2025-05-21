@@ -1,0 +1,272 @@
+/**
+ * Terralize Map - Styles des contrôles
+ * Ce fichier contient les styles pour les boutons et contrôles interactifs
+ */
+
+@layer terralize-controls {
+    .map-controls {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 5px;
+        box-shadow: 0 2px 8px rgba(42, 42, 42, 0.2);
+    }
+
+    .control-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 16px;
+        background-color: var(--terralize-button-background-color);
+        border-radius: var(--terralize-button-border-radius);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: var(--terralize-button-text-color);
+    }
+
+    .control-btn.active,
+    .control-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+    
+    .control-btn svg {
+        vertical-align: middle;
+    }
+    
+    /* Styles des boutons d'action */
+    .apply-filters-btn,
+    .reset-filters-btn,
+    .find-nearest-poi-btn,
+    .locate-me-btn {
+        padding: 8px 16px;
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    /* Bouton appliquer les filtres */
+    .apply-filters-btn {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+    }
+    
+    /* Bouton réinitialiser les filtres */
+    .reset-filters-btn {
+        background-color: transparent;
+        color: var(--terralize-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-border-color);
+    }
+    
+    .apply-filters-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+    
+    /* Bouton de localisation personnalisé */
+    .location-action {
+        padding: 0 15px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .locate-me-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px 15px;
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .locate-me-btn svg {
+        stroke: var(--terralize-button-text-color);
+        width: 16px;
+        height: 16px;
+    }
+
+    .locate-me-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    .locate-me-btn:hover svg {
+        stroke: var(--terralize-button-hover-text);
+    }
+    
+    /* Bouton pour trouver le POI le plus proche */
+    .find-nearest-poi-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+        gap: 8px;
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+
+    .find-nearest-poi-btn svg {
+        stroke: white;
+        width: 16px;
+        height: 16px;
+    }
+
+    .find-nearest-poi-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    .find-nearest-poi-btn:hover svg {
+        stroke: white;
+    }
+    
+    /* Styles des boutons de pagination */
+    .pagination-btn {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .pagination-btn:hover {
+        background-color: var(--terralize-button-hover-background);
+        color: var(--terralize-button-hover-text);
+    }
+
+    /* Styles pour les options de localisation */
+    .location-options {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px 0;
+        overflow-y: auto;
+        max-height: calc(100% - 50px);
+    }
+    
+    .location-option-card {
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .location-option-card:hover {
+        box-shadow: 0 3px 8px var(--terralize-shadow-color);
+        border-color: var(--terralize-accent-color);
+    }
+    
+    .location-option-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: var(--terralize-accent-color);
+        border-bottom: 1px solid var(--terralize-border-color);
+        padding-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .location-option-card h3 svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--terralize-accent-color);
+    }
+    
+    .location-option-card p {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: var(--terralize-text-color);
+    }
+    
+    @media (max-height: 600px) {
+        .location-options {
+            gap: 10px;
+            padding: 5px 0;
+        }
+        
+        .location-option-card {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .location-option-card h3 {
+            font-size: 14px;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .location-option-card p {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+    }
+
+    /* Bouton flèche pour ouvrir/fermer la sidebar */
+    .sidebar-toggle-btn {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        background: var(--terralize-primary-color);
+        color: var(--terralize-button-text-color);
+        border: none;
+        border-radius: 0 var(--terralize-button-border-radius) var(--terralize-button-border-radius) 0;
+        width: 32px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1000;
+        transition: left 0.3s ease, background-color 0.2s ease;
+        box-shadow: 0 2px 4px var(--terralize-shadow-color);
+    }
+
+    /* Lorsque la sidebar est ouverte, on décale le bouton à sa largeur */
+    .map-container-wrapper.sidebar-open .sidebar-toggle-btn {
+        left: 350px; /* largeur de la sidebar */
+    }
+
+    .sidebar-toggle-btn i {
+        pointer-events: none;
+        font-size: 18px;
+    }
+
+    .sidebar-toggle-btn:hover {
+        background: var(--terralize-button-hover-background);
+    }
+} 

@@ -1,0 +1,181 @@
+/**
+ * Terralize Map - Styles de base
+ * Ce fichier contient les styles fondamentaux pour la carte et ses éléments
+ */
+
+@layer terralize-base {
+    .terralize-map-container {
+        display: flex;
+        flex-direction: column;
+        font-family: 'Montserrat', 'Inter', sans-serif;
+        color: var(--terralize-text-color);
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-color: var(--terralize-background-color);
+    }
+
+    .map-container-wrapper {
+        display: flex;
+        position: relative;
+        flex-grow: 1;
+        height: 70vh;
+        overflow: hidden;
+    }
+    
+    /* Styles pour le mode plein écran */
+    .terralize-map-container.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+        background: var(--terralize-background-color);
+    }
+
+    .terralize-map-container.fullscreen .map-container-wrapper {
+        height: 100vh;
+    }
+
+    /* Assurer que la carte remplit tout son conteneur */
+    .terralize-map {
+        width: 100%;
+        height: 100% !important;
+    }
+    
+    /* Styles des zones */
+    .zone-polygon {
+        fill: var(--terralize-primary-color);
+        stroke: var(--terralize-secondary-color);
+        stroke-width: 2;
+        fill-opacity: 0.5;
+    }
+
+    /* Styles des points d'intérêt */
+    .poi-marker {
+        background-color: var(--terralize-accent-color);
+        border: 2px solid var(--terralize-background-color);
+        border-radius: 50%;
+    }
+    
+    /* Styles pour le survol des marqueurs */
+    .leaflet-marker-icon:hover {
+        filter: brightness(1.2) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+    
+    /* Styles pour le cercle de précision de localisation */
+    .leaflet-interactive {
+        transition: opacity 0.3s ease;
+    }
+    
+    /* Styles pour les marqueurs de localisation */
+    .user-location-marker {
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+        animation: marker-pulse 2s infinite;
+    }
+
+    .nearest-poi-marker {
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+        animation: marker-bounce 1.5s infinite;
+    }
+
+    /* Animation de pulsation pour le marqueur utilisateur */
+    @keyframes marker-pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Animation de rebond pour le marqueur POI le plus proche */
+    @keyframes marker-bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    /* Champs de recherche */
+    .search-field {
+        position: relative;
+        margin-bottom: 15px;
+    }
+    .search-field input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        font-size: 14px;
+        color: var(--terralize-text-color);
+        background-color: var(--terralize-background-color);
+    }
+    .search-field input:focus {
+        outline: none;
+        border-color: var(--terralize-primary-color);
+        background-color: var(--terralize-background-color);
+    }
+    .search-field .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--terralize-text-color);
+    }
+    /* Résultats */
+    .results-list {
+        margin-top: 15px;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        background-color: var(--terralize-background-color);
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        padding: 10px;
+    }
+    .result-item {
+        padding: 15px;
+        border: 1px solid var(--terralize-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        margin-bottom: 10px;
+        background: var(--terralize-background-color);
+        transition: all 0.2s;
+    }
+    .result-item:hover {
+        box-shadow: 0 3px 8px var(--terralize-shadow-color);
+        border-color: var(--terralize-primary-color);
+    }
+    .result-item h3 {
+        margin: 0 0 10px;
+        color: var(--terralize-text-color);
+    }
+    .result-item .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 0 var(--terralize-button-border-radius) 0 var(--terralize-button-border-radius);
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .result-item .badge-primary {
+        background: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+    }
+    .result-item .badge-secondary {
+        background: var(--terralize-secondary-color);
+        color: var(--terralize-text-color);
+    }
+    .result-item p {
+        margin: 10px 0;
+        color: var(--terralize-text-color);
+    }
+} 

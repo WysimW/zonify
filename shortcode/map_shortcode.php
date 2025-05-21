@@ -12,6 +12,10 @@ function tracteur_zone_map_shortcode($atts) {
         'regions' => '',     // Filtrage par région(s)
         'height' => '600px', // Hauteur de la carte
         'show_sidebar' => 'true', // Afficher la sidebar
+        'center_lat' => '',  // Latitude du centre (si vide, utilise les options par défaut)
+        'center_lng' => '',  // Longitude du centre (si vide, utilise les options par défaut)
+        'zoom' => '',        // Niveau de zoom (si vide, utilise les options par défaut)
+        'debug' => 'false',  // Active le mode débogage
         
         // Options de style
         'button_border_radius' => '',
@@ -94,6 +98,7 @@ function tracteur_zone_map_shortcode($atts) {
                 $social_links = '';
                 $border_color = '';
                 $fill_color = '';
+                $commercial_custom_fields = array();
 
                 if ($comm_id) {
                     $nom_commercial = get_the_title($comm_id);
@@ -105,6 +110,40 @@ function tracteur_zone_map_shortcode($atts) {
                     $social_links = get_post_meta($comm_id, 'commercial_social_links', true);
                     $border_color = get_post_meta($comm_id, 'commercial_border_color', true);
                     $fill_color = get_post_meta($comm_id, 'commercial_fill_color', true);
+                    
+                    // Récupérer les champs personnalisés du commercial s'ils existent
+                    $commercial_custom_fields = array();
+                    if (function_exists('terralize_get_commercial_custom_fields')) {
+                        $commercial_custom_fields = terralize_get_commercial_custom_fields($comm_id);
+                        
+                        // DEBUG - Afficher les champs du commercial récupérés dans la console
+                        $debug_enabled = defined('WP_DEBUG') && WP_DEBUG;
+                        if ($debug_enabled) {
+                            echo '<script>console.log("[DEBUG] Custom fields for commercial ' . $comm_id . ':", ' . json_encode($commercial_custom_fields) . ');</script>';
+                            
+                            // Vérifier la présence de la propriété display_zone
+                            $zones_count = array('header' => 0, 'info' => 0, 'contact' => 0, 'location' => 0);
+                            foreach ($commercial_custom_fields as $field) {
+                                if (isset($field['display_zone'])) {
+                                    $zone = $field['display_zone'];
+                                    $zones_count[$zone] = isset($zones_count[$zone]) ? $zones_count[$zone] + 1 : 1;
+                                } else {
+                                    $zones_count['non_défini'] = isset($zones_count['non_défini']) ? $zones_count['non_défini'] + 1 : 1;
+                                }
+                            }
+                            echo '<script>console.log("[DEBUG] Répartition des zones d\'affichage pour commercial ' . $comm_id . ':", ' . json_encode($zones_count) . ');</script>';
+                        }
+                        
+                        // Traiter les champs de type image pour obtenir les URLs
+                        foreach ($commercial_custom_fields as $key => $field) {
+                            if ($field['type'] === 'image' && !empty($field['value'])) {
+                                $image_url = wp_get_attachment_image_url($field['value'], 'medium');
+                                if ($image_url) {
+                                    $commercial_custom_fields[$key]['value'] = $image_url;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // Récupérer les catégories de cette zone
@@ -150,13 +189,20 @@ function tracteur_zone_map_shortcode($atts) {
                         'border_color' => $border_color,
                         'fill_color' => $fill_color,
                         'categories' => $zone_categories,
-                        'regions' => $zone_regions
+                        'regions' => $zone_regions,
+                        'commercial_custom_fields' => $commercial_custom_fields
                     ),
                     'geometry' => json_decode($geojson, true)
                 );
             }
         }
         wp_reset_postdata();
+    } else {
+        // Aucune donnée disponible, créer un FeatureCollection vide
+        $zones_data = array(
+            'type' => 'FeatureCollection',
+            'features' => array()
+        );
     }
 
     // Récupération des points d'intérêt (POI)
@@ -224,6 +270,36 @@ function tracteur_zone_map_shortcode($atts) {
                     }
                 }
 
+                // Récupérer les champs personnalisés
+                $custom_fields = terralize_get_poi_custom_fields(get_the_ID());
+                
+                // DEBUG - Afficher les champs récupérés dans la console
+                $debug_enabled = defined('WP_DEBUG') && WP_DEBUG;
+                if ($debug_enabled) {
+                    echo '<script>console.log("[DEBUG] Custom fields for POI ' . get_the_ID() . ':", ' . json_encode($custom_fields) . ');</script>';
+                    
+                    // Vérifier la présence de la propriété display_zone
+                    $zones_count = array('header' => 0, 'info' => 0, 'contact' => 0, 'location' => 0);
+                    foreach ($custom_fields as $field) {
+                        if (isset($field['display_zone'])) {
+                            $zone = $field['display_zone'];
+                            $zones_count[$zone] = isset($zones_count[$zone]) ? $zones_count[$zone] + 1 : 1;
+                        } else {
+                            $zones_count['non_défini'] = isset($zones_count['non_défini']) ? $zones_count['non_défini'] + 1 : 1;
+                        }
+                    }
+                    echo '<script>console.log("[DEBUG] Répartition des zones d\'affichage:", ' . json_encode($zones_count) . ');</script>';
+                }
+                
+                // Récupérer l'image principale si elle existe
+                $image_url = '';
+                foreach ($custom_fields as $field_key => $field) {
+                    if ($field['type'] === 'image' && !empty($field['value'])) {
+                        $image_url = wp_get_attachment_image_url($field['value'], 'medium');
+                        break;
+                    }
+                }
+
                 $zones_data[] = array(
                     'type' => 'Feature',
                     'properties' => array(
@@ -232,7 +308,9 @@ function tracteur_zone_map_shortcode($atts) {
                         'type' => 'poi',
                         'categories' => $poi_categories,
                         'regions' => $poi_regions,
-                        'icon' => !empty($icon_data) ? $icon_data : null
+                        'icon' => !empty($icon_data) ? $icon_data : null,
+                        'custom_fields' => $custom_fields,
+                        'image_url' => $image_url
                     ),
                     'geometry' => json_decode($poi_geojson, true)
                 );
@@ -268,9 +346,9 @@ function tracteur_zone_map_shortcode($atts) {
         'zone_fill_color'  => get_option('terralize_zone_fill_color_front', '#3388ff'),
         'zone_border_color' => get_option('terralize_zone_border_color_front', '#3388ff'),
         'zone_opacity'     => floatval(get_option('terralize_zone_opacity_front', 0.5)),
-        'map_zoom'         => intval(get_option('terralize_map_zoom_front', 9)),
-        'map_center_lat'   => get_option('terralize_map_center_lat_front', '50.5'),
-        'map_center_lng'   => get_option('terralize_map_center_lng_front', '2.5'),
+        'map_zoom'         => !empty($atts['zoom']) ? intval($atts['zoom']) : intval(get_option('terralize_map_zoom_front', 9)),
+        'map_center_lat'   => !empty($atts['center_lat']) ? $atts['center_lat'] : get_option('terralize_map_center_lat_front', '50.5'),
+        'map_center_lng'   => !empty($atts['center_lng']) ? $atts['center_lng'] : get_option('terralize_map_center_lng_front', '2.5'),
         'show_category_filter' => true,
     );
     
@@ -288,7 +366,8 @@ function tracteur_zone_map_shortcode($atts) {
     
     $contact_page_url = get_option('terralize_contact_page_url', '/contact');
     $combined_options = array_merge($front_options, $popup_options, array(
-        'contact_page_url' => $contact_page_url
+        'contact_page_url' => $contact_page_url,
+        'map_id' => 'terralize-map-' . uniqid(), // Ajout d'un ID unique pour cette instance de carte
     ));
 
     // Enqueue Leaflet et les scripts/styles nécessaires
@@ -299,26 +378,53 @@ function tracteur_zone_map_shortcode($atts) {
     wp_enqueue_script('leaflet-control-geocoder', 'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js', array('leaflet-js'), null, true);
     
     // Ajout du plugin de géolocalisation Leaflet.locate
-    wp_enqueue_style('leaflet-locate-css', 'https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css');
-    wp_enqueue_script('leaflet-locate-js', 'https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js', array('leaflet-js'), '0.79.0', true);
+    wp_enqueue_style('leaflet-locate-css', 'https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css');
+    wp_enqueue_script('leaflet-locate-js', 'https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js', array('leaflet-js'), '0.79.0', true);
+    
+    // Ajouter Font Awesome pour les icônes
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
     
     // Chargement du fichier de style personnalisé pour la carte
-    wp_enqueue_style('tracteur-zone-map-styles', plugin_dir_url(__FILE__) . '../css/tracteur-zone-map.css');
+    wp_enqueue_style('terralize-map-styles', plugin_dir_url(__FILE__) . '../assets/css/terralize-map.css');
     
     // Ajout de Select2
     wp_enqueue_style('select2-css', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
     wp_enqueue_script('select2-js', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', array('jquery'), '4.1.0', true);
     
-    // Chargement du script multi-select personnalisé
-    wp_enqueue_script('tracteur-zone-multi-select', plugin_dir_url(__FILE__) . '../scripts/tracteur-zone-multi-select.js', array('jquery'), '1.0.0', true);
-    
     // Charger notre script JS personnalisé
-    wp_enqueue_script('tracteur-zone-map', plugin_dir_url(__FILE__) . '../scripts/tracteur-zone-map.js', array('leaflet-js', 'leaflet-control-geocoder', 'leaflet-locate-js', 'select2-js', 'jquery', 'tracteur-zone-multi-select'), '1.0.0', true);
+    wp_enqueue_script('terralize-map', plugin_dir_url(__FILE__) . '../scripts/terralize-map.js', array('leaflet-js', 'leaflet-control-geocoder', 'leaflet-locate-js', 'select2-js', 'jquery'), '1.0.0', true);
+    
+    // Forcer le type module pour le script terralize-map
+    add_filter('script_loader_tag', function(
+        $tag, $handle
+    ) {
+        if ($handle === 'terralize-map') {
+            return str_replace('<script ', '<script type="module" ', $tag);
+        }
+        return $tag;
+    }, 10, 2);
     
     // Passer les données à notre script
-    wp_localize_script('tracteur-zone-map', 'zonesData', $zones_data);
-    wp_localize_script('tracteur-zone-map', 'terralizeFrontendOptions', $combined_options);
-    wp_localize_script('tracteur-zone-map', 'terralizeCategories', array_map(function ($term) {
+    // S'assurer que les données sont au format FeatureCollection pour Leaflet
+    if (!empty($zones_data)) {
+        if (!isset($zones_data['type'])) {
+            // Si c'est un tableau de features, les transformer en FeatureCollection
+            $zones_data = array(
+                'type' => 'FeatureCollection',
+                'features' => $zones_data
+            );
+        }
+    } else {
+        // Si aucune donnée n'est disponible, créer un FeatureCollection vide
+        $zones_data = array(
+            'type' => 'FeatureCollection',
+            'features' => array()
+        );
+    }
+    
+    wp_localize_script('terralize-map', 'zonesData', $zones_data);
+    wp_localize_script('terralize-map', 'terralizeFrontendOptions', $combined_options);
+    wp_localize_script('terralize-map', 'terralizeCategories', array_map(function ($term) {
         return array(
             'id' => $term->term_id,
             'slug' => $term->slug,
@@ -327,7 +433,7 @@ function tracteur_zone_map_shortcode($atts) {
     }, $categories));
     
     // Générer un identifiant unique pour cette instance de carte
-    $map_id = 'tracteur-zone-map-' . uniqid();
+    $map_id = $combined_options['map_id'];
     
     // Commencer à capturer la sortie
     ob_start();
@@ -345,96 +451,111 @@ function tracteur_zone_map_shortcode($atts) {
     // Ajouter le CSS personnalisé avant la sortie
     echo $custom_css;
     ?>
-    <div class="tracteur-zone-map-container">
-        <div class="map-container-wrapper">
-            <?php if ($show_sidebar) : ?>
-            <!-- Boutons de contrôle de l'interface -->
-            <div class="map-controls">
-                <button id="toggle-filters-<?php echo $map_id; ?>" class="control-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                    </svg>
-                    Filtres
-                </button>
-                <button id="toggle-results-<?php echo $map_id; ?>" class="control-btn active">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="8" y1="6" x2="21" y2="6"></line>
-                        <line x1="8" y1="12" x2="21" y2="12"></line>
-                        <line x1="8" y1="18" x2="21" y2="18"></line>
-                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                    </svg>
-                    Résultats <span id="results-counter-<?php echo $map_id; ?>">(0)</span>
-                </button>
-                <button id="expand-map-<?php echo $map_id; ?>" class="control-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <polyline points="9 21 3 21 3 15"></polyline>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
-                    </svg>
-                    Plein écran
-                </button>
-            </div>
 
-            <!-- Panneau latéral avec onglets -->
-            <div class="map-sidebar">
+    <div class="terralize-map-container">
+        <!-- Définir les variables JavaScript globales avant le reste du code -->
+        <script>
+            // Déclarer les variables globales pour cette instance de carte
+            window['mapId_<?php echo $map_id; ?>'] = '<?php echo $map_id; ?>';
+            window.mapOptions = <?php echo json_encode($combined_options); ?>;
+            
+            // DONNÉES DE TEST DIRECTES pour garantir qu'elles sont bien transmises
+            window.zonesData = <?php echo json_encode($zones_data); ?>;
+            
+            console.log("Variables globales initialisées pour la carte:", '<?php echo $map_id; ?>');
+        </script>
+        
+        <div class="map-container-wrapper" data-map-id="<?php echo $map_id; ?>">
+            <?php if ($show_sidebar) : ?>
+            <!-- Bouton flèche pour ouvrir/fermer la sidebar -->
+            <button id="sidebar-toggle-<?php echo $map_id; ?>" class="sidebar-toggle-btn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Sidebar pour les filtres et résultats -->
+            <div class="map-sidebar" data-map-id="<?php echo $map_id; ?>">
                 <div class="sidebar-tabs">
                     <button class="tab-btn" data-tab="filters" data-map-id="<?php echo $map_id; ?>">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                        </svg>
-                        Filtres
+                        Filtres <span id="results-counter-<?php echo $map_id; ?>">(0)</span>
                     </button>
                     <button class="tab-btn active" data-tab="results" data-map-id="<?php echo $map_id; ?>">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="8" y1="6" x2="21" y2="6"></line>
-                            <line x1="8" y1="12" x2="21" y2="12"></line>
-                            <line x1="8" y1="18" x2="21" y2="18"></line>
-                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                        </svg>
-                        Résultats <span id="tab-results-count-<?php echo $map_id; ?>">0</span>
+                        Résultats <span id="results-count-<?php echo $map_id; ?>">(0)</span>
                     </button>
-                    <button class="tab-btn location-tab" data-tab="location" data-map-id="<?php echo $map_id; ?>">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <circle cx="12" cy="12" r="3"></circle>
+                    <button class="panel-close-btn" data-map-id="<?php echo $map_id; ?>">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
-                        Localisation
                     </button>
                 </div>
 
                 <!-- Panneau des filtres -->
-                <div id="filters-panel-<?php echo $map_id; ?>" class="sidebar-panel">
-                    <div class="panel-header">
-                        <h2>Filtrer la carte</h2>
-                        <button class="panel-close-btn" data-map-id="<?php echo $map_id; ?>">&times;</button>
-                    </div>
-
+                <div id="filters-panel-<?php echo $map_id; ?>" class="sidebar-panel" data-map-id="<?php echo $map_id; ?>">
                     <div class="accordion-filters">
-                        <!-- Ajout du champ de recherche textuel en premier -->
-                        <div class="accordion-item active">
+                        <h3>Filtrer les zones commerciales</h3>
+                        
+                        <!-- Filtre de recherche -->
+                        <div class="filter-options search-filter">
+                            <label for="search-filter-<?php echo $map_id; ?>">Rechercher</label>
+                            <input type="text" id="search-filter-<?php echo $map_id; ?>" class="search-filter-input" placeholder="Rechercher par nom, titre...">
+                        </div>
+
+                        <!-- Accordéon Localisation -->
+                        <div class="accordion-item">
                             <div class="accordion-header">
-                                <h3>Recherche</h3>
-                                <span class="accordion-icon">-</span>
+                                <span>Localisation</span>
+                                <span class="accordion-icon">+</span>
                             </div>
                             <div class="accordion-content">
-                                <div class="filter-options search-filter">
-                                    <input type="text" id="search-filter-<?php echo $map_id; ?>" class="search-filter-input" placeholder="Rechercher par nom, titre..." />
+                                <?php if (!empty($regions)) : ?>
+                                <div class="filter-options regions-filter">
+                                    <label for="region-filter-<?php echo $map_id; ?>">Région</label>
+                                    <select id="region-filter-<?php echo $map_id; ?>" class="region-filter-select">
+                                        <option value="">Toutes les régions</option>
+                                        <?php foreach ($regions as $slug => $name) : ?>
+                                            <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($name); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <?php endif; ?>
+
+                                <!-- Géolocalisation -->
+                                <div class="location-action">
+                                    <label>Ma position</label>
+                                    <div class="geolocation-controls">
+                                        <button id="locate-me-btn-<?php echo $map_id; ?>" class="locate-me-btn">
+                                            <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i> Me localiser
+                                        </button>
+                                        <div id="geo-radius-container-<?php echo $map_id; ?>" style="display: none;">
+                                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                                                <select id="geo-radius-filter-<?php echo $map_id; ?>" class="region-filter-select" style="flex-grow: 1;">
+                                                    <option value="1">1 km</option>
+                                                    <option value="2">2 km</option>
+                                                    <option value="5" selected>5 km</option>
+                                                    <option value="10">10 km</option>
+                                                    <option value="20">20 km</option>
+                                                    <option value="50">50 km</option>
+                                                </select>
+                                                <button id="apply-geo-filter-<?php echo $map_id; ?>" class="apply-filters-btn" style="margin-top: 0;">
+                                                    Filtrer
+                                                </button>
+                                            </div>
+                                            <div id="geo-status-<?php echo $map_id; ?>" style="margin-top: 8px; font-size: 12px; color: #666;"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
+
+                        <!-- Accordéon Type d'affichage -->
                         <div class="accordion-item">
                             <div class="accordion-header">
-                                <h3>Type d'affichage</h3>
+                                <span>Type d'affichage</span>
                                 <span class="accordion-icon">+</span>
                             </div>
                             <div class="accordion-content">
                                 <div class="filter-options type-filter">
+                                    <label for="type-filter-<?php echo $map_id; ?>">Type</label>
                                     <select id="type-filter-<?php echo $map_id; ?>" class="type-filter-select">
                                         <option value="all">Tout afficher</option>
                                         <option value="zone">Zones commerciales</option>
@@ -444,65 +565,41 @@ function tracteur_zone_map_shortcode($atts) {
                             </div>
                         </div>
 
-                        <?php if (!empty($regions)) : ?>
-                            <div class="accordion-item">
-                                <div class="accordion-header">
-                                    <h3>Régions</h3>
-                                    <span class="accordion-icon">+</span>
-                                </div>
-                                <div class="accordion-content">
-                                    <div class="filter-options regions-filter">
-                                        <select id="region-filter-<?php echo $map_id; ?>" class="region-filter-select">
-                                            <option value="">Toutes les régions</option>
-                                            <?php foreach ($regions as $slug => $name) : ?>
-                                                <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html($name); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
+                        <!-- Accordéon Catégories -->
                         <?php if (!empty($categories)) : ?>
-                            <div class="accordion-item">
-                                <div class="accordion-header">
-                                    <h3>Catégories</h3>
-                                    <span class="accordion-icon">+</span>
-                                </div>
-                                <div class="accordion-content">
-                                    <div class="filter-options categories-filter">
-                                        <select id="categoryFilter-<?php echo $map_id; ?>" class="terralize-category-filter" multiple="multiple" data-placeholder="Sélectionner des catégories">
-                                            <?php foreach ($categories as $category) : ?>
-                                                <option value="<?php echo esc_attr($category->slug); ?>"><?php echo esc_html($category->name); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span>Catégories</span>
+                                <span class="accordion-icon">+</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="filter-options categories-filter">
+                                    <label for="categoryFilter-<?php echo $map_id; ?>">Catégories</label>
+                                    <select id="categoryFilter-<?php echo $map_id; ?>" class="terralize-category-filter" multiple="multiple" data-placeholder="Sélectionner des catégories">
+                                        <?php foreach ($categories as $category) : ?>
+                                            <option value="<?php echo esc_attr($category->slug); ?>"><?php echo esc_html($category->name); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                             </div>
+                        </div>
                         <?php endif; ?>
-                    </div>
 
-                    <!-- Bouton de géolocalisation personnalisé -->
-                    <!-- Les boutons de localisation ont été déplacés dans leur propre onglet -->
-
-                    <div class="filter-actions">
-                        <button id="applyFilter-<?php echo $map_id; ?>" class="apply-filters-btn">Appliquer les filtres</button>
-                        <button id="resetFilter-<?php echo $map_id; ?>" class="reset-filters-btn">Réinitialiser</button>
+                        <div class="filter-actions">
+                            <button id="apply-filter-<?php echo $map_id; ?>" class="apply-filters-btn">Appliquer les filtres</button>
+                            <button id="reset-filter-<?php echo $map_id; ?>" class="reset-filters-btn">Réinitialiser</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Panneau des résultats -->
-                <div id="results-panel-<?php echo $map_id; ?>" class="sidebar-panel active">
+                <div id="results-panel-<?php echo $map_id; ?>" class="sidebar-panel active" data-map-id="<?php echo $map_id; ?>">
                     <div class="panel-header">
-                        <h2>Résultats <span id="results-count-<?php echo $map_id; ?>">(0)</span></h2>
-                        <button class="panel-close-btn" data-map-id="<?php echo $map_id; ?>">&times;</button>
+                        <h2>Résultats <span id="tab-results-count-<?php echo $map_id; ?>">0</span> éléments</h2>
                     </div>
-
                     <div id="results-list-<?php echo $map_id; ?>" class="results-list">
                         <p class="no-results">Utilisez les filtres pour afficher les zones et points de vente</p>
                     </div>
-
-                    <!-- Contrôles de pagination -->
                     <div class="pagination-controls">
                         <div class="pagination-info">
                             Page <span id="current-page-<?php echo $map_id; ?>">1</span> sur <span id="total-pages-<?php echo $map_id; ?>">1</span>
@@ -521,65 +618,329 @@ function tracteur_zone_map_shortcode($atts) {
                         </div>
                     </div>
                 </div>
-                
-                <!-- Panneau de localisation -->
-                <div id="location-panel-<?php echo $map_id; ?>" class="sidebar-panel">
-                    <div class="panel-header">
-                        <h2>Options de localisation</h2>
-                        <button class="panel-close-btn" data-map-id="<?php echo $map_id; ?>">&times;</button>
-                    </div>
-                    
-                    <div class="location-options">
-                        <div class="location-option-card">
-                            <h3>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                                Ma position
-                            </h3>
-                            <p>Affichez votre position actuelle sur la carte pour visualiser les zones commerciales à proximité.</p>
-                            <button id="locateMe-<?php echo $map_id; ?>" class="locate-me-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                                Me localiser
-                            </button>
-                        </div>
-                        
-                        <div class="location-option-card">
-                            <h3>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                    <circle cx="12" cy="10" r="3"></circle>
-                                </svg>
-                                Point de vente le plus proche
-                            </h3>
-                            <p>Trouvez le point de vente ou la concession la plus proche de votre position actuelle.</p>
-                            <button id="findNearestPoi-<?php echo $map_id; ?>" class="find-nearest-poi-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                    <circle cx="12" cy="10" r="3"></circle>
-                                </svg>
-                                Trouver la concession la plus proche
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
             <?php endif; ?>
 
-            <!-- Conteneur principal de la carte -->
+            <!-- Conteneur de la carte -->
             <div class="map-main-container <?php echo $show_sidebar ? 'with-sidebar' : 'without-sidebar'; ?>">
-                <div id="<?php echo $map_id; ?>" class="tracteur-zone-map" style="height: <?php echo esc_attr($atts['height']); ?>;"></div>
+                <div id="<?php echo $map_id; ?>" class="terralize-map" style="height: <?php echo esc_attr($atts['height']); ?>;"></div>
             </div>
         </div>
     </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Définir l'ID de la carte directement pour cette instance
+        var mapId = '<?php echo $map_id; ?>';
+        console.log("Script initialisé pour la carte:", mapId);
+        
+        // Variables pour les éléments de l'interface
+        var sidebar = document.querySelector('.map-sidebar[data-map-id="' + mapId + '"]');
+        var mapContainer = document.querySelector('.map-container-wrapper[data-map-id="' + mapId + '"]');
+        var map = document.getElementById(mapId);
+        
+        // Gestionnaire d'événements pour le bouton "Me localiser"
+        var locateMeBtn = document.getElementById('locate-me-btn-' + mapId);
+        if (locateMeBtn) {
+            locateMeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Utiliser une API alternative si la carte n'est pas disponible
+                if (window.maps && window.maps[mapId]) {
+                    // La carte est disponible, utiliser sa fonction de localisation
+                    console.log("Utilisation de l'API terralizemap pour la localisation");
+                    if (window.terralizemap && typeof window.terralizemap.locateUser === 'function') {
+                        window.terralizemap.locateUser(mapId);
+                    } else {
+                        console.error("L'API terralizemap n'est pas disponible");
+                    }
+                } else if (window.terralizemap && typeof window.terralizemap.locateUser === 'function') {
+                    // Utiliser l'API terralizemap si disponible
+                    console.log("Utilisation de l'API terralizemap pour la localisation");
+                    window.terralizemap.locateUser(mapId);
+                } else {
+                    // Fallback avec l'API de géolocalisation du navigateur
+                    console.log("Fallback avec l'API de géolocalisation du navigateur");
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            var latitude = position.coords.latitude;
+                            var longitude = position.coords.longitude;
+                            console.log("Position obtenue:", latitude, longitude);
+                            
+                            // Afficher le conteneur du rayon
+                            var geoRadiusContainer = document.getElementById('geo-radius-container-' + mapId);
+                            if (geoRadiusContainer) {
+                                geoRadiusContainer.style.display = 'block';
+                            }
+                            
+                            // Mettre à jour le statut
+                            var geoStatus = document.getElementById('geo-status-' + mapId);
+                            if (geoStatus) {
+                                geoStatus.textContent = 'Position trouvée: ' + latitude.toFixed(5) + ', ' + longitude.toFixed(5);
+                            }
+                            
+                            // Si l'API terralizemap est chargée après l'obtention de la position, l'utiliser
+                            if (window.terralizemap && typeof window.terralizemap.locateUser === 'function') {
+                                window.terralizemap.locateUser(mapId, latitude, longitude);
+                            } else {
+                                console.warn("L'API terralizemap n'est toujours pas disponible pour utiliser les coordonnées", latitude, longitude);
+                                // Essayer de stocker les coordonnées pour une utilisation future
+                                window.userLatLng = L && L.latLng ? L.latLng(latitude, longitude) : {
+                                    lat: latitude,
+                                    lng: longitude
+                                };
+                            }
+                        }, function(error) {
+                            console.error("Erreur de géolocalisation:", error.message);
+                            alert("Erreur de géolocalisation: " + error.message);
+                        });
+                    } else {
+                        alert("La géolocalisation n'est pas supportée par votre navigateur.");
+                    }
+                }
+            });
+        }
+
+        // Gestionnaire pour le bouton de filtrage par distance
+        var applyGeoFilterBtn = document.getElementById('apply-geo-filter-' + mapId);
+        if (applyGeoFilterBtn) {
+            applyGeoFilterBtn.addEventListener('click', function() {
+                if (!window.userLatLng) {
+                    alert("Veuillez d'abord vous localiser.");
+                    return;
+                }
+                
+                var radiusSelect = document.getElementById('geo-radius-filter-' + mapId);
+                if (!radiusSelect) return;
+                
+                var radius = parseInt(radiusSelect.value, 10);
+                
+                // Si l'API terralizemap est disponible, utiliser sa fonction de filtrage
+                if (window.terralizemap && typeof window.terralizemap.filterByDistance === 'function') {
+                    window.terralizemap.filterByDistance(window.userLatLng, radius * 1000);
+                } else {
+                    console.warn("Fonction de filtrage par distance non disponible");
+                    alert("Le filtrage par distance n'est pas disponible pour le moment. Veuillez réessayer après le chargement complet de la page.");
+                }
+            });
+        }
+
+        // Force le recalcul des dimensions de la carte
+        function updateMapSize() {
+            // Récupérer la référence à l'objet Leaflet map à partir de window.maps
+            var leafletMap = window.maps && window.maps[mapId];
+            
+            // Vérifier si la carte existe, sinon attendre qu'elle soit chargée
+            if (!leafletMap && window.terralizemap && window.terralizemap.getMapInstance) {
+                // Utiliser l'API terralizemap pour obtenir l'instance de carte
+                leafletMap = window.terralizemap.getMapInstance(mapId);
+                // Stocker la référence dans l'objet maps global
+                if (leafletMap) {
+                    window.maps[mapId] = leafletMap;
+                }
+            }
+            // Sécurisation supplémentaire
+            if (!leafletMap || typeof leafletMap.invalidateSize !== 'function') {
+                console.error("Impossible de redimensionner la carte - la carte Leaflet n'est pas initialisée correctement", {mapId, maps: window.maps});
+                return;
+            }
+            setTimeout(function() {
+                leafletMap.invalidateSize();
+            }, 300);
+        }
+
+        // Fonction pour ouvrir la sidebar
+        function openSidebar(tabName) {
+            if (mapContainer) mapContainer.classList.add('sidebar-open');
+            if (sidebar) sidebar.classList.add('sidebar-visible');
+            
+            // Modifier l'icône du bouton toggle
+            var toggleBtn = document.getElementById('sidebar-toggle-' + mapId);
+            if (toggleBtn && toggleBtn.querySelector('i')) {
+                toggleBtn.querySelector('i').className = 'fas fa-chevron-left';
+            }
+            
+            // Activer l'onglet spécifié
+            if (tabName) {
+                var tabElement = document.querySelector('.tab-btn[data-tab="' + tabName + '"][data-map-id="' + mapId + '"]');
+                if (tabElement) {
+                    tabElement.click();
+                } else {
+                    console.error("Onglet non trouvé:", tabName, mapId);
+                }
+            }
+            
+            // Essayer de redimensionner la carte, mais ne pas bloquer si ça échoue
+            try {
+                updateMapSize();
+            } catch (e) {
+                console.error("Erreur lors du redimensionnement de la carte:", e);
+            }
+        }
+
+        // Fonction pour fermer la sidebar
+        function closeSidebar() {
+            if (mapContainer) mapContainer.classList.remove('sidebar-open');
+            if (sidebar) sidebar.classList.remove('sidebar-visible');
+            
+            // Modifier l'icône du bouton toggle
+            var toggleBtn = document.getElementById('sidebar-toggle-' + mapId);
+            if (toggleBtn && toggleBtn.querySelector('i')) {
+                toggleBtn.querySelector('i').className = 'fas fa-chevron-right';
+            }
+            
+            // Essayer de redimensionner la carte, mais ne pas bloquer si ça échoue
+            try {
+                updateMapSize();
+            } catch (e) {
+                console.error("Erreur lors du redimensionnement de la carte:", e);
+            }
+        }
+
+        // Écouteur d'événement pour le bouton de basculement de la sidebar
+        var sidebarToggleBtn = document.getElementById('sidebar-toggle-' + mapId);
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.addEventListener('click', function() {
+                if (mapContainer && mapContainer.classList.contains('sidebar-open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+        }
+
+        // Fermeture de la sidebar via le bouton de fermeture
+        document.querySelectorAll('.panel-close-btn[data-map-id="' + mapId + '"]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                closeSidebar();
+            });
+        });
+        
+        // Gestion des onglets
+        document.querySelectorAll('.tab-btn[data-map-id="' + mapId + '"]').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var tabName = this.getAttribute('data-tab');
+                
+                // Désactiver tous les onglets et panneaux
+                document.querySelectorAll('.tab-btn[data-map-id="' + mapId + '"]').forEach(function(t) {
+                    t.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.sidebar-panel[data-map-id="' + mapId + '"]').forEach(function(panel) {
+                    panel.classList.remove('active');
+                });
+                
+                // Activer l'onglet et le panneau sélectionnés
+                this.classList.add('active');
+                document.getElementById(tabName + '-panel-' + mapId).classList.add('active');
+            });
+        });
+
+        // Gestionnaire pour les boutons de filtrage
+        var applyFilterBtn = document.getElementById('apply-filter-' + mapId);
+        if (applyFilterBtn) {
+            applyFilterBtn.addEventListener('click', function() {
+                var selectedCategories = [];
+                
+                // Récupérer les catégories sélectionnées via Select2 si disponible
+                if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+                    var categoryFilter = jQuery('#categoryFilter-' + mapId);
+                    if (categoryFilter.length) {
+                        selectedCategories = categoryFilter.val() || [];
+                    }
+                }
+                
+                // Récupérer les autres valeurs de filtres
+                var regionFilter = document.getElementById('region-filter-' + mapId) ? 
+                                  document.getElementById('region-filter-' + mapId).value : '';
+                var typeFilter = document.getElementById('type-filter-' + mapId) ? 
+                                document.getElementById('type-filter-' + mapId).value : 'all';
+                var searchQuery = document.getElementById('search-filter-' + mapId) ? 
+                                 document.getElementById('search-filter-' + mapId).value : '';
+                
+                // Utiliser l'API terralizemap si disponible
+                if (window.terralizemap && typeof window.terralizemap.filterData === 'function') {
+                    window.terralizemap.filterData(mapId, {
+                        categories: selectedCategories,
+                        region: regionFilter,
+                        type: typeFilter,
+                        searchQuery: searchQuery
+                    });
+                } else {
+                    console.error("API terralizemap.filterData non disponible");
+                }
+            });
+        }
+        
+        // Gestionnaire pour le bouton de réinitialisation des filtres
+        var resetFilterBtn = document.getElementById('reset-filter-' + mapId);
+        if (resetFilterBtn) {
+            resetFilterBtn.addEventListener('click', function() {
+                // Utiliser l'API terralizemap si disponible
+                if (window.terralizemap && typeof window.terralizemap.resetFilters === 'function') {
+                    window.terralizemap.resetFilters(mapId);
+                    
+                    // Réinitialiser manuellement l'interface
+                    if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+                        var categoryFilter = jQuery('#categoryFilter-' + mapId);
+                        if (categoryFilter.length) {
+                            categoryFilter.val(null).trigger('change');
+                        }
+                    }
+                    
+                    var regionFilter = document.getElementById('region-filter-' + mapId);
+                    if (regionFilter) regionFilter.value = '';
+                    
+                    var typeFilter = document.getElementById('type-filter-' + mapId);
+                    if (typeFilter) typeFilter.value = 'all';
+                    
+                    var searchFilter = document.getElementById('search-filter-' + mapId);
+                    if (searchFilter) searchFilter.value = '';
+                } else {
+                    console.error("API terralizemap.resetFilters non disponible");
+                }
+            });
+        }
+
+        // Écouter les événements de filtrage
+        document.addEventListener('terralize:filter_data', function(e) {
+            if (e.detail && e.detail.mapId === mapId) {
+                console.log("Événement de filtrage reçu:", e.detail);
+            }
+        });
+        
+        // Écouter les événements de réinitialisation des filtres
+        document.addEventListener('terralize:reset_filters', function(e) {
+            if (e.detail && e.detail.mapId === mapId) {
+                console.log("Événement de réinitialisation des filtres reçu:", e.detail);
+            }
+        });
+
+        // Initialisation de Select2
+        if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+            jQuery('.select2-filter').each(function() {
+                jQuery(this).select2({
+                    width: '100%',
+                    placeholder: jQuery(this).attr('placeholder') || "Sélectionner...",
+                    allowClear: true
+                });
+            });
+        }
+    });
+    </script>
     <?php
+    
     // Passer le map_id au script JS
-    wp_localize_script('tracteur-zone-map', 'tracteurZoneMapId', $map_id);
+    wp_localize_script('terralize-map', 'tracteurZoneMapId', $map_id);
+    
+    // Ajouter le script de débogage si l'option est activée
+    $debug_mode = filter_var($atts['debug'], FILTER_VALIDATE_BOOLEAN);
+    if ($debug_mode) {
+        wp_enqueue_script('terralize-debug-helper', plugin_dir_url(__FILE__) . '../debug-helper.js', array('jquery'), '1.0.0', true);
+        
+        // Alerte pour signaler que le mode debug est activé
+        $output = '<script>console.log("TERRALIZE MAP: Mode débogage activé!");</script>' . ob_get_clean();
+        return $output;
+    }
     
     // Retourner la sortie
     return ob_get_clean();

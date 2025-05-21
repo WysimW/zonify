@@ -1,0 +1,163 @@
+/**
+ * Terralize Map - Styles des onglets
+ * Ce fichier contient les styles pour les onglets de navigation
+ */
+
+@layer terralize-tabs {
+    /* Conteneur des onglets */
+    .sidebar-tabs {
+        display: flex;
+        background-color: var(--terralize-background-color);
+        border-bottom: 1px solid var(--terralize-border-color);
+        padding: 0;
+        margin: 0;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Bouton d'onglet */
+    .tab-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 15px;
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-text-color);
+        border: var(--terralize-button-border-width) var(--terralize-button-border-style) var(--terralize-button-border-color);
+        border-radius: var(--terralize-button-border-radius);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Onglet de localisation */
+    .tab-btn.location-tab {
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-accent-color);
+    }
+    
+    .tab-btn.location-tab.active {
+        background-color: var(--terralize-accent-color);
+        color: var(--terralize-background-color);
+    }
+    
+    .tab-btn.location-tab svg {
+        stroke: var(--terralize-accent-color);
+    }
+    
+    .tab-btn.location-tab.active svg {
+        stroke: var(--terralize-background-color);
+    }
+    
+    .tab-btn.location-tab::after {
+        background-color: var(--terralize-accent-color);
+    }
+
+    /* Icône dans le bouton */
+    .tab-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        transition: all 0.3s ease;
+    }
+
+    /* État hover du bouton */
+    .tab-btn:hover {
+        background-color: var(--terralize-background-color);
+        color: var(--terralize-primary-color);
+    }
+
+    /* État actif du bouton */
+    .tab-btn.active {
+        background-color: var(--terralize-button-background-color);
+        color: var(--terralize-button-text-color);
+        font-weight: 600;
+    }
+
+    /* Compteur dans le bouton */
+    .tab-btn .tab-counter {
+        background-color: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+        border-radius: 12px;
+        padding: 2px 6px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 4px;
+    }
+
+    /* Animation du soulignement */
+    .tab-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--terralize-primary-color);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .tab-btn:hover::after,
+    .tab-btn.active::after {
+        transform: scaleX(1);
+    }
+
+    /* Styles spécifiques pour le premier et dernier bouton */
+    .tab-btn:first-child {
+        border-top-left-radius: var(--terralize-button-border-radius);
+    }
+
+    .tab-btn:last-child {
+        border-top-right-radius: var(--terralize-button-border-radius);
+        border-right: none;
+    }
+
+    /* Styles pour les petits écrans */
+    @media (max-width: 768px) {
+        .sidebar-tabs {
+            flex-direction: column;
+            border-bottom: none;
+        }
+
+        .tab-btn {
+            padding: 10px 12px;
+            border-bottom: none;
+            border-right: 2px solid transparent;
+            justify-content: flex-start;
+        }
+
+        .tab-btn.active {
+            border-right-color: var(--terralize-primary-color);
+            border-bottom: none;
+        }
+
+        .tab-btn::after {
+            width: 2px;
+            height: 100%;
+            transform: scaleY(0);
+            transform-origin: top;
+        }
+
+        .tab-btn:hover::after,
+        .tab-btn.active::after {
+            transform: scaleY(1);
+        }
+
+        .tab-btn:first-child {
+            border-top-left-radius: var(--terralize-button-border-radius);
+            border-top-right-radius: var(--terralize-button-border-radius);
+        }
+
+        .tab-btn:last-child {
+            border-bottom-left-radius: var(--terralize-button-border-radius);
+            border-bottom-right-radius: var(--terralize-button-border-radius);
+        }
+    }
+} 

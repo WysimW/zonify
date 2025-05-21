@@ -2,7 +2,7 @@
 /*
 Plugin Name: Terralize
 Description: Plugin pour gérer les zones des commerciaux via une carte interactive.
-Version: 1.0.5
+Version: 2.0.0
 Author: THomas Dupez, Agence MBS
 License: GPL2
 Requires at least: 5.0
@@ -161,9 +161,9 @@ add_action('wp_ajax_nopriv_terralize_dynamic_styles', 'terralize_ajax_dynamic_st
 require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
 
 // Charger les extensions
-
+/*
     if (file_exists(plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php')) {
         require_once plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php';
     }
-
+*/
 

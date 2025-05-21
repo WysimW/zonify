@@ -1,0 +1,38 @@
+/**
+ * Terralize Map - Variables par défaut
+ * Ce fichier contient les variables CSS par défaut pour la carte
+ */
+
+@layer terralize-default {
+    :root {
+        /* Couleurs principales */
+        --terralize-primary-color: #3388ff;
+        --terralize-secondary-color: #2c3e50;
+        --terralize-accent-color: #e74c3c;
+        --terralize-background-color: #ffffff;
+        --terralize-text-color: #333333;
+        --terralize-border-color: #e0e0e0;
+        --terralize-shadow-color: rgba(0, 0, 0, 0.1);
+
+        /* Valeurs par défaut pour les variables dynamiques */
+        --terralize-button-background-color: #3388ff;
+        --terralize-button-text-color: #ffffff;
+        --terralize-button-hover-background: #2c3e50;
+        --terralize-button-hover-text: #ffffff;
+        --terralize-button-border-color: #3388ff;
+        --terralize-button-border-width: 1px;
+        --terralize-button-border-style: solid;
+        --terralize-button-border-radius: 4px;
+
+        --terralize-sidebar-background: #ffffff;
+        --terralize-sidebar-border-color: #e0e0e0;
+        --terralize-sidebar-text-color: #333333;
+
+        --terralize-popup-background: #ffffff;
+        --terralize-popup-border-color: #e0e0e0;
+        --terralize-popup-border-width: 1px;
+        --terralize-popup-border-style: solid;
+        --terralize-popup-border-radius: 4px;
+        --terralize-popup-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+} 

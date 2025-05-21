@@ -490,7 +490,7 @@
 }
 
 .tab-btn.active {
-  color: var(--terralize-primary);
+  color: var(--terralize-text-light);
 }
 
 .tab-btn.active::after {

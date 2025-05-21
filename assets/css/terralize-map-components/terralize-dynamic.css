@@ -1,0 +1,8 @@
+/**
+ * Terralize Map - Styles dynamiques
+ * Ce fichier sert de placeholder pour les styles dynamiques chargés par terralize-dynamic-styles.php
+ */
+
+@layer terralize-dynamic {
+    /* Ce layer sera rempli dynamiquement par terralize-dynamic-styles.php */
+} 

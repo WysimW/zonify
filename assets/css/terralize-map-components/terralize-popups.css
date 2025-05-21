@@ -1,0 +1,298 @@
+/**
+ * Terralize Map - Styles des popups
+ * Ce fichier contient les styles pour les popups et fenêtres modales
+ */
+
+@layer terralize-popups {
+    .terralize-custom-popup .leaflet-popup-content-wrapper {
+        background-color: var(--terralize-popup-background);
+        border-radius: var(--terralize-popup-border-radius);
+        box-shadow: 0 3px 14px var(--terralize-shadow-color);
+        max-width: 350px;
+    }
+
+    .terralize-custom-popup .leaflet-popup-content {
+        margin: 15px;
+        min-width: 250px;
+    }
+
+    .terralize-custom-popup .leaflet-popup-tip {
+        background-color: var(--terralize-popup-background);
+    }
+
+    /* Styles pour les contenus des popups */
+    .popup-container h2, 
+    .popup-container h3 {
+        margin-top: 0;
+        color: var(--terralize-text-color);
+    }
+
+    .popup-container .panel-image {
+        margin-bottom: 15px;
+        position: relative;
+        text-align: center;
+    }
+
+    .popup-container .panel-image img {
+        max-width: 100%;
+        max-height: 180px;
+        border-radius: var(--terralize-popup-border-radius);
+        object-fit: cover;
+    }
+
+    .popup-container .image-zoom-icon {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255, 255, 255, 0.7);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .popup-container .image-zoom-icon:hover {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Styles pour les onglets */
+    .popup-container .panel-tabs {
+        margin-bottom: 15px;
+    }
+
+    .popup-container .tab-headers {
+        display: flex;
+        border-bottom: 1px solid var(--terralize-border-color);
+        margin-bottom: 10px;
+    }
+
+    .popup-container .tab-btn {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        cursor: pointer;
+        font-weight: normal;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .popup-container .tab-btn.active {
+        font-weight: bold;
+        border-bottom-color: var(--terralize-primary-color);
+        color: var(--terralize-primary-color);
+    }
+
+    .popup-container .tab-btn:hover:not(.active) {
+        background-color: var(--terralize-border-color);
+    }
+
+    /* Gestion de l'affichage des contenus d'onglets */
+    .popup-container .tab-content {
+        display: none;
+    }
+
+    .popup-container .tab-content:first-child,
+    .popup-container .tab-btn.active + .tab-content,
+    .popup-container .tab-btn.active ~ .tab-contents .tab-content[id$="-info-content"] {
+        display: block;
+    }
+
+    /* Styles pour les zones d'affichage */
+    .popup-container .popup-section {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--terralize-border-color);
+    }
+
+    .popup-container .popup-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .popup-container .popup-section h4 {
+        margin-top: 0;
+        color: var(--terralize-text-color);
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .popup-container .location-title {
+        margin-top: 15px;
+    }
+
+    /* Style pour les checkboxes */
+    .popup-container .checkbox-mark {
+        color: var(--terralize-primary-color);
+    }
+
+    /* Styles spécifiques pour la zone de contact */
+    .popup-container .contact-info a {
+        color: var(--terralize-primary-color);
+        text-decoration: none;
+    }
+
+    .popup-container .contact-info a:hover {
+        text-decoration: underline;
+    }
+
+    .popup-container .contact-info i {
+        margin-right: 8px;
+        width: 16px;
+        text-align: center;
+        color: var(--terralize-secondary-color);
+    }
+
+    /* Styles pour les boutons */
+    .popup-container .btn-contact,
+    .popup-container .get-directions-btn,
+    .popup-container .locate-and-route-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: var(--terralize-button-border-radius);
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .popup-container .panel-actions {
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    /* Section spécifique pour les itinéraires */
+    .popup-container .routes-section {
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid var(--terralize-border-color);
+    }
+
+    .popup-container .routes-section p {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .popup-container .routes-section p i {
+        margin-right: 8px;
+        color: var(--terralize-primary-color);
+    }
+
+    .popup-container .btn-contact {
+        background: var(--terralize-primary-color);
+    }
+
+}
+   .leaflet-container .popup-container a {
+        color: var(--terralize-background-color);
+    }
+
+    .popup-container .get-directions-btn,
+    .popup-container .locate-and-route-btn {
+        background: var(--terralize-primary-color);
+        color: var(--terralize-background-color);
+        border: none;
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .popup-container .btn-contact:hover {
+        background: var(--terralize-button-hover-background);
+    }
+
+    .popup-container .get-directions-btn:hover,
+    .popup-container .locate-and-route-btn:hover {
+        background: var(--terralize-button-hover-background);
+    }
+
+    /* Styles pour les tags */
+    .popup-container .popup-tags {
+        margin: 10px 0;
+    }
+
+    .popup-container .popup-tag {
+        display: inline-block;
+        background: var(--terralize-border-color);
+        padding: 2px 8px;
+        margin: 2px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    /* Lightbox pour les images */
+    .lightbox-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    .lightbox-container {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+    }
+
+    .lightbox-content img {
+        max-width: 100%;
+        max-height: 90vh;
+        display: block;
+        margin: 0 auto;
+        border: 5px solid var(--terralize-background-color);
+        box-shadow: 0 0 20px var(--terralize-shadow-color);
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        font-size: 30px;
+        color: var(--terralize-background-color);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+    
+    /* Style pour la popup du POI le plus proche */
+    .nearest-poi-popup {
+        padding: 15px;
+        font-family: 'Inter', sans-serif;
+        max-width: 250px;
+    }
+
+    .nearest-poi-popup h3 {
+        margin: 0 0 12px 0;
+        color: var(--terralize-primary-color);
+        font-size: 16px;
+        font-weight: 600;
+        border-bottom: 2px solid var(--terralize-primary-color);
+        padding-bottom: 8px;
+    }
+
+    .nearest-poi-popup p {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: var(--terralize-text-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nearest-poi-popup p svg {
+        width: 16px;
+        height: 16px;
+        color: var(--terralize-primary-color);
+    }
+} 

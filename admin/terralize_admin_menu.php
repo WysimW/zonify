@@ -72,8 +72,8 @@ function terralize_admin_menu()
         // Ajout du sous-menu pour la liste des Points d'Intérêt (POI)
         add_submenu_page(
             'terralize',
-            'Liste des Points d’Intérêt',
-            'Liste des Points d’Intérêt',
+            'Liste des Points d\'Intérêt',
+            'Liste des Points d\'Intérêt',
             'manage_options',
             'edit.php?post_type=poi'
         );
@@ -86,6 +86,16 @@ function terralize_admin_menu()
             'manage_options',
             'terralize_poi',
             'terralize_poi_pages'
+        );
+        
+        // Ajout du sous-menu pour la gestion des champs des POI
+        add_submenu_page(
+            'terralize',
+            'Gestion des champs POI',
+            'Gestion des champs POI',
+            'manage_options',
+            'terralize_poi_fields',
+            'terralize_poi_fields_admin_page'
         );
 
         add_submenu_page(
@@ -129,8 +139,8 @@ function terralize_admin_menu()
         // Ajout du sous-menu pour la liste des Points d'Intérêt (POI)
         add_submenu_page(
             'terralize',
-            'Liste des Points d’Intérêt',
-            'Liste des Points d’Intérêt',
+            'Liste des Points d\'Intérêt',
+            'Liste des Points d\'Intérêt',
             'manage_options',
             'edit.php?post_type=poi'
         );
@@ -143,6 +153,16 @@ function terralize_admin_menu()
             'manage_options',
             'terralize_poi',
             'terralize_poi_pages'
+        );
+        
+        // Ajout du sous-menu pour la gestion des champs des POI
+        add_submenu_page(
+            'terralize',
+            'Gestion des champs POI',
+            'Gestion des champs POI',
+            'manage_options',
+            'terralize_poi_fields',
+            'terralize_poi_fields_admin_page'
         );
     }
 }

@@ -1,0 +1,150 @@
+/**
+ * Terralize Map - Styles responsives
+ * Ce fichier contient les styles pour l'adaptation aux différentes tailles d'écran
+ */
+
+@layer terralize-responsive {
+    @media (max-width: 768px) {
+        .map-container-wrapper {
+            height: 80vh;
+        }
+
+        .map-sidebar {
+            width: 100%;
+            max-width: none;
+        }
+
+        .map-controls {
+            left: 15px;
+            right: 15px;
+            justify-content: space-between;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row;
+            border-bottom: 1px solid var(--terralize-border-color);
+        }
+
+        .tab-btn {
+            padding: 10px 5px;
+            font-size: 13px;
+            flex: 1;
+        }
+        
+        /* Ajuster l'espacement des icônes dans les onglets */
+        .tab-btn svg {
+            margin-right: 2px;
+        }
+        
+        /* Cacher certains textes sur très petit écran */
+        @media (max-width: 360px) {
+            .tab-btn {
+                font-size: 11px;
+                padding: 8px 4px;
+            }
+        }
+    }
+    
+    /* Media queries pour les écrans de petite hauteur */
+    @media (max-height: 600px) {
+        .map-container-wrapper {
+            height: 65vh;
+        }
+        
+        .map-sidebar {
+            height: 100%;
+            max-height: 100%;
+        }
+        
+        .sidebar-panel {
+            padding: 10px;
+            max-height: calc(100% - 50px);
+        }
+        
+        .tab-btn {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+        
+        .accordion-header {
+            padding: 8px 10px;
+        }
+        
+        .accordion-content {
+            padding: 10px;
+        }
+        
+        /* Optimisation du panneau de localisation */
+        .location-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        
+        /* Réduire l'espacement dans les options de localisation */
+        .location-option-card {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .location-option-card h3 {
+            font-size: 14px;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .location-option-card p {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        /* Ajuster les boutons de localisation */
+        .locate-me-btn, .find-nearest-poi-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+    }
+    
+    /* Media queries pour les très petits écrans (smartphones en mode portrait) */
+    @media (max-width: 480px) {
+        .map-sidebar {
+            overflow-y: auto;
+        }
+        
+        .sidebar-panel {
+            margin-top: 5px;
+            padding: 8px;
+        }
+        
+        .tab-btn {
+            padding: 8px 6px;
+            font-size: 12px;
+        }
+        
+        .tab-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Au-dessous de 360px, n'afficher que les icônes dans les onglets */
+        @media (max-width: 360px) {
+            .tab-btn span:not(.tab-counter) {
+                display: none;
+            }
+            
+            .tab-btn {
+                justify-content: center;
+                padding: 8px 4px;
+            }
+            
+            .tab-btn svg {
+                margin-right: 0;
+                width: 18px;
+                height: 18px;
+            }
+        }
+    }
+} 

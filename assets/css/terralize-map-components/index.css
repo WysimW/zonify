@@ -1,0 +1,37 @@
+/**
+ * Terralize Map - Fichier d'importation principal
+ * Ce fichier importe tous les composants CSS de la carte interactive
+ */
+
+/* Définition des layers dans l'ordre de priorité */
+@layer terralize-dynamic, terralize-default, terralize-base, terralize-controls, terralize-sidebar, terralize-popups, terralize-responsive, terralize-utilities, terralize-tabs;
+
+/* Import des variables par défaut */
+@import "./terralize-default.css";
+
+/* Import des styles dynamiques */
+@import "./terralize-dynamic.css";
+
+/* Import des styles de base */
+@import "./terralize-base.css";
+
+/* Import des contrôles de la carte */
+@import "./terralize-controls.css";
+
+/* Import de la barre latérale */
+@import "./terralize-sidebar.css";
+
+/* Import des popups */
+@import "./terralize-popups.css";
+
+/* Import des styles responsive */
+@import "./terralize-responsive.css";
+
+/* Import des utilitaires */
+@import "./terralize-utilities.css";
+
+/* Import des onglets */
+@import "./terralize-tabs.css";
+
+/* Import des styles complémentaires */
+@import "./terralize-additional.css"; 

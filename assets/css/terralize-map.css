@@ -1,0 +1,12 @@
+/**
+ * Tracteur Zone - Styles combinés pour la carte interactive
+ * Ce fichier a été réorganisé pour une meilleure maintenabilité.
+ * Les styles sont maintenant divisés en composants modulaires dans le dossier terralize-map-components.
+ */
+
+/* Import des composants */
+@import "./terralize-map-components/index.css";
+@layer terralize-dynamic {
+    /* Ce layer sera rempli dynamiquement par terralize-dynamic-styles.php */
+}
+
