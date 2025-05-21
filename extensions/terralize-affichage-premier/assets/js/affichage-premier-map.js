@@ -628,7 +628,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Initialiser la carte pour ce conteneur
-        var currentMap = L.map(mapId).setView([centerLat, centerLng], zoom);
+        // Désactivation du contrôle de zoom par défaut afin de pouvoir le replacer en bas à droite
+        var currentMap = L.map(mapId, { zoomControl: false }).setView([centerLat, centerLng], zoom);
         
         // Stocker la référence de la carte dans un objet global
         window.maps = window.maps || {};
@@ -680,6 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             updateMapSize(mapId);
+            updateSidebarToggle();
         }
 
         L.tileLayer(tileLayerUrl, {
@@ -687,10 +689,14 @@ document.addEventListener('DOMContentLoaded', function() {
             maxZoom: 19
         }).addTo(currentMap);
 
+        // Ajouter les contrôles de zoom en bas à droite (plus ergonomique)
+        L.control.zoom({ position: 'bottomright' }).addTo(currentMap);
+
         // Ajouter le geocoder pour la recherche d'adresses
         var geocoder = L.Control.geocoder({
             defaultMarkGeocode: false,
-            position: 'topleft',
+            // Déplacement du champ de recherche en bas à droite pour garder le coin supérieur gauche libre
+            position: 'bottomright',
             placeholder: 'Rechercher une adresse...',
             errorMessage: 'Adresse introuvable'
         }).on('markgeocode', function(e) {
@@ -719,6 +725,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 openSidebar('filters', mapId);
                 // Forcer un redimensionnement de la carte après que la sidebar soit ouverte
                 updateMapSize(mapId);
+                updateSidebarToggle();
             });
         }
 
@@ -727,6 +734,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 openSidebar('results', mapId);
                 // Forcer un redimensionnement de la carte après que la sidebar soit ouverte
                 updateMapSize(mapId);
+                updateSidebarToggle();
             });
         }
 
@@ -739,8 +747,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 // Forcer un redimensionnement de la carte après changement d'état
                 updateMapSize(mapId);
+                updateSidebarToggle();
             });
         }
+
+        /* ------------------------------------------------------------------
+         *  Bouton flèche pour ouvrir / fermer la sidebar
+         * ----------------------------------------------------------------*/
+        var sidebarToggleBtn = document.createElement('button');
+        sidebarToggleBtn.id = 'sidebar-toggle-' + mapId;
+        sidebarToggleBtn.className = 'sidebar-toggle-btn';
+        sidebarToggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        mapContainer.appendChild(sidebarToggleBtn);
+
+        // Met à jour l'orientation de la flèche selon l'état de la sidebar
+        function updateSidebarToggle() {
+            if (mapContainer.classList.contains('sidebar-open')) {
+                sidebarToggleBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            } else {
+                sidebarToggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            }
+        }
+
+        // État initial
+        updateSidebarToggle();
+
+        // Gestion du clic sur la flèche
+        sidebarToggleBtn.addEventListener('click', function() {
+            if (mapContainer.classList.contains('sidebar-open')) {
+                closeSidebar(mapId);
+            } else {
+                openSidebar(null, mapId);
+            }
+            // Mettre à jour l'icône après le basculement
+            updateSidebarToggle();
+        });
     });
 
     // Fonction pour fermer la sidebar
@@ -765,6 +806,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         updateMapSize(mapId);
+        updateSidebarToggle();
     }
 
     // 6) Générer le contenu de la popup pour un panneau
@@ -775,14 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ' color:' + (options.popup_font_color || '#333') + ';' +
             ' width: 320px;">';
         
-        // Titre avec référence
-        content += '<h3 style="margin: 0 0 10px; color: #70c141;">' + panel.title;
-        if (panel.reference) {
-            content += ' <span style="font-size: 0.8em; opacity: 0.8;">(Réf: ' + panel.reference + ')</span>';
-        }
-        content += '</h3>';
-        
-        // Image en haut de la popup, avant les onglets
+        // Image en haut de la popup, avant le titre
         if (panel.image) {
             content += '<div class="panel-image" style="text-align: center; margin-bottom: 15px; position: relative;">' +
                        '<img src="' + panel.image + '" alt="' + panel.title + '" style="max-width: 100%; max-height: 180px; border-radius: 4px; object-fit: cover;">' +
@@ -805,19 +840,19 @@ document.addEventListener('DOMContentLoaded', function() {
                        '</div>';
         }
         
+        // Titre après l'image, sans référence
+        content += '<h3 style="margin: 0 0 10px; color: #70c141;">' + panel.title + '</h3>';
+        
         // Système d'onglets avec onclick directement sur les boutons
         content += '<div class="panel-tabs" style="margin-bottom: 15px;">';
         content += '<div class="tab-headers" style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 10px;">';
         
-        // Boutons des onglets avec onclick
+        // Boutons des onglets avec onclick - seulement 2 onglets maintenant
         content += '<div class="tab-btn active" onclick="switchTab(this, \'tech-content\')" ' +
                   'style="flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: bold; border-bottom: 3px solid #70c141; color: #70c141;">Technique</div>';
         
         content += '<div class="tab-btn" onclick="switchTab(this, \'location-content\')" ' +
                   'style="flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: normal; border-bottom: 3px solid transparent;">Localisation</div>';
-        
-        content += '<div class="tab-btn" onclick="switchTab(this, \'visibility-content\')" ' +
-                  'style="flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: normal; border-bottom: 3px solid transparent;">Visibilité</div>';
         
         content += '</div>'; // Fin tab-headers
         
@@ -862,11 +897,16 @@ document.addEventListener('DOMContentLoaded', function() {
             content += '<p style="margin: 3px 0;"><strong>Fin d\'engagement:</strong> ' + panel.panel_date_fin + '</p>';
         }
         
+        // Référence (déplacée dans l'onglet technique)
+        if (panel.reference) {
+            content += '<p style="margin: 3px 0;"><strong>Référence:</strong> ' + panel.reference + '</p>';
+        }
+        
         content += '</div>'; // Fin tech-content
         
-        // Onglet 2: Localisation
+        // Onglet 2: Localisation (fusion de localisation et visibilité)
         content += '<div class="tab-content" id="location-content" style="display: none;">';
-        content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Localisation</h4>';
+        content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Localisation et visibilité</h4>';
         
         // Adresse complète
         if (parseInt(options.popup_show_address) === 1) {
@@ -888,12 +928,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (panel.panel_latitude && panel.panel_longitude) {
             content += '<p style="margin: 3px 0;"><strong>Coordonnées GPS:</strong> ' + panel.panel_latitude + ', ' + panel.panel_longitude + '</p>';
         }
-        
-        content += '</div>'; // Fin location-content
-        
-        // Onglet 3: Visibilité
-        content += '<div class="tab-content" id="visibility-content" style="display: none;">';
-        content += '<h4 style="margin: 0 0 8px; color: #70c141; font-size: 15px;">Visibilité</h4>';
         
         // Informations de visibilité
         if (panel.visibility_from || panel.visibility_to) {
@@ -921,7 +955,7 @@ document.addEventListener('DOMContentLoaded', function() {
             content += '<p style="margin: 3px 0;"><strong>Notes:</strong> ' + panel.visibility_note + '</p>';
         }
         
-        content += '</div>'; // Fin visibility-content
+        content += '</div>'; // Fin location-content
         
         content += '</div>'; // Fin tab-contents
         content += '</div>'; // Fin panel-tabs
@@ -937,8 +971,18 @@ document.addEventListener('DOMContentLoaded', function() {
             '" class="panel-contact-btn" style="' +
             'background-color: #70c141; color: white; padding: 8px 15px; text-decoration: none; ' +
             'border-radius: 4px; display: inline-block; font-weight: bold;">' +
-            'Contacter / Réserver</a>' +
-            '</div>';
+            'Contacter / Réserver</a>';
+
+        // Bouton d'édition pour les administrateurs
+        if (window.isAdminUser) {
+            content += '<a href="/wp-admin/post.php?post=' + panel.id + '&action=edit" ' +
+                       'class="panel-edit-btn" target="_blank" style="' +
+                       'background-color: #2271b1; color: white; padding: 8px 15px; text-decoration: none; ' +
+                       'border-radius: 4px; display: inline-block; margin-left: 10px; font-weight: bold;">' +
+                       '<i class="fas fa-edit"></i> Éditer</a>';
+        }
+        
+        content += '</div>';
         
         content += '</div>'; // Fin panel-popup
         

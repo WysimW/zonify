@@ -303,32 +303,7 @@ function affichage_premier_map_shortcode($atts) {
         
         <div class="map-container-wrapper" data-map-id="<?php echo $map_id; ?>">
             <?php if ($show_sidebar) : ?>
-            <!-- Boutons de contrôle de l'interface -->
-            <div class="map-controls">
-                <button id="toggle-filters-<?php echo $map_id; ?>" class="control-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                    </svg>
-                    Filtres
-                </button>
-                <button id="toggle-results-<?php echo $map_id; ?>" class="control-btn active">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="8" y1="6" x2="21" y2="6"></line>
-                        <line x1="8" y1="12" x2="21" y2="12"></line>
-                        <line x1="8" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                    Résultats
-                </button>
-                <button id="expand-map-<?php echo $map_id; ?>" class="control-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <polyline points="9 21 3 21 3 15"></polyline>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
-                    </svg>
-                    Plein écran
-                </button>
-            </div>
+            <!-- Les boutons map-controls ont été retirés, la flèche latérale gère désormais l'affichage de la sidebar -->
 
             <!-- Sidebar pour les filtres et résultats -->
             <div class="map-sidebar" data-map-id="<?php echo $map_id; ?>">
@@ -609,6 +584,10 @@ function affichage_premier_map_shortcode($atts) {
         var sidebar = document.querySelector('.map-sidebar[data-map-id="' + mapId + '"]');
         var mapContainer = document.querySelector('.map-container-wrapper[data-map-id="' + mapId + '"]');
         var map = document.getElementById(mapId);
+
+        // Définir si l'utilisateur est administrateur
+        window.isAdminUser = <?php echo current_user_can('edit_posts') ? 'true' : 'false'; ?>;
+        console.log("L'utilisateur est administrateur:", window.isAdminUser);
 
         // Force le recalcul des dimensions de la carte
         function updateMapSize() {

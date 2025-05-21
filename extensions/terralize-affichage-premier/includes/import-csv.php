@@ -1351,9 +1351,18 @@ function terralize_ap_process_csv_import() {
                 }
                 
                 // Titre à utiliser pour le panneau
-                $panneau_title = !empty($reference) ? $reference : 'Panneau ' . $adresse;
+                $panneau_title = '';
                 if (!empty($ville)) {
-                    $panneau_title .= ' - ' . $ville;
+                    $panneau_title .= $ville;
+                }
+                if (!empty($code_postal)) {
+                    $panneau_title .= (!empty($panneau_title) ? ' - ' : '') . $code_postal;
+                }
+                if (!empty($adresse)) {
+                    $panneau_title .= (!empty($panneau_title) ? ' - ' : '') . $adresse;
+                }
+                if (empty($panneau_title)) {
+                    $panneau_title = 'Panneau sans nom';
                 }
                 
                 // Préparer les méta-données en utilisant les noms exacts des champs de la meta box

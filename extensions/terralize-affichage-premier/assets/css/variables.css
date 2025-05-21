@@ -1,0 +1,45 @@
+:root {
+    /* Couleurs principales */
+    --terralize-ap-primary: #70c141;
+    --terralize-ap-primary-hover: #5ca035;
+    --terralize-ap-primary-light: rgba(112, 193, 65, 0.1);
+    --terralize-ap-primary-dark: #4a8a2a;
+
+    /* Couleurs secondaires */
+    --terralize-ap-secondary: #e64d00;
+    --terralize-ap-secondary-hover: #d32f2f;
+    --terralize-ap-secondary-light: rgba(230, 77, 0, 0.1);
+
+    /* Couleurs de texte */
+    --terralize-ap-text-primary: #333333;
+    --terralize-ap-text-secondary: #666666;
+    --terralize-ap-text-light: #888888;
+    --terralize-ap-text-white: #ffffff;
+
+    /* Couleurs de fond */
+    --terralize-ap-bg-primary: #ffffff;
+    --terralize-ap-bg-secondary: #f8f8f8;
+    --terralize-ap-bg-tertiary: #f0f0f0;
+    --terralize-ap-bg-hover: #f5f5f5;
+
+    /* Couleurs de bordure */
+    --terralize-ap-border-light: #e0e0e0;
+    --terralize-ap-border-medium: #dddddd;
+    --terralize-ap-border-dark: #cccccc;
+
+    /* Couleurs de statut */
+    --terralize-ap-status-success: #28a745;
+    --terralize-ap-status-warning: #ffc107;
+    --terralize-ap-status-error: #dc3545;
+    --terralize-ap-status-info: #17a2b8;
+
+    /* Couleurs d'ombre */
+    --terralize-ap-shadow-light: rgba(0, 0, 0, 0.1);
+    --terralize-ap-shadow-medium: rgba(0, 0, 0, 0.2);
+    --terralize-ap-shadow-dark: rgba(0, 0, 0, 0.5);
+
+    /* Couleurs de transparence */
+    --terralize-ap-overlay-light: rgba(255, 255, 255, 0.9);
+    --terralize-ap-overlay-dark: rgba(0, 0, 0, 0.85);
+    --terralize-ap-overlay-primary: rgba(112, 193, 65, 0.4);
+} 
