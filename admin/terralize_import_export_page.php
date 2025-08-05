@@ -36,6 +36,26 @@ function terralize_import_export_page() {
             echo '<div class="updated notice"><p>Import CSV des panneaux réussi : ' . $created . ' panneaux créés, ' . $updated . ' panneaux mis à jour, ' . $errors . ' erreurs.</p></div>';
         }
         
+        // Vérifier si un import de commerciaux a été effectué
+        if ( isset($_GET['commercial_import_done']) ) {
+            $created = isset($_GET['created']) ? intval($_GET['created']) : 0;
+            $updated = isset($_GET['updated']) ? intval($_GET['updated']) : 0;
+            $associations = isset($_GET['associations']) ? intval($_GET['associations']) : 0;
+            $errors = isset($_GET['errors']) ? intval($_GET['errors']) : 0;
+            echo '<div class="updated notice"><p>Import CSV des commerciaux réussi : ' . $created . ' commerciaux créés, ' . $updated . ' commerciaux mis à jour, ' . $associations . ' associations zone-commercial créées, ' . $errors . ' erreurs.</p></div>';
+            
+            // Afficher les erreurs détaillées si disponibles
+            $import_errors = get_transient('terralize_import_errors');
+            if (!empty($import_errors)) {
+                echo '<div class="error notice"><h4>Détail des erreurs :</h4><ul>';
+                foreach ($import_errors as $error) {
+                    echo '<li>' . esc_html($error) . '</li>';
+                }
+                echo '</ul></div>';
+                delete_transient('terralize_import_errors');
+            }
+        }
+        
         // Vérifier si des zones ont été supprimées
         if ( isset($_GET['zones_cleared']) ) {
             $count = isset($_GET['count']) ? intval($_GET['count']) : 0;
@@ -86,6 +106,53 @@ function terralize_import_export_page() {
                 <input type="file" name="zones_csv" id="zones_csv" accept=".csv,text/csv" />
             </p>
             <input type="submit" value="Importer CSV" class="button button-primary" />
+        </form>
+        
+        <hr/>
+        
+        <h2>Import des Commerciaux</h2>
+        <p>Importez vos commerciaux et associez-les automatiquement aux zones correspondantes à partir d'un fichier CSV.</p>
+        
+        <div class="card">
+            <h3>Instructions</h3>
+            <p>Le fichier CSV doit contenir exactement 4 colonnes dans cet ordre :</p>
+            <ol>
+                <li><strong>Nom commune</strong> - Nom de la commune (ex: Abancourt)</li>
+                <li><strong>Code Postal</strong> - Code postal (ex: 59268)</li>
+                <li><strong>Code Commune</strong> - Code INSEE de la commune (ex: 59001)</li>
+                <li><strong>Commercial</strong> - Nom du commercial (ex: CHARLES GAMBLON NH)</li>
+            </ol>
+            <p><strong>Note :</strong> Les mentions "NH" et "NON NH" seront automatiquement supprimées des noms des commerciaux.</p>
+            <p><strong>Association automatique :</strong> Le système recherchera les zones dont le titre commence par le code commune (format: "59001 - Abancourt") et y associera le commercial correspondant.</p>
+        </div>
+
+        <!-- Formulaire d'import CSV des commerciaux -->
+        <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url('admin-post.php?action=terralize_import_commercial_csv') ); ?>" style="margin-top: 20px;">
+            <?php wp_nonce_field('terralize_import_commercial_csv_nonce'); ?>
+            
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row"><label for="commercial_csv">Fichier CSV :</label></th>
+                    <td>
+                        <input type="file" name="commercial_csv" id="commercial_csv" accept=".csv,text/csv" required />
+                        <p class="description">Format attendu : CSV séparé par des virgules (,).<br>
+                        Encodage recommandé : UTF-8</p>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Options d'importation :</th>
+                    <td>
+                        <label for="skip_header_commercial">
+                            <input type="checkbox" name="skip_header" id="skip_header_commercial" value="1" checked />
+                            Ignorer la première ligne (en-têtes)
+                        </label>
+                    </td>
+                </tr>
+            </table>
+
+            <p class="submit">
+                <input type="submit" name="submit" id="submit" class="button button-primary" value="Importer les commerciaux CSV" />
+            </p>
         </form>
         
         <hr/>

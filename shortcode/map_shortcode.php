@@ -16,6 +16,7 @@ function tracteur_zone_map_shortcode($atts) {
         'center_lng' => '',  // Longitude du centre (si vide, utilise les options par défaut)
         'zoom' => '',        // Niveau de zoom (si vide, utilise les options par défaut)
         'debug' => 'false',  // Active le mode débogage
+        'load_fontawesome' => 'auto', // 'auto', 'true', 'false' - Contrôle le chargement de Font Awesome
         
         // Options de style
         'button_border_radius' => '',
@@ -98,6 +99,7 @@ function tracteur_zone_map_shortcode($atts) {
                 $social_links = '';
                 $border_color = '';
                 $fill_color = '';
+                $commercial_slug = '';
                 $commercial_custom_fields = array();
 
                 if ($comm_id) {
@@ -110,6 +112,7 @@ function tracteur_zone_map_shortcode($atts) {
                     $social_links = get_post_meta($comm_id, 'commercial_social_links', true);
                     $border_color = get_post_meta($comm_id, 'commercial_border_color', true);
                     $fill_color = get_post_meta($comm_id, 'commercial_fill_color', true);
+                    $commercial_slug = get_post_field('post_name', $comm_id);
                     
                     // Récupérer les champs personnalisés du commercial s'ils existent
                     $commercial_custom_fields = array();
@@ -179,6 +182,7 @@ function tracteur_zone_map_shortcode($atts) {
                         'title' => get_the_title(),
                         'type' => 'zone',
                         'commercial_id' => $comm_id,
+                        'commercial_slug' => $commercial_slug,
                         'nom_commercial' => $nom_commercial,
                         'infos' => $infos,
                         'email' => $email,
@@ -300,18 +304,24 @@ function tracteur_zone_map_shortcode($atts) {
                     }
                 }
 
+                // Préparer les données de base du POI
+                $poi_data = array(
+                    'id' => get_the_ID(),
+                    'title' => get_the_title(),
+                    'type' => 'poi',
+                    'categories' => $poi_categories,
+                    'regions' => $poi_regions,
+                    'icon' => !empty($icon_data) ? $icon_data : null,
+                    'custom_fields' => $custom_fields,
+                    'image_url' => $image_url
+                );
+                
+                // Appliquer le filtre pour permettre aux modules d'ajouter des données
+                $poi_data = apply_filters('terralize_poi_data', $poi_data, get_the_ID());
+
                 $zones_data[] = array(
                     'type' => 'Feature',
-                    'properties' => array(
-                        'id' => get_the_ID(),
-                        'title' => get_the_title(),
-                        'type' => 'poi',
-                        'categories' => $poi_categories,
-                        'regions' => $poi_regions,
-                        'icon' => !empty($icon_data) ? $icon_data : null,
-                        'custom_fields' => $custom_fields,
-                        'image_url' => $image_url
-                    ),
+                    'properties' => $poi_data,
                     'geometry' => json_decode($poi_geojson, true)
                 );
             }
@@ -368,6 +378,8 @@ function tracteur_zone_map_shortcode($atts) {
     $combined_options = array_merge($front_options, $popup_options, array(
         'contact_page_url' => $contact_page_url,
         'map_id' => 'terralize-map-' . uniqid(), // Ajout d'un ID unique pour cette instance de carte
+        'site_url' => home_url(), // URL de base du site pour gérer les multisites
+        'base_path' => parse_url(home_url(), PHP_URL_PATH) ?: '', // Chemin de base pour les multisites
     ));
 
     // Enqueue Leaflet et les scripts/styles nécessaires
@@ -381,8 +393,31 @@ function tracteur_zone_map_shortcode($atts) {
     wp_enqueue_style('leaflet-locate-css', 'https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css');
     wp_enqueue_script('leaflet-locate-js', 'https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js', array('leaflet-js'), '0.79.0', true);
     
-    // Ajouter Font Awesome pour les icônes
-    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+    // Gestion intelligente du chargement de Font Awesome
+    $load_fa = $atts['load_fontawesome'];
+    
+    if ($load_fa === 'true') {
+        // Forcer le chargement de Font Awesome
+        wp_enqueue_style('terralize-font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', array(), '5.15.4');
+    } elseif ($load_fa === 'auto') {
+        // Mode automatique : vérifier si Font Awesome est déjà chargé
+        $font_awesome_loaded = false;
+        
+        // Vérifier les différentes variantes de Font Awesome qui peuvent être chargées
+        $fa_handles = array('font-awesome', 'fontawesome', 'bricks-font-awesome', 'fa', 'font-awesome-5', 'fontawesome-css');
+        foreach ($fa_handles as $handle) {
+            if (wp_style_is($handle, 'enqueued') || wp_style_is($handle, 'registered')) {
+                $font_awesome_loaded = true;
+                break;
+            }
+        }
+        
+        // Charger Font Awesome seulement si aucune version n'est détectée
+        if (!$font_awesome_loaded) {
+            wp_enqueue_style('terralize-font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', array(), '5.15.4');
+        }
+    }
+    // Si $load_fa === 'false', ne rien charger
     
     // Chargement du fichier de style personnalisé pour la carte
     wp_enqueue_style('terralize-map-styles', plugin_dir_url(__FILE__) . '../assets/css/terralize-map.css');
@@ -475,10 +510,10 @@ function tracteur_zone_map_shortcode($atts) {
             <!-- Sidebar pour les filtres et résultats -->
             <div class="map-sidebar" data-map-id="<?php echo $map_id; ?>">
                 <div class="sidebar-tabs">
-                    <button class="tab-btn" data-tab="filters" data-map-id="<?php echo $map_id; ?>">
+                    <button class="tab-btn active" data-tab="filters" data-map-id="<?php echo $map_id; ?>">
                         Filtres <span id="results-counter-<?php echo $map_id; ?>">(0)</span>
                     </button>
-                    <button class="tab-btn active" data-tab="results" data-map-id="<?php echo $map_id; ?>">
+                    <button class="tab-btn" data-tab="results" data-map-id="<?php echo $map_id; ?>">
                         Résultats <span id="results-count-<?php echo $map_id; ?>">(0)</span>
                     </button>
                     <button class="panel-close-btn" data-map-id="<?php echo $map_id; ?>">
@@ -490,7 +525,7 @@ function tracteur_zone_map_shortcode($atts) {
                 </div>
 
                 <!-- Panneau des filtres -->
-                <div id="filters-panel-<?php echo $map_id; ?>" class="sidebar-panel" data-map-id="<?php echo $map_id; ?>">
+                <div id="filters-panel-<?php echo $map_id; ?>" class="sidebar-panel active" data-map-id="<?php echo $map_id; ?>">
                     <div class="accordion-filters">
                         <h3>Filtrer les zones commerciales</h3>
                         
@@ -593,7 +628,7 @@ function tracteur_zone_map_shortcode($atts) {
                 </div>
 
                 <!-- Panneau des résultats -->
-                <div id="results-panel-<?php echo $map_id; ?>" class="sidebar-panel active" data-map-id="<?php echo $map_id; ?>">
+                <div id="results-panel-<?php echo $map_id; ?>" class="sidebar-panel" data-map-id="<?php echo $map_id; ?>">
                     <div class="panel-header">
                         <h2>Résultats <span id="tab-results-count-<?php echo $map_id; ?>">0</span> éléments</h2>
                     </div>
@@ -759,14 +794,13 @@ function tracteur_zone_map_shortcode($atts) {
                 toggleBtn.querySelector('i').className = 'fas fa-chevron-left';
             }
             
-            // Activer l'onglet spécifié
-            if (tabName) {
-                var tabElement = document.querySelector('.tab-btn[data-tab="' + tabName + '"][data-map-id="' + mapId + '"]');
-                if (tabElement) {
-                    tabElement.click();
-                } else {
-                    console.error("Onglet non trouvé:", tabName, mapId);
-                }
+            // Activer l'onglet spécifié, ou 'filters' par défaut
+            var targetTab = tabName || 'filters';
+            var tabElement = document.querySelector('.tab-btn[data-tab="' + targetTab + '"][data-map-id="' + mapId + '"]');
+            if (tabElement) {
+                tabElement.click();
+            } else {
+                console.error("Onglet non trouvé:", targetTab, mapId);
             }
             
             // Essayer de redimensionner la carte, mais ne pas bloquer si ça échoue

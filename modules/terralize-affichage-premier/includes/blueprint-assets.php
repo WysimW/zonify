@@ -49,7 +49,7 @@ function terralize_ap_register_blueprint_assets() {
         
         // Mettre à disposition les données pour le script JS
         $map_data = array(
-            'panelTypes' => array('mural', 'pre-enseigne', '4x3', '8x3', 'déroulant', 'totem'),
+            'panelTypes' => array('mural', 'pre-implantations', '4x3', '8x3', 'déroulant', 'totem'),
             'defaultCenter' => array(46.227638, 2.213749), // Centre de la France
             'defaultZoom' => 6
         );

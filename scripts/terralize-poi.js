@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Événement déclenché lors de la création d'un marker
     map.on(L.Draw.Event.CREATED, function(e) {
         var layer = e.layer;
-        // Demande de renseignement du titre du POI via une prompt
+        // Demande de rimplantationsment du titre du POI via une prompt
         var poiTitle = prompt("Entrez le nom du point d'intérêt :");
         if (poiTitle) {
             layer.bindPopup("<strong>" + poiTitle + "</strong>");

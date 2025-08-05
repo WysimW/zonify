@@ -209,7 +209,7 @@
                 // Couleurs associées aux types (correspondant aux classes CSS dans les marqueurs)
                 const typeColors = {
                     'mural': '#70c141',
-                    'pre-enseigne': '#E04D00',
+                    'pre-implantations': '#E04D00',
                     '4x3': '#2c5aa0',
                     '8x3': '#1e3c68',
                     'déroulant': '#9C27B0',

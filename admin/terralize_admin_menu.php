@@ -61,6 +61,16 @@ function terralize_admin_menu()
             'terralize_import_export_page'
         );
 
+        // Ajout du sous-menu pour la gestion des modules
+        add_submenu_page(
+            'terralize',
+            'Gestion des modules',
+            'Modules',
+            'manage_options',
+            'terralize_modules',
+            'terralize_modules_page'
+        );
+
         // Ajout du sous-menu pour la gestion des Contacts
         add_submenu_page(
             'terralize',

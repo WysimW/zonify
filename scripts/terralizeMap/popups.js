@@ -227,7 +227,18 @@ export function showFeaturePopup(map, feature, layer, options) {
             content += '<div class="popup-section contact-info">';
             content += '<h4>Contact</h4>';
             
-            if (hasContactInfo) {
+            // DEBUG: Afficher toutes les propriétés du POI pour debug
+            console.log("[Popup] Toutes les propriétés du POI:", feature.properties);
+            
+            // Vérifier si le POI est lié à une implantation
+            if (feature.properties.implantation_url) {
+                console.log("[Popup] POI lié à une implantation, redirection vers:", feature.properties.implantation_url);
+                content += '<div class="contact-buttons">';
+                content += '<a href="' + feature.properties.implantation_url + '" class="contact-button">';
+                content += '<i class="fas fa-store"></i> Voir l\'implantation';
+                content += '</a>';
+                content += '</div>';
+            } else if (hasContactInfo) {
                 console.log("[Popup] Affichage des champs contact:", Object.keys(contactFields));
                 Object.entries(contactFields).forEach(([key, field]) => {
                     if (field.value) {
@@ -277,10 +288,25 @@ export function showFeaturePopup(map, feature, layer, options) {
             
             content += '</div>'; // Fin routes-section
         
-            // Bouton Contact dans le bas de la popup
-            const contactUrl = options.contact_page_url || '/contact';
+            // Bouton Contact dans le bas de la popup - utiliser l'implantation si disponible
+            let contactUrl = options.contact_page_url || '/contact';
+            let contactParams = '';
+            
+            console.log("[Popup] Vérification implantation pour bouton contact:", feature.properties.implantation_url);
+            
+            // Si le POI est lié à une implantation, utiliser l'URL de l'implantation
+            if (feature.properties.implantation_url) {
+                contactUrl = feature.properties.implantation_url;
+                contactParams = '';
+                console.log("[Popup] POI lié à une implantation, redirection vers:", contactUrl);
+            } else {
+                // Sinon, utiliser la page de contact par défaut avec les paramètres
+                contactParams = '?poi_id=' + feature.properties.id;
+                console.log("[Popup] Pas d'implantation liée, utilisation contact par défaut:", contactUrl + contactParams);
+            }
+            
             content += '<div class="panel-actions">' +
-                    '<a href="' + contactUrl + '?poi_id=' + feature.properties.id + '" class="btn-contact">Contacter</a>' +
+                    '<a href="' + contactUrl + contactParams + '" class="btn-contact">Contacter</a>' +
                 '</div>';
         
             content += '</div>'; // Fin popup-container
@@ -366,7 +392,8 @@ export function showFeaturePopup(map, feature, layer, options) {
                 // Section Informations générales
                 content += '<div class="popup-section info">';
                 content += '<h4>Informations</h4>';
-                
+                content += '<h4>' + feature.properties.nom_commercial + '</h4>';
+
                 if (Object.keys(infoFields).length > 0) {
                     console.log("[Popup] Affichage des champs info pour commercial:", Object.keys(infoFields));
                     Object.entries(infoFields).forEach(([key, field]) => {
@@ -502,8 +529,26 @@ export function showFeaturePopup(map, feature, layer, options) {
             
             // Bouton de contact (toujours présent)
             if (options && options.popup_enable_contact_btn && parseInt(options.popup_enable_contact_btn) === 1) {
-                const contactUrl = options.contact_page_url || '/contact';
-                                content += '<div class="panel-actions">';                content += '<a href="' + contactUrl + '?zone_id=' + feature.properties.id + (hasCommercial ? '&commercial_id=' + comm_id : '') + '" class="btn-contact">Contacter</a>';                content += '</div>';
+                let contactUrl = options.contact_page_url || '/contact';
+                let contactParams = '';
+                
+                // Si la zone a un commercial associé, rediriger vers sa page
+                if (hasCommercial && feature.properties.commercial_slug) {
+                    // Utiliser l'URL de base fournie par PHP pour gérer les multisites
+                    var siteUrl = options.site_url || window.location.origin;
+                    var basePath = options.base_path || '';
+                    
+                    // Construire l'URL complète
+                    contactUrl = siteUrl + '/commercial/' + feature.properties.commercial_slug;
+                    console.log("[Popup] Zone liée à un commercial, redirection vers:", contactUrl);
+                } else {
+                    // Sinon, utiliser la page de contact par défaut avec les paramètres
+                    contactParams = '?zone_id=' + feature.properties.id + (hasCommercial ? '&commercial_id=' + comm_id : '');
+                }
+                
+                content += '<div class="panel-actions">';
+                content += '<a href="' + contactUrl + contactParams + '" class="btn-contact">Contacter</a>';
+                content += '</div>';
             }
             
             content += '</div>'; // Fin popup-container

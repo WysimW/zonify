@@ -671,7 +671,7 @@ function terralize_ap_fill_panel_admin_columns($column, $post_id) {
             $panel_type = get_post_meta($post_id, 'panel_type', true);
             $types = array(
                 'mural' => 'Mural',
-                'pre-enseigne' => 'Pré-enseigne',
+                'pre-implantations' => 'Pré-implantations',
                 '4x3' => '4x3',
                 '8x3' => '8x3',
                 'déroulant' => 'Déroulant',

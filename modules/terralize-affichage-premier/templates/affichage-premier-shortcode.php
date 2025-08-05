@@ -42,8 +42,8 @@ function affichage_premier_map_shortcode($atts) {
     $combined_options = $front_options + $popup_options;
 
     // Récupérer le chemin vers le plugin terralize Affichage Premier
-    $plugin_dir = WP_PLUGIN_DIR . '/zone-commercial-pluginwp/extensions/terralize-affichage-premier';
-    $plugin_url = plugins_url('/zone-commercial-pluginwp/extensions/terralize-affichage-premier');
+    $plugin_dir = WP_PLUGIN_DIR . '/zone-commercial-pluginwp/modules/terralize-affichage-premier';
+    $plugin_url = plugins_url('/zone-commercial-pluginwp/modules/terralize-affichage-premier');
 
     // Enqueue Leaflet et les scripts/styles nécessaires
     wp_enqueue_style('leaflet-css', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css');
@@ -71,6 +71,15 @@ function affichage_premier_map_shortcode($atts) {
 
     // Ajout du script personnalisé pour la carte d'affichage (depuis le plugin)
     wp_enqueue_script('ap-map-frontend', $plugin_url . '/assets/js/affichage-premier-map.js', array('jquery', 'leaflet-js'), '1.0', true);
+
+    // Charger les options d'icônes du module Affichage Premier
+    $ap_icon_options = array(
+        'poi_icon_url' => get_option('terralize_ap_poi_icon_url', '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin.svg'),
+        'poi_icon_size' => get_option('terralize_ap_poi_icon_size', 30),
+        'poi_icon_anchor_x' => get_option('terralize_ap_poi_icon_anchor_x', 15),
+        'poi_icon_anchor_y' => get_option('terralize_ap_poi_icon_anchor_y', 40)
+    );
+    wp_localize_script('ap-map-frontend', 'terralizeAPIconOptions', $ap_icon_options);
 
     // Récupérer les points d'intérêt depuis la base de données
     $poi_args = array(
@@ -308,10 +317,10 @@ function affichage_premier_map_shortcode($atts) {
             <!-- Sidebar pour les filtres et résultats -->
             <div class="map-sidebar" data-map-id="<?php echo $map_id; ?>">
                 <div class="sidebar-tabs">
-                    <button class="tab-btn" data-tab="filters" data-map-id="<?php echo $map_id; ?>">
+                    <button class="tab-btn active" data-tab="filters" data-map-id="<?php echo $map_id; ?>">
                         Filtres <span id="results-counter-<?php echo $map_id; ?>">(0)</span>
                     </button>
-                    <button class="tab-btn active" data-tab="results" data-map-id="<?php echo $map_id; ?>">
+                    <button class="tab-btn" data-tab="results" data-map-id="<?php echo $map_id; ?>">
                         Résultats <span id="results-count-<?php echo $map_id; ?>">(0)</span>
                     </button>
                     <button class="panel-close-btn" data-map-id="<?php echo $map_id; ?>">
@@ -324,7 +333,7 @@ function affichage_premier_map_shortcode($atts) {
 
                 <!-- Les mêmes panneaux de filtres et résultats que dans le template -->
                 <!-- Panneau des filtres -->
-                <div id="filters-panel-<?php echo $map_id; ?>" class="sidebar-panel" data-map-id="<?php echo $map_id; ?>">
+                <div id="filters-panel-<?php echo $map_id; ?>" class="sidebar-panel active" data-map-id="<?php echo $map_id; ?>">
                     <div class="filters-container">
                         <h3>Filtrer les panneaux</h3>
                         
@@ -547,7 +556,7 @@ function affichage_premier_map_shortcode($atts) {
                 </div>
 
                 <!-- Panneau des résultats -->
-                <div id="results-panel-<?php echo $map_id; ?>" class="sidebar-panel active" data-map-id="<?php echo $map_id; ?>">
+                <div id="results-panel-<?php echo $map_id; ?>" class="sidebar-panel" data-map-id="<?php echo $map_id; ?>">
                     <div class="results-header">
                         <h3>Résultats <span id="tab-results-count-<?php echo $map_id; ?>">0</span> panneaux</h3>
                     </div>

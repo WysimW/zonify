@@ -1,0 +1,25 @@
+/* Style pour le bouton de l'implantations */
+.contact-buttons {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.contact-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--terralize-primary-color, #3388ff);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.contact-button:hover {
+    background-color: var(--terralize-primary-color-hover, #2b6cd4);
+    color: white;
+    text-decoration: none;
+}
+
+.contact-button i {
+    margin-right: 8px;
+} 

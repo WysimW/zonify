@@ -160,10 +160,21 @@ add_action('wp_ajax_nopriv_terralize_dynamic_styles', 'terralize_ajax_dynamic_st
 
 require_once plugin_dir_path(__FILE__) . 'settings/settings.php';
 
+// Charger le module GFG si présent
+if (file_exists(plugin_dir_path(__FILE__) . 'modules/terralize-gfg/terralize-gfg.php')) {
+    require_once plugin_dir_path(__FILE__) . 'modules/terralize-gfg/terralize-gfg.php';
+}
+
+// Charger le module Affichage Premier si activé
+$affichage_premier_enabled = get_option('terralize_affichage_premier_enabled', false);
+if ($affichage_premier_enabled && file_exists(plugin_dir_path(__FILE__) . 'modules/terralize-affichage-premier/terralize-affichage-premier.php')) {
+    require_once plugin_dir_path(__FILE__) . 'modules/terralize-affichage-premier/terralize-affichage-premier.php';
+}
+
 // Charger les extensions
 /*
-    if (file_exists(plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php')) {
-        require_once plugin_dir_path(__FILE__) . 'extensions/terralize-affichage-premier/terralize-affichage-premier.php';
+    if (file_exists(plugin_dir_path(__FILE__) . 'modules/terralize-affichage-premier/terralize-affichage-premier.php')) {
+        require_once plugin_dir_path(__FILE__) . 'modules/terralize-affichage-premier/terralize-affichage-premier.php';
     }
 */
 

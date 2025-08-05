@@ -110,7 +110,7 @@ function terralize_ap_add_cpt_table_scripts() {
         color: #70c141 !important;
     }
 
-    .column-panel_type span.type-pre-enseigne {
+    .column-panel_type span.type-pre-implantations {
         background-color: rgba(224, 77, 0, 0.2) !important;
         color: #E04D00 !important;
     }

@@ -290,9 +290,10 @@ function terralize_ap_customize_admin_ui() {
 add_action('admin_head', 'terralize_ap_customize_admin_ui');
 
 /**
- * Ajouter une page d'aide personnalisée
+ * Ajouter les pages personnalisées (aide + modules + configuration)
  */
-function terralize_ap_add_help_page() {
+function terralize_ap_add_custom_pages() {
+    // Page d'aide
     add_submenu_page(
         'terralize',
         'Aide Affichage Premier',
@@ -301,8 +302,424 @@ function terralize_ap_add_help_page() {
         'terralize_ap_help',
         'terralize_ap_help_page_content'
     );
+    
+    // Page des modules (pour conserver l'accès)
+    add_submenu_page(
+        'terralize',
+        'Modules Terralize',
+        'Modules',
+        'manage_options',
+        'terralize_modules',
+        'terralize_modules_page'
+    );
+    
+    // Page de configuration Affichage Premier
+    add_submenu_page(
+        'terralize',
+        'Configuration Affichage Premier',
+        'Configuration AP',
+        'manage_options',
+        'terralize_ap_config',
+        'terralize_ap_config_page_content'
+    );
 }
-add_action('admin_menu', 'terralize_ap_add_help_page');
+add_action('admin_menu', 'terralize_ap_add_custom_pages');
+
+/**
+ * Fonction pour gérer l'upload de fichier SVG
+ */
+function terralize_ap_handle_icon_upload($file) {
+    // Vérifications de sécurité
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return array('success' => false, 'error' => 'Erreur lors de l\'upload du fichier.');
+    }
+    
+    // Vérifier l'extension du fichier
+    $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if ($file_extension !== 'svg') {
+        return array('success' => false, 'error' => 'Seuls les fichiers SVG sont autorisés.');
+    }
+    
+    // Vérifier la taille du fichier (max 1MB)
+    if ($file['size'] > 1048576) {
+        return array('success' => false, 'error' => 'Le fichier est trop volumineux (max 1MB).');
+    }
+    
+    // Vérifier le type MIME
+    $allowed_mime_types = array('image/svg+xml', 'text/plain');
+    $file_mime = mime_content_type($file['tmp_name']);
+    if (!in_array($file_mime, $allowed_mime_types)) {
+        // Vérification supplémentaire en lisant le contenu du fichier
+        $file_content = file_get_contents($file['tmp_name']);
+        if (strpos($file_content, '<svg') === false) {
+            return array('success' => false, 'error' => 'Le fichier ne semble pas être un SVG valide.');
+        }
+    }
+    
+    // Créer le répertoire de destination s'il n'existe pas
+    $upload_dir = wp_upload_dir();
+    $icon_dir = $upload_dir['basedir'] . '/terralize-icons/';
+    if (!file_exists($icon_dir)) {
+        wp_mkdir_p($icon_dir);
+    }
+    
+    // Générer un nom de fichier unique
+    $file_name = 'poi-icon-' . time() . '.svg';
+    $file_path = $icon_dir . $file_name;
+    
+    // Déplacer le fichier uploadé
+    if (move_uploaded_file($file['tmp_name'], $file_path)) {
+        $file_url = $upload_dir['baseurl'] . '/terralize-icons/' . $file_name;
+        return array('success' => true, 'url' => $file_url);
+    } else {
+        return array('success' => false, 'error' => 'Impossible de sauvegarder le fichier.');
+    }
+}
+
+/**
+ * Contenu de la page de configuration Affichage Premier
+ */
+function terralize_ap_config_page_content() {
+    // Traitement du formulaire
+    if (isset($_POST['terralize_ap_config_submit']) && wp_verify_nonce($_POST['terralize_ap_config_nonce'], 'terralize_ap_config')) {
+        
+        // Gestion de l'upload de fichier SVG
+        $uploaded_icon_url = '';
+        if (!empty($_FILES['poi_icon_file']['name'])) {
+            $upload_result = terralize_ap_handle_icon_upload($_FILES['poi_icon_file']);
+            if ($upload_result['success']) {
+                $uploaded_icon_url = $upload_result['url'];
+                update_option('terralize_ap_poi_icon_url', $uploaded_icon_url);
+                echo '<div class="notice notice-success is-dismissible"><p>Icône SVG uploadée avec succès : ' . basename($uploaded_icon_url) . '</p></div>';
+            } else {
+                echo '<div class="notice notice-error is-dismissible"><p>Erreur lors de l\'upload : ' . $upload_result['error'] . '</p></div>';
+            }
+        } else {
+            // Si pas d'upload, utiliser l'URL saisie manuellement
+            update_option('terralize_ap_poi_icon_url', sanitize_text_field($_POST['poi_icon_url']));
+        }
+        
+        update_option('terralize_ap_poi_icon_size', intval($_POST['poi_icon_size']));
+        update_option('terralize_ap_poi_icon_anchor_x', intval($_POST['poi_icon_anchor_x']));
+        update_option('terralize_ap_poi_icon_anchor_y', intval($_POST['poi_icon_anchor_y']));
+        
+        if (empty($uploaded_icon_url)) {
+            echo '<div class="notice notice-success is-dismissible"><p>Configuration sauvegardée avec succès !</p></div>';
+        }
+    }
+    
+    // Récupérer les valeurs actuelles
+    $poi_icon_url = get_option('terralize_ap_poi_icon_url', '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin.svg');
+    $poi_icon_size = get_option('terralize_ap_poi_icon_size', 30);
+    $poi_icon_anchor_x = get_option('terralize_ap_poi_icon_anchor_x', 15);
+    $poi_icon_anchor_y = get_option('terralize_ap_poi_icon_anchor_y', 40);
+    
+    $icon_url = plugin_dir_url(dirname(__FILE__)) . '../assets/icons/icon.png';
+    ?>
+    <div class="wrap">
+        <div class="terralize-header">
+            <div class="terralize-header-left">
+                <img src="<?php echo esc_url($icon_url); ?>" alt="Terralize Icon" class="terralize-icon" />
+                <h1 class="terralize-title">Configuration Affichage Premier</h1>
+            </div>
+        </div>
+        
+        <div class="terralize-content">
+            <form method="post" action="" enctype="multipart/form-data">
+                <?php wp_nonce_field('terralize_ap_config', 'terralize_ap_config_nonce'); ?>
+                
+                <section class="terralize-section">
+                    <h2>Configuration des icônes de panneaux</h2>
+                    
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row">
+                                <label for="poi_icon_file">Upload d'icône SVG</label>
+                            </th>
+                            <td class="upload-zone">
+                                <input type="file" 
+                                       id="poi_icon_file" 
+                                       name="poi_icon_file" 
+                                       accept=".svg,image/svg+xml" 
+                                       class="regular-text" />
+                                <p class="description">
+                                    Uploadez un fichier SVG pour remplacer l'icône actuelle (max 1MB).<br>
+                                    <strong>Recommandé :</strong> Utilisez cette méthode pour une meilleure sécurité.<br>
+                                    <em>Vous pouvez également glisser-déposer votre fichier SVG ici.</em>
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row" style="border-top: 2px solid #ddd; padding-top: 20px;">
+                                <label for="poi_icon_url">OU URL de l'icône SVG</label>
+                            </th>
+                            <td style="border-top: 2px solid #ddd; padding-top: 20px;">
+                                <input type="text" 
+                                       id="poi_icon_url" 
+                                       name="poi_icon_url" 
+                                       value="<?php echo esc_attr($poi_icon_url); ?>" 
+                                       class="regular-text" />
+                                <p class="description">
+                                    Alternativement, saisissez l'URL complète vers un fichier SVG existant.<br>
+                                    Exemple : /wp-content/plugins/zone-commercial-pluginwp/assets/svg/mon_icone.svg<br>
+                                    <em>Note : L'upload de fichier a la priorité sur cette URL.</em>
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="poi_icon_size">Taille de l'icône</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="poi_icon_size" 
+                                       name="poi_icon_size" 
+                                       value="<?php echo esc_attr($poi_icon_size); ?>" 
+                                       min="10" 
+                                       max="100" 
+                                       step="1" />
+                                <p class="description">Taille en pixels (largeur, la hauteur sera calculée proportionnellement)</p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="poi_icon_anchor_x">Point d'ancrage X</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="poi_icon_anchor_x" 
+                                       name="poi_icon_anchor_x" 
+                                       value="<?php echo esc_attr($poi_icon_anchor_x); ?>" 
+                                       min="0" 
+                                       max="100" 
+                                       step="1" />
+                                <p class="description">Position horizontale du point d'ancrage (généralement la moitié de la largeur)</p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="poi_icon_anchor_y">Point d'ancrage Y</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="poi_icon_anchor_y" 
+                                       name="poi_icon_anchor_y" 
+                                       value="<?php echo esc_attr($poi_icon_anchor_y); ?>" 
+                                       min="0" 
+                                       max="100" 
+                                       step="1" />
+                                <p class="description">Position verticale du point d'ancrage (généralement la hauteur totale pour une épingle)</p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <div class="blueprint-note">
+                        <h4>Aperçu de l'icône</h4>
+                        <div id="icon-preview-container" style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 4px; margin: 10px 0;">
+                            <img id="icon-preview" 
+                                 src="<?php echo esc_url($poi_icon_url); ?>" 
+                                 alt="Aperçu de l'icône" 
+                                 style="max-width: <?php echo esc_attr($poi_icon_size); ?>px; height: auto; border: 1px solid #ddd; border-radius: 4px;" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                            <p id="icon-preview-error" style="display: none; color: #999;">Impossible de charger l'aperçu de l'icône</p>
+                            <div id="icon-preview-info" style="margin-top: 10px; font-size: 12px; color: #666;">
+                                <p>Taille affichée : <?php echo esc_attr($poi_icon_size); ?>px</p>
+                                <p>URL actuelle : <?php echo esc_html(basename($poi_icon_url)); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <?php submit_button('Enregistrer la configuration', 'primary', 'terralize_ap_config_submit'); ?>
+            </form>
+        </div>
+    </div>
+    
+    <style>
+        .terralize-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-table th {
+            width: 200px;
+            padding: 15px 10px 15px 0;
+        }
+        
+        .form-table td {
+            padding: 15px 10px;
+        }
+        
+        .regular-text {
+            width: 400px;
+        }
+        
+        input[type="number"] {
+            width: 100px;
+        }
+        
+        #poi_icon_file {
+            padding: 8px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+        
+        #poi_icon_file:hover {
+            border-color: #70c141;
+            background: #f0f8ff;
+        }
+        
+        #poi_icon_file:focus {
+            border-color: #70c141;
+            outline: none;
+            box-shadow: 0 0 5px rgba(112, 193, 65, 0.3);
+        }
+        
+        .upload-zone {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-zone.dragover {
+            border-color: #70c141;
+            background: #f0f8ff;
+        }
+    </style>
+    
+    <script>
+        jQuery(document).ready(function($) {
+            // Prévisualisation en temps réel de l'upload
+            $('#poi_icon_file').on('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    // Vérifier l'extension plutôt que le type MIME (plus fiable pour SVG)
+                    var fileName = file.name.toLowerCase();
+                    var isSVG = fileName.endsWith('.svg') || 
+                               file.type === 'image/svg+xml' || 
+                               file.type === 'text/plain' ||
+                               file.type === 'application/xml';
+                    
+                    if (isSVG) {
+                        console.log('Fichier SVG détecté:', {
+                            name: file.name,
+                            type: file.type,
+                            size: file.size
+                        });
+                        
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var content = e.target.result;
+                            console.log('Contenu lu, taille:', content.length, 'Type:', typeof content);
+                            
+                            // Vérifier que le contenu contient bien du SVG
+                            if (content.indexOf('<svg') !== -1 || content.indexOf('data:image/svg+xml') !== -1) {
+                                // Pour les SVG, essayer d'abord l'affichage direct
+                                $('#icon-preview').attr('src', content)
+                                    .on('load', function() {
+                                        console.log('SVG affiché avec succès');
+                                        $('#icon-preview').show();
+                                        $('#icon-preview-error').hide();
+                                        $('#icon-preview-info p:last-child').text('Nouveau fichier : ' + file.name);
+                                    })
+                                    .on('error', function() {
+                                        console.log('Erreur d\'affichage SVG, tentative avec URL blob');
+                                        // Si l'affichage direct échoue, essayer avec un blob
+                                        var blob = new Blob([content], {type: 'image/svg+xml'});
+                                        var url = URL.createObjectURL(blob);
+                                        $('#icon-preview').attr('src', url).show();
+                                        $('#icon-preview-error').hide();
+                                        $('#icon-preview-info p:last-child').text('Nouveau fichier : ' + file.name);
+                                    });
+                            } else {
+                                console.log('Contenu ne semble pas être du SVG:', content.substring(0, 100));
+                                $('#icon-preview').hide();
+                                $('#icon-preview-error').text('Le fichier ne semble pas contenir de SVG valide.').show();
+                            }
+                        };
+                        reader.onerror = function(error) {
+                            console.error('Erreur FileReader:', error);
+                            $('#icon-preview').hide();
+                            $('#icon-preview-error').text('Erreur lors de la lecture du fichier.').show();
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        $('#icon-preview').hide();
+                        $('#icon-preview-error').text('Veuillez sélectionner un fichier SVG (.svg).').show();
+                    }
+                } else {
+                    // Aucun fichier sélectionné, revenir à l'URL par défaut
+                    var defaultUrl = $('#poi_icon_url').val();
+                    if (defaultUrl) {
+                        $('#icon-preview').attr('src', defaultUrl).show();
+                        $('#icon-preview-error').hide();
+                        $('#icon-preview-info p:last-child').text('URL : ' + defaultUrl.split('/').pop());
+                    }
+                }
+            });
+            
+            // Mise à jour de l'aperçu quand la taille change
+            $('#poi_icon_size').on('input', function() {
+                var newSize = $(this).val() + 'px';
+                $('#icon-preview').css('max-width', newSize);
+                $('#icon-preview-info p:first-child').text('Taille affichée : ' + $(this).val() + 'px');
+            });
+            
+            // Mise à jour de l'aperçu quand l'URL change
+            $('#poi_icon_url').on('input', function() {
+                var newUrl = $(this).val();
+                if (newUrl && !$('#poi_icon_file').val()) {
+                    $('#icon-preview').attr('src', newUrl).show();
+                    $('#icon-preview-error').hide();
+                    $('#icon-preview-info p:last-child').text('URL : ' + newUrl.split('/').pop());
+                }
+            });
+            
+            // Gestion du drag & drop sur la zone d'upload
+            $('.upload-zone').on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('dragover');
+            }).on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+            }).on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+                
+                var files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    var file = files[0];
+                    var fileInput = $('#poi_icon_file')[0];
+                    
+                    // Créer un nouvel objet FileList pour le champ input
+                    var dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                    
+                    // Déclencher l'événement change
+                    $('#poi_icon_file').trigger('change');
+                }
+            });
+            
+            // Empêcher le comportement par défaut du drag & drop sur toute la page
+            $(document).on('dragover drop', function(e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+    <?php
+}
 
 /**
  * Contenu de la page d'aide
@@ -342,7 +759,7 @@ function terralize_ap_help_page_content() {
                 
                 <div class="blueprint-note">
                     <h3>Informations techniques</h3>
-                    <p>Pour chaque panneau, vous pouvez renseigner :</p>
+                    <p>Pour chaque panneau, vous pouvez rimplantationsr :</p>
                     <ul>
                         <li><strong>Référence :</strong> Code unique d'identification du panneau</li>
                         <li><strong>Type :</strong> 4x3, 8x3, mural, etc.</li>
@@ -497,7 +914,7 @@ function terralize_ap_add_contextual_help() {
                 <div class="blueprint-grid" style="padding: 15px;">
                     <h2>Comment remplir les informations du panneau</h2>
                     <div class="blueprint-detail">
-                        <p><strong>Caractéristiques techniques :</strong> Renseignez le type de panneau, ses dimensions et sa référence unique.</p>
+                        <p><strong>Caractéristiques techniques :</strong> Rimplantationsz le type de panneau, ses dimensions et sa référence unique.</p>
                     </div>
                     <div class="blueprint-detail">
                         <p><strong>Localisation :</strong> Vous pouvez soit saisir manuellement l\'adresse, soit utiliser le bouton "Remplir automatiquement l\'adresse" après avoir positionné le panneau sur la carte.</p>
@@ -556,7 +973,7 @@ function terralize_ap_dashboard_widget_content() {
     // Récupérer la répartition par type
     $panel_types = array(
         'mural'        => 0,
-        'pre-enseigne' => 0,
+        'pre-implantations' => 0,
         '4x3'          => 0,
         '8x3'          => 0,
         'déroulant'    => 0,
@@ -604,6 +1021,37 @@ function terralize_ap_dashboard_widget_content() {
 }
 
 /**
+ * Ajouter les options d'icônes POI pour le front-end
+ */
+function terralize_ap_add_poi_icon_options() {
+    // Récupérer les options sauvegardées
+    $poi_icon_url = get_option('terralize_ap_poi_icon_url', '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin.svg');
+    $poi_icon_size = get_option('terralize_ap_poi_icon_size', 30);
+    $poi_icon_anchor_x = get_option('terralize_ap_poi_icon_anchor_x', 15);
+    $poi_icon_anchor_y = get_option('terralize_ap_poi_icon_anchor_y', 40);
+    
+    // Passer les options au script JavaScript (pour le shortcode et l'admin)
+    if (wp_script_is('ap-map-frontend', 'enqueued')) {
+        wp_localize_script('ap-map-frontend', 'terralizeAPIconOptions', array(
+            'poi_icon_url' => $poi_icon_url,
+            'poi_icon_size' => $poi_icon_size,
+            'poi_icon_anchor_x' => $poi_icon_anchor_x,
+            'poi_icon_anchor_y' => $poi_icon_anchor_y
+        ));
+    }
+    
+    if (wp_script_is('terralize-map', 'enqueued')) {
+        wp_localize_script('terralize-map', 'terralizeAPIconOptions', array(
+            'poi_icon_url' => $poi_icon_url,
+            'poi_icon_size' => $poi_icon_size,
+            'poi_icon_anchor_x' => $poi_icon_anchor_x,
+            'poi_icon_anchor_y' => $poi_icon_anchor_y
+        ));
+    }
+}
+add_action('wp_enqueue_scripts', 'terralize_ap_add_poi_icon_options');
+
+/**
  * Ajouter des styles CSS personnalisés pour les marqueurs de carte
  */
 function terralize_ap_add_custom_marker_styles() {
@@ -627,7 +1075,7 @@ function terralize_ap_add_custom_marker_styles() {
             background-color: #70c141;
         }
         
-        .marker-type-preenseigne {
+        .marker-type-preimplantations {
             background-color: #E04D00;
         }
         

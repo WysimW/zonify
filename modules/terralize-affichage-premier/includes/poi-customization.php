@@ -96,7 +96,7 @@ function terralize_ap_add_poi_admin_filters() {
         $panel_types = array(
             '' => 'Tous les types',
             'mural' => 'Mural',
-            'pre-enseigne' => 'Pré-enseigne',
+            'pre-implantations' => 'Pré-implantations',
             '4x3' => '4x3',
             '8x3' => '8x3',
             'déroulant' => 'Déroulant',

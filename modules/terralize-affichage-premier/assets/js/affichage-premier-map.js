@@ -552,11 +552,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Créer et ajouter la nouvelle couche GeoJSON
         geoJSONLayer = L.geoJSON(filteredData, {
             pointToLayer: function(feature, latlng) {
+                // Récupérer les options d'icônes depuis les paramètres du module Affichage Premier
+                var iconOptions = window.terralizeAPIconOptions || {};
+                var iconUrl = iconOptions.poi_icon_url || '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin.svg';
+                var iconSize = parseInt(iconOptions.poi_icon_size) || 30;
+                var iconAnchorX = parseInt(iconOptions.poi_icon_anchor_x) || 15;
+                var iconAnchorY = parseInt(iconOptions.poi_icon_anchor_y) || 40;
+                
+                // Calculer les dimensions de l'icône (maintenir le ratio 3:4 pour l'icône par défaut)
+                var iconHeight = Math.round(iconSize * 1.33); // Ratio 30:40 = 1:1.33
+                
                 var icon = L.icon({
-                    iconUrl: '/wp-content/plugins/zone-commercial-pluginwp/assets/svg/sucette_panneau_pin.svg',
-                    iconSize: [30, 40],
-                    iconAnchor: [15, 40],
-                    popupAnchor: [0, -35]
+                    iconUrl: iconUrl,
+                    iconSize: [iconSize, iconHeight],
+                    iconAnchor: [iconAnchorX, iconAnchorY],
+                    popupAnchor: [0, -iconAnchorY + 5] // Ajuster la popup selon l'ancrage
                 });
                 return L.marker(latlng, { icon: icon });
             },
@@ -665,11 +675,11 @@ document.addEventListener('DOMContentLoaded', function() {
             mapContainer.classList.add('sidebar-open');
             sidebar.classList.add('sidebar-visible');
             
-            if (tabName) {
-                var tabBtn = document.querySelector('.tab-btn[data-tab="' + tabName + '"][data-map-id="' + mapId + '"]');
-                if (tabBtn) {
-                    tabBtn.click();
-                }
+            // Activer l'onglet spécifié, ou 'filters' par défaut
+            var targetTab = tabName || 'filters';
+            var tabBtn = document.querySelector('.tab-btn[data-tab="' + targetTab + '"][data-map-id="' + mapId + '"]');
+            if (tabBtn) {
+                tabBtn.click();
             }
             
             var expandMapBtn = document.getElementById('expand-map-' + mapId);

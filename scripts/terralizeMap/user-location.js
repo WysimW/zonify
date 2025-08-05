@@ -15,8 +15,8 @@ export function setupUserLocation(map, options) {
             setView: true,
             watch: false
         },
-        // Revenir à l'icône par défaut pour le moment
-        icon: 'fa fa-location-arrow',
+        // Utiliser l'icône marker de Font Awesome (compatible avec Bricks)
+        icon: 'fas fa-map-marker-alt',
         onLocationFound: function(e) {
             showUserLocation(map, e);
         }
